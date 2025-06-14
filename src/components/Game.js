@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Settings, Download } from 'lucide-react';
+import { AlertTriangle, Settings } from 'lucide-react';
 import { getPrompt } from '../utils/prompts';
 import { shuffleArray } from '../utils/gameLogic';
 import { useGame } from '../context/GameContext';
@@ -40,19 +40,10 @@ const Game = ({ theme }) => {
   const [showAnswer, setShowAnswer] = useState(currentGameState?.showAnswer ?? true);
   const [timerPaused, setTimerPaused] = useState(true);
   const [timerResetTrigger, setTimerResetTrigger] = useState(0);
-  const [generatingClues, setGeneratingClues] = useState(false);
-  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
-
-  // Check for install prompt availability
-  useEffect(() => {
-    if (window.deferredPrompt) {
-      setShowInstallPrompt(true);
-    }
-  }, []);
 
   // Save game state whenever it changes (but not during loading)
   useEffect(() => {
-    if (currentItem && !loading && !generatingClues) {
+    if (currentItem && !loading) {
       saveGameState({
         currentCategory,
         currentItem,
@@ -61,7 +52,7 @@ const Game = ({ theme }) => {
         showAnswer
       });
     }
-  }, [currentCategory, currentItem, clues, revealedClues, showAnswer, loading, generatingClues, saveGameState]);
+  }, [currentCategory, currentItem, clues, revealedClues, showAnswer, loading, saveGameState]);
 
   const generateCard = async (category) => {
     setLoading(true);
@@ -71,11 +62,6 @@ const Game = ({ theme }) => {
     setShowAnswer(!hideAnswerOnGeneration);
     setTimerPaused(true);
     setTimerResetTrigger(prev => prev + 1);
-    setGeneratingClues(false);
-    
-    // Clear old clues when starting new generation
-    setClues([]);
-    setCurrentItem('');
     
     clearGameState();
   
@@ -85,30 +71,27 @@ const Game = ({ theme }) => {
       // Use streaming API
       const result = await generateCluesWithProgress(prompt, {
         onItemFound: (item) => {
-          // As soon as we have the item, set it and update category
+          // As soon as we have the item, set it and HIDE the loading screen
           setCurrentItem(item);
-          setCurrentCategory(category); // Update category immediately when item is found
           if (!hideAnswerOnGeneration) {
             setShowAnswer(true);
           }
-          setLoading(false); // Hide loading screen
-          setGeneratingClues(true); // Show generating clues message
+          setLoading(false); // Hide loading screen immediately when answer is found!
         },
         onComplete: (result) => {
           // When fully complete, set the clues
           const shuffledClues = shuffleArray(result.clues.slice(0, numberOfClues));
           setClues(shuffledClues);
-          setGeneratingClues(false); // Hide generating message
         }
       });
       
+      setCurrentCategory(category);
       addUsedItem(category, result.item);
       
     } catch (err) {
       setError(err.message || 'En fejl opstod. Prøv igen.');
       console.error('Generation error:', err);
-      setLoading(false);
-      setGeneratingClues(false);
+      setLoading(false); // Also hide on error
     }
   };
 
@@ -141,17 +124,6 @@ const Game = ({ theme }) => {
     return categories[key]?.name || key;
   };
 
-  const handleInstallClick = async () => {
-    if (window.deferredPrompt) {
-      window.deferredPrompt.prompt();
-      const { outcome } = await window.deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setShowInstallPrompt(false);
-      }
-      window.deferredPrompt = null;
-    }
-  };
-
   return (
     <>
       {loading && <LoadingScreen category={getCategoryName(loadingCategory)} />}
@@ -160,30 +132,19 @@ const Game = ({ theme }) => {
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 flex justify-between items-center">
             <h1 className="text-2xl md:text-4xl font-bold">20 Questions</h1>
-            <div className="flex gap-2">
-              {showInstallPrompt && (
-                <button
-                  onClick={handleInstallClick}
-                  className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                  title="Installer app"
-                >
-                  <Download className="w-5 h-5" />
-                </button>
-              )}
-              <Link
-                to="/settings"
-                className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-              >
-                <Settings className="w-5 h-5" />
-              </Link>
-            </div>
+            <Link
+              to="/settings"
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <Settings className="w-5 h-5" />
+            </Link>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg">
             <CategorySelector
               currentCategory={currentCategory}
               onCategorySelect={generateCard}
-              loading={loading || generatingClues}
+              loading={loading}
               usedItems={usedItems}
             />
 
@@ -205,7 +166,7 @@ const Game = ({ theme }) => {
             {currentItem && (
               <ActionButtons
                 onRandomCategory={pickRandomCategory}
-                loading={loading || generatingClues}
+                loading={loading}
               />
             )}
 
@@ -216,7 +177,7 @@ const Game = ({ theme }) => {
               </div>
             )}
 
-            {generatingClues && (
+            {currentItem && clues.length === 0 && (
               <div className="text-center mb-4">
                 <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">
                   Genererer ledetråde...

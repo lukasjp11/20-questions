@@ -110,11 +110,6 @@ button:active {
   transform: scale(0.98);
 }
 
-/* iOS specific button styles - remove tap highlight */
-button {
-  -webkit-tap-highlight-color: transparent;
-}
-
 /* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 10px;
@@ -158,21 +153,4 @@ button {
   .no-print {
     display: none !important;
   }
-}
-
-/* Prevent zoom on input focus on iOS */
-@media (max-width: 768px) {
-  input[type="text"],
-  input[type="number"],
-  input[type="email"],
-  input[type="tel"],
-  textarea,
-  select {
-    font-size: 16px !important;
-  }
-}
-
-/* Safe area support for iOS without breaking layout */
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
 }

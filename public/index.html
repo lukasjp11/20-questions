@@ -3,26 +3,22 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/icons/icon-192x192.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#3b82f6" />
     <meta name="description" content="20 Questions - Et trivia-spil med AI-genererede ledetråde" />
     
     <!-- PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="20 Questions">
-    <meta name="format-detection" content="telephone=no">
     
-    <!-- iOS Meta Tags for Standalone Mode -->
+    <!-- iOS Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="20 Questions">
-    <meta name="apple-touch-fullscreen" content="yes">
     
     <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/icons/icon-192x192.png" />
     <link rel="apple-touch-icon" sizes="152x152" href="%PUBLIC_URL%/icons/icon-152x152.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/icons/icon-192x192.png" />
-    <link rel="apple-touch-icon" sizes="167x167" href="%PUBLIC_URL%/icons/icon-192x192.png" />
     
     <!-- Android/Chrome Icons -->
     <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/icons/icon-192x192.png" />
@@ -32,56 +28,9 @@
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
     <title>20 Questions</title>
-
-    <style>
-      /* Simple loading screen */
-      .app-loading {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: #111827;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-      }
-      
-      .app-loading-spinner {
-        width: 50px;
-        height: 50px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: #3b82f6;
-        animation: spin 1s ease-in-out infinite;
-      }
-      
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    </style>
   </head>
   <body>
     <noscript>Du skal aktivere JavaScript for at køre denne app.</noscript>
-    
-    <!-- Initial loading screen -->
-    <div id="loading" class="app-loading">
-      <div class="app-loading-spinner"></div>
-    </div>
-    
     <div id="root"></div>
-    
-    <script>
-      // Hide loading screen when React app is mounted
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          const loadingElement = document.getElementById('loading');
-          if (loadingElement) {
-            loadingElement.style.display = 'none';
-          }
-        }, 100);
-      });
-    </script>
   </body>
 </html>
