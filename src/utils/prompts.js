@@ -77,17 +77,17 @@ const categoryDescriptions = {
     }
   },
   ting: {
-    description: 'en genstand, koncept, dyr, opfindelse eller fænomen',
+    description: 'en genstand, objekt eller ting',
     examples: {
-      1: 'bold, vand, sol, træ, bil',
-      10: 'cykel, is, chokolade, hund, telefon',
-      25: 'computer, pizza, elefant, flyvemaskine, fodbold',
-      40: 'internet, demokrati, dinosaur, mikroskop, vitamin',
-      50: 'DNA, klimaforandringer, kunstig intelligens, antibiotika',
-      60: 'kvantemekanik, blockchain, CRISPR, mørkt stof, stamceller',
-      75: 'kvantekryptering, epigenetik, neutrino, graphene, Higgs boson',
-      90: 'topologiske isolatorer, prioner, kvantesuperposition, metamaterialer',
-      100: 'anyoner, skyrmioner, Majorana fermioner, tachyoner'
+      1:   'sten, bog, blyant, kop, stol',
+      10:  'cykel, jakke, paraply, sko, taske',
+      25:  'fiskestang, skruetrækker, rygsæk, termos, kompas',
+      40:  'teleskop, brødrister, skrivemaskine, campingovn, komfur',
+      50:  'kamera, mikroskop, satellit, drone, solcellepanel',
+      60:  '3D-printer, elbil, robotstøvsuger, hybridfly, dronesværm',
+      75:  'nanorobot, kvantecomputer, superledermagnet, selvhelende materiale, autonom drone',
+      90:  'partikelaccelerator, fusionspilotanlæg, rumstation, synkrotron, neutrinoobservatorium',
+      100: 'tokamak-reaktor, LHC-detektor, gravitationsbølgeobservatorium, James Webb-teleskop, fusionskraftværk'
     }
   },
   begivenhed: {
@@ -178,8 +178,8 @@ MEGET VIGTIGT FOR LEDETRÅDE:
 - Bland forskellige typer hints
 - Undgå åbenlyse sammenhænge mellem ledetråde
 
-Special-ledetråde (KUN hvis sværhed > 20%):
-- Hvis sværhed > 20%, vælg 3 TILFÆLDIGE positioner mellem 1-${numberOfClues}
+Special-ledetråde:
+- Vælg 3 TILFÆLDIGE positioner mellem 1-${numberOfClues}
 - Indsæt disse special-ledetråde:
   • "byt plads med forreste"
   • "ryk 3 felter frem"
