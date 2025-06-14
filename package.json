@@ -42,7 +42,7 @@
     "check-env": "node -e \"console.log('API Key:', process.env.REACT_APP_HF_API_KEY ? '✓ Set' : '✗ Missing')\"",
     "reset-data": "node -e \"console.log('Clearing localStorage...'); localStorage && localStorage.clear(); console.log('Done!')\"",
     "generate-icons": "npx pwa-asset-generator public/logo.svg public/icons",
-    "build:pwa": "npm run build && npx workbox generateSW workbox-config.js",
+    "build:pwa": "npm run build && cp public/service-worker.js build/",
     "validate": "npm run lint && npm run test:coverage && npm run build"
   },
   "eslintConfig": {
