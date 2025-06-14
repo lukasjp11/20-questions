@@ -32,6 +32,9 @@ jobs:
       env:
         CI: false
     
+    - name: Copy service worker
+      run: cp public/service-worker.js build/
+    
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:

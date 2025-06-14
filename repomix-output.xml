@@ -44,6 +44,9 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+.github/
+  workflows/
+    deploy.yml
 public/
   index.html
   manifest.json
@@ -78,45 +81,46 @@ tailwind.config.js
 <files>
 This section contains the contents of the repository's files.
 
-<file path="public/index.html">
-<!DOCTYPE html>
-<html lang="da">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="20 Questions - Et trivia-spil med AI-genererede ledetråde"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>20 Questions</title>
-  </head>
-  <body>
-    <noscript>Du skal aktivere JavaScript for at køre denne app.</noscript>
-    <div id="root"></div>
-  </body>
-</html>
-</file>
+<file path=".github/workflows/deploy.yml">
+name: Deploy to GitHub Pages
 
-<file path="public/manifest.json">
-{
-  "short_name": "20 Questions",
-  "name": "20 Questions",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
-}
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build
+      run: npm run build
+      env:
+        CI: false
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build
 </file>
 
 <file path="src/components/ActionButtons.js">
@@ -328,211 +332,6 @@ const CluesGrid = memo(({ clues, revealedClues, onClueClick }) => {
 CluesGrid.displayName = 'CluesGrid';
 
 export default CluesGrid;
-</file>
-
-<file path="src/components/Game.js">
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { AlertTriangle, Settings } from 'lucide-react';
-import { getPrompt } from '../utils/prompts';
-import { shuffleArray } from '../utils/gameLogic';
-import { useGame } from '../context/GameContext';
-import CategorySelector from './CategorySelector';
-import AnswerBox from './AnswerBox';
-import ActionButtons from './ActionButtons';
-import CluesGrid from './CluesGrid';
-import Instructions from './Instructions';
-import LoadingScreen from './LoadingScreen';
-import Timer from './Timer';
-import { generateCluesWithProgress } from '../utils/api';
-
-const Game = ({ theme }) => {
-  const {
-    difficulty,
-    customTheme,
-    hideAnswerOnGeneration,
-    numberOfClues,
-    enableTimer,
-    timePerClue,
-    categories,
-    usedItems,
-    addUsedItem,
-    currentGameState,
-    saveGameState,
-    clearGameState
-  } = useGame();
-
-  // Initialize state from saved game state or defaults
-  const [currentCategory, setCurrentCategory] = useState(currentGameState?.currentCategory || 'person');
-  const [currentItem, setCurrentItem] = useState(currentGameState?.currentItem || '');
-  const [clues, setClues] = useState(currentGameState?.clues || []);
-  const [revealedClues, setRevealedClues] = useState(currentGameState?.revealedClues || []);
-  const [loading, setLoading] = useState(false);
-  const [loadingCategory, setLoadingCategory] = useState('');
-  const [error, setError] = useState('');
-  const [showAnswer, setShowAnswer] = useState(currentGameState?.showAnswer ?? true);
-  const [timerPaused, setTimerPaused] = useState(true);
-  const [timerResetTrigger, setTimerResetTrigger] = useState(0);
-
-  // Save game state whenever it changes (but not during loading)
-  useEffect(() => {
-    if (currentItem && !loading) {
-      saveGameState({
-        currentCategory,
-        currentItem,
-        clues,
-        revealedClues,
-        showAnswer
-      });
-    }
-  }, [currentCategory, currentItem, clues, revealedClues, showAnswer, loading, saveGameState]);
-
-  const generateCard = async (category) => {
-    setLoading(true);
-    setLoadingCategory(category);
-    setError('');
-    setRevealedClues([]);
-    setShowAnswer(!hideAnswerOnGeneration);
-    setTimerPaused(true);
-    setTimerResetTrigger(prev => prev + 1);
-    
-    clearGameState();
-
-    try {
-      const prompt = getPrompt(category, difficulty, usedItems, customTheme, numberOfClues);
-      
-      // Use streaming API
-      const result = await generateCluesWithProgress(prompt, {
-        onItemFound: (item) => {
-          // As soon as we have the item, set it (this happens very fast)
-          setCurrentItem(item);
-          if (!hideAnswerOnGeneration) {
-            setShowAnswer(true);
-          }
-        },
-        onComplete: (result) => {
-          // When fully complete, set the clues
-          const shuffledClues = shuffleArray(result.clues.slice(0, numberOfClues));
-          setClues(shuffledClues);
-        }
-      });
-      
-      setCurrentCategory(category);
-      addUsedItem(category, result.item);
-      
-    } catch (err) {
-      setError(err.message || 'En fejl opstod. Prøv igen.');
-      console.error('Generation error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleClue = (index) => {
-    setRevealedClues(prev => {
-      if (prev.includes(index)) {
-        return prev.filter(i => i !== index);
-      } else {
-        // Always reset timer when revealing a new clue
-        if (enableTimer) {
-          setTimerResetTrigger(trigger => trigger + 1);
-          setTimerPaused(false);
-        }
-        return [...prev, index];
-      }
-    });
-  };
-
-  const handleTimeUp = () => {
-    setTimerPaused(true);
-  };
-
-  const pickRandomCategory = () => {
-    const keys = Object.keys(categories);
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    generateCard(randomKey);
-  };
-
-  const getCategoryName = (key) => {
-    return categories[key]?.name || key;
-  };
-
-  return (
-    <>
-      {loading && <LoadingScreen category={getCategoryName(loadingCategory)} />}
-
-      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} text-gray-900 dark:text-white p-4 md:p-8`}>
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6 flex justify-between items-center">
-            <h1 className="text-2xl md:text-4xl font-bold">20 Questions</h1>
-            <Link
-              to="/settings"
-              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-            >
-              <Settings className="w-5 h-5" />
-            </Link>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg">
-            <CategorySelector
-              currentCategory={currentCategory}
-              onCategorySelect={generateCard}
-              loading={loading}
-              usedItems={usedItems}
-            />
-
-            <AnswerBox
-              currentItem={currentItem}
-              showAnswer={showAnswer}
-              setShowAnswer={setShowAnswer}
-            />
-
-            {enableTimer && currentItem && revealedClues.length > 0 && (
-              <Timer
-                timePerClue={timePerClue}
-                onTimeUp={handleTimeUp}
-                isPaused={timerPaused || revealedClues.length === clues.length}
-                resetTrigger={timerResetTrigger}
-              />
-            )}
-
-            {currentItem && (
-              <ActionButtons
-                onRandomCategory={pickRandomCategory}
-                loading={loading}
-              />
-            )}
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg flex items-center text-red-600 dark:text-red-400 text-sm">
-                <AlertTriangle className="mr-2 w-4 h-4 flex-shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <CluesGrid
-              clues={clues}
-              revealedClues={revealedClues}
-              onClueClick={toggleClue}
-            />
-
-            {!currentItem && !loading && (
-              <Instructions onStartRandom={pickRandomCategory} />
-            )}
-          </div>
-
-          {customTheme && (
-            <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-              Tema: {customTheme}
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  );
-};
-
-export default Game;
 </file>
 
 <file path="src/components/Instructions.js">
@@ -1164,88 +963,6 @@ export const GameProvider = ({ children }) => {
 };
 </file>
 
-<file path="src/utils/api.js">
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-
-export const generateCluesWithProgress = async (prompt, callbacks = {}) => {
-  const {
-    onItemFound = () => {},
-    onComplete = () => {},
-    onError = () => {}
-  } = callbacks;
-
-  try {
-    const response = await fetch(`${API_URL}/api/generate-stream`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prompt,
-        max_tokens: 1000,
-        temperature: 0.7
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      
-      if (done) break;
-      
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      
-      // Keep the last incomplete line in the buffer
-      buffer = lines.pop() || '';
-      
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6);
-          
-          if (data === '[DONE]') {
-            return;
-          }
-          
-          try {
-            const event = JSON.parse(data);
-            
-            switch (event.type) {
-              case 'item_found':
-                // Call this as soon as we have the item
-                onItemFound(event.item);
-                break;
-                
-              case 'complete':
-                // Call this when everything is done
-                onComplete(event.result);
-                return event.result;
-                
-              case 'error':
-                throw new Error(event.error);
-            }
-          } catch (e) {
-            // Ignore JSON parse errors for incomplete data
-            if (e.message.includes('JSON')) continue;
-            throw e;
-          }
-        }
-      }
-    }
-  } catch (error) {
-    onError(error);
-    throw error;
-  }
-};
-</file>
-
 <file path="src/utils/gameLogic.js">
 export const shuffleArray = (array) => {
   const newArray = [...array];
@@ -1283,205 +1000,6 @@ export const loadFromLocalStorage = (key, defaultValue) => {
     return defaultValue;
   }
 };
-</file>
-
-<file path="src/utils/prompts.js">
-import { Brain, MapPin, Lightbulb, Sparkles } from 'lucide-react';
-
-export const categories = {
-  person: { 
-    name: 'Person', 
-    icon: Brain, 
-    gradient: 'from-blue-600 to-indigo-700',
-    description: 'Berømte personer, karakterer & erhverv'
-  },
-  sted: { 
-    name: 'Sted', 
-    icon: MapPin, 
-    gradient: 'from-emerald-600 to-teal-700',
-    description: 'Geografiske lokationer & steder'
-  },
-  ting: { 
-    name: 'Ting', 
-    icon: Lightbulb, 
-    gradient: 'from-amber-600 to-orange-700',
-    description: 'Objekter, koncepter & idéer'
-  },
-  begivenhed: { 
-    name: 'Begivenhed', 
-    icon: Sparkles, 
-    gradient: 'from-purple-600 to-pink-700',
-    description: 'Historiske begivenheder & øjeblikke'
-  }
-};
-
-export const getDifficultyLabel = (value) => {
-  if (value <= 10) return 'Børneniveau';
-  if (value <= 25) return 'Meget let';
-  if (value <= 40) return 'Let';
-  if (value <= 60) return 'Normal';
-  if (value <= 75) return 'Svær';
-  if (value <= 90) return 'Meget svær';
-  return 'Ekspert';
-};
-
-export const getDifficultyDescription = (value) => {
-  if (value <= 10) return 'For små børn (3-6 år)';
-  if (value <= 25) return 'For børn og begyndere';
-  if (value <= 40) return 'Velkendte emner for de fleste';
-  if (value <= 60) return 'Standard voksen trivia';
-  if (value <= 75) return 'Kræver god almen viden';
-  if (value <= 90) return 'Udfordrende selv for vidende';
-  return 'Kun for eksperter og specialister';
-};
-
-const categoryDescriptions = {
-  person: {
-    description: 'en berømt person, fiktiv karakter, dyr med personlighed, gruppe eller erhverv',
-    examples: {
-      1: 'mor, far, hund, kat, baby, lærer',
-      10: 'Pippi Langstrømpe, julemanden, Mickey Mouse, politimand, brandmand',
-      25: 'Dronning Margrethe, Donald Duck, Harry Potter, Batman, Ronaldo',
-      40: 'Einstein, Leonardo da Vinci, Madonna, The Beatles, Sherlock Holmes',
-      50: 'Darwin, Beethoven, Van Gogh, Winston Churchill, Cleopatra',
-      60: 'Marie Curie, Sokrates, Frida Kahlo, Nikola Tesla, Marco Polo',
-      75: 'Niels Bohr, Virginia Woolf, Archimedes, Stradivarius, Dostoyevsky',
-      90: 'Ada Lovelace, Ibn Khaldun, Hypatia, Tycho Brahe, Mary Anning',
-      100: 'Srinivasa Ramanujan, Hedy Lamarr, Ibn al-Haytham, Lise Meitner'
-    }
-  },
-  sted: {
-    description: 'et berømt rejsemål, monument, vartegn, bygning eller naturligt vidunder',
-    examples: {
-      1: 'hjem, have, legeplads, skov, sø',
-      10: 'zoo, svømmehal, strand, bondegård, akvarium',
-      25: 'Eiffeltårnet, Frihedsgudinden, Disneyland, Taj Mahal, Stonehenge',
-      40: 'Grand Canyon, Colosseum, Niagara Falls, Den Kinesiske Mur, Mount Fuji',
-      50: 'Machu Picchu, Angkor Wat, Louvre, Alhambra, Burj Khalifa',
-      60: 'Petra, Moai-statuerne, Uluru, Neuschwanstein, Mont Saint-Michel',
-      75: 'Socotra, Meteora, Derinkuyu, Borobudur, Pamukkale',
-      90: 'Chand Baori, Skellig Michael, Gobekli Tepe, Kiyomizu-dera, Banaue-risterrasserne',
-      100: 'Derinkuyu, Gangkhar Puensum, Antelope Canyon, Mount Roraima, Taktsang-klostret'
-    }
-  },
-  ting: {
-    description: 'en genstand, koncept, dyr, opfindelse eller fænomen',
-    examples: {
-      1: 'bold, vand, sol, træ, bil',
-      10: 'cykel, is, chokolade, hund, telefon',
-      25: 'computer, pizza, elefant, flyvemaskine, fodbold',
-      40: 'internet, demokrati, dinosaur, mikroskop, vitamin',
-      50: 'DNA, klimaforandringer, kunstig intelligens, antibiotika',
-      60: 'kvantemekanik, blockchain, CRISPR, mørkt stof, stamceller',
-      75: 'kvantekryptering, epigenetik, neutrino, graphene, Higgs boson',
-      90: 'topologiske isolatorer, prioner, kvantesuperposition, metamaterialer',
-      100: 'anyoner, skyrmioner, Majorana fermioner, tachyoner'
-    }
-  },
-  begivenhed: {
-    description: 'en historisk begivenhed, opdagelse, opfindelse eller vigtigt øjeblik',
-    examples: {
-      1: 'fødseldag, jul, sommer, nat, morgen',
-      10: 'nytår, påske, første skoledag, VM i fodbold',
-      25: 'månelandingen, OL, opdagelsen af Amerika, Titanic synker',
-      40: 'Berlinmurens fald, 2. verdenskrig, internettet opfindes, 9/11',
-      50: 'Den franske revolution, renæssancen, industrielle revolution',
-      60: 'Sorte Død, opdagelsen af penicillin, Magna Carta, Reformationen',
-      75: 'Vestfalske fred, Rosettastenen findes, DNA-struktur opdages',
-      90: 'Carrington Event, År uden sommer 1816, Tunguska-eksplosionen',
-      100: 'Toba-udbruddet, Younger Dryas, Kambrium eksplosionen'
-    }
-  }
-};
-
-const difficultyDescriptions = {
-  1: 'ekstrem begynderniveau - for de allermindste børn (3-4 år), kun de mest basale koncepter',
-  10: 'børneniveau - velkendt for børn i 5-8 års alderen',
-  25: 'let niveau - kendt af næsten alle, inklusiv børn',
-  40: 'under middel - ret velkendt for de fleste voksne',
-  50: 'middelniveau - standard voksen trivia, kræver almindelig almen viden',
-  60: 'over middel - kræver god almen viden eller interesse for emnet',
-  75: 'svært niveau - kræver omfattende viden eller specialinteresse',
-  90: 'meget svært - kun kendt af folk med dyb viden inden for området',
-  100: 'ekspertniveau - ekstremt obskurt, kendt af meget få mennesker'
-};
-
-export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20) => {
-  // Find the closest difficulty example
-  const difficultyKeys = Object.keys(categoryDescriptions[category].examples).map(Number);
-  const closestDifficulty = difficultyKeys.reduce((prev, curr) => 
-    Math.abs(curr - difficulty) < Math.abs(prev - difficulty) ? curr : prev
-  );
-
-  const categoryInfo = categoryDescriptions[category];
-  const examples = categoryInfo.examples[closestDifficulty];
-  const usedInCategory = usedItems
-    .filter(item => item.category === category)
-    .map(item => item.item);
-
-  // Find closest difficulty description
-  const descriptionKeys = Object.keys(difficultyDescriptions).map(Number);
-  const closestDescriptionKey = descriptionKeys.reduce((prev, curr) => 
-    Math.abs(curr - difficulty) < Math.abs(prev - difficulty) ? curr : prev
-  );
-
-  const themeSection = customTheme 
-    ? `\nVIGTIGT TEMA: Alle emner SKAL relatere til "${customTheme}". 
-Vælg kun emner der passer til dette tema OG den valgte kategori.
-Hvis temaet er for specifikt til at finde ${categoryInfo.description} på det givne sværhedsniveau, så tilpas sværheden en smule men hold dig til temaet.\n`
-    : '';
-
-  return `Du er vært for et ${numberOfClues} Questions spil. Din opgave er at vælge ${categoryInfo.description} som er ${difficultyDescriptions[closestDescriptionKey]}.
-
-KATEGORI: ${categories[category].name}
-SVÆRHEDSGRAD: ${difficulty}% (${getDifficultyLabel(difficulty)})
-${themeSection}
-EKSEMPLER på passende emner for denne sværhedsgrad:
-${examples}
-
-MEGET VIGTIGT - ALLEREDE BRUGTE EMNER I DENNE KATEGORI:
-${usedInCategory.length > 0 ? usedInCategory.join(', ') : 'Ingen brugte emner i denne kategori endnu'}
-
-Du MÅ ABSOLUT IKKE vælge noget der allerede er brugt!
-
-REGLER FOR VALG AF EMNE:
-1. Emnet SKAL matche sværhedsgraden præcist (${difficulty}%)
-   - 1%: Ekstrem begynder (3-4 år) - kun de mest basale ting
-   - 10%: Børneniveau (5-8 år) 
-   - 25%: Let - kendt af næsten alle
-   - 50%: Middel - standard voksen trivia
-   - 75%: Svær - kræver god viden
-   - 90%: Meget svær - kun for vidende
-   - 100%: Ekspert - ekstremt obskurt
-2. ${customTheme ? `Emnet SKAL relatere til temaet "${customTheme}"` : 'Emnet skal være internationalt relevant'}
-3. Emnet MÅ IKKE være på listen over brugte emner
-4. Match sværheden fra eksemplerne præcist
-
-MEGET VIGTIGT FOR LEDETRÅDE:
-- Tilpas ledetrådenes sværhed til målgruppen:
-  * 1-25%: Simple, konkrete ledetråde med basale ord
-  * 50%: Standard trivia-niveau ledetråde  
-  * 75-100%: Komplekse ledetråde der kræver specialviden
-- Hver ledetråd skal være HELT UAFHÆNGIG af de andre
-- Bland forskellige typer hints
-- Undgå åbenlyse sammenhænge mellem ledetråde
-
-Special-ledetråde (KUN hvis sværhed > 20%):
-- Hvis sværhed > 20%, vælg 3 TILFÆLDIGE positioner mellem 1-${numberOfClues}
-- Indsæt disse special-ledetråde:
-  • "byt plads med forreste"
-  • "ryk 3 felter frem"
-  • "Du har 2 gæt"
-
-Svar KUN med følgende JSON format:
-{
-  "item": "det valgte emne",
-  "clues": [${numberOfClues} ledetråde${difficulty > 20 ? ' med præcis 3 special-ledetråde på tilfældige positioner' : ' uden special-ledetråde'}]
-}
-Respond ONLY with valid JSON. Do not include any markdown or explanations.`;
-};
-
-export const defaultCategories = categories;
 </file>
 
 <file path="src/App.css">
@@ -1788,8 +1306,313 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+
+
 # Environment variables
 .env
+</file>
+
+<file path="postcss.config.js">
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+</file>
+
+<file path="tailwind.config.js">
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+</file>
+
+<file path="src/utils/api.js">
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
+export const generateCluesWithProgress = async (prompt, callbacks = {}) => {
+  const {
+    onItemFound = () => {},
+    onComplete = () => {},
+    onError = () => {}
+  } = callbacks;
+
+  try {
+    const response = await fetch(`${API_URL}/api/generate-stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        max_tokens: 1024,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      
+      // Keep the last incomplete line in the buffer
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          
+          if (data === '[DONE]') {
+            return;
+          }
+          
+          try {
+            const event = JSON.parse(data);
+            
+            switch (event.type) {
+              case 'item_found':
+                // Call this as soon as we have the item
+                onItemFound(event.item);
+                break;
+                
+              case 'complete':
+                // Call this when everything is done
+                onComplete(event.result);
+                return event.result;
+                
+              case 'error':
+                throw new Error(event.error);
+            }
+          } catch (e) {
+            // Ignore JSON parse errors for incomplete data
+            if (e.message.includes('JSON')) continue;
+            throw e;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    onError(error);
+    throw error;
+  }
+};
+</file>
+
+<file path="src/utils/prompts.js">
+import { Brain, MapPin, Lightbulb, Sparkles } from 'lucide-react';
+
+export const categories = {
+  person: { 
+    name: 'Person', 
+    icon: Brain, 
+    gradient: 'from-blue-600 to-indigo-700',
+    description: 'Berømte personer, karakterer & erhverv'
+  },
+  sted: { 
+    name: 'Sted', 
+    icon: MapPin, 
+    gradient: 'from-emerald-600 to-teal-700',
+    description: 'Geografiske lokationer & steder'
+  },
+  ting: { 
+    name: 'Ting', 
+    icon: Lightbulb, 
+    gradient: 'from-amber-600 to-orange-700',
+    description: 'Objekter, koncepter & idéer'
+  },
+  begivenhed: { 
+    name: 'Begivenhed', 
+    icon: Sparkles, 
+    gradient: 'from-purple-600 to-pink-700',
+    description: 'Historiske begivenheder & øjeblikke'
+  }
+};
+
+export const getDifficultyLabel = (value) => {
+  if (value <= 10) return 'Børneniveau';
+  if (value <= 25) return 'Meget let';
+  if (value <= 40) return 'Let';
+  if (value <= 60) return 'Normal';
+  if (value <= 75) return 'Svær';
+  if (value <= 90) return 'Meget svær';
+  return 'Ekspert';
+};
+
+export const getDifficultyDescription = (value) => {
+  if (value <= 10) return 'For små børn (3-6 år)';
+  if (value <= 25) return 'For børn og begyndere';
+  if (value <= 40) return 'Velkendte emner for de fleste';
+  if (value <= 60) return 'Standard voksen trivia';
+  if (value <= 75) return 'Kræver god almen viden';
+  if (value <= 90) return 'Udfordrende selv for vidende';
+  return 'Kun for eksperter og specialister';
+};
+
+const categoryDescriptions = {
+  person: {
+    description: 'en berømt person, fiktiv karakter, dyr med personlighed, gruppe eller erhverv',
+    examples: {
+      1: 'mor, far, hund, kat, baby, lærer',
+      10: 'Pippi Langstrømpe, julemanden, Mickey Mouse, politimand, brandmand',
+      25: 'Dronning Margrethe, Donald Duck, Harry Potter, Batman, Ronaldo',
+      40: 'Einstein, Leonardo da Vinci, Madonna, The Beatles, Sherlock Holmes',
+      50: 'Darwin, Beethoven, Van Gogh, Winston Churchill, Cleopatra',
+      60: 'Marie Curie, Sokrates, Frida Kahlo, Nikola Tesla, Marco Polo',
+      75: 'Niels Bohr, Virginia Woolf, Archimedes, Stradivarius, Dostoyevsky',
+      90: 'Ada Lovelace, Ibn Khaldun, Hypatia, Tycho Brahe, Mary Anning',
+      100: 'Srinivasa Ramanujan, Hedy Lamarr, Ibn al-Haytham, Lise Meitner'
+    }
+  },
+  sted: {
+    description: 'et berømt rejsemål, monument, vartegn, bygning eller naturligt vidunder',
+    examples: {
+      1: 'hjem, have, legeplads, skov, sø',
+      10: 'zoo, svømmehal, strand, bondegård, akvarium',
+      25: 'Eiffeltårnet, Frihedsgudinden, Disneyland, Taj Mahal, Stonehenge',
+      40: 'Grand Canyon, Colosseum, Niagara Falls, Den Kinesiske Mur, Mount Fuji',
+      50: 'Machu Picchu, Angkor Wat, Louvre, Alhambra, Burj Khalifa',
+      60: 'Petra, Moai-statuerne, Uluru, Neuschwanstein, Mont Saint-Michel',
+      75: 'Socotra, Meteora, Derinkuyu, Borobudur, Pamukkale',
+      90: 'Chand Baori, Skellig Michael, Gobekli Tepe, Kiyomizu-dera, Banaue-risterrasserne',
+      100: 'Derinkuyu, Gangkhar Puensum, Antelope Canyon, Mount Roraima, Taktsang-klostret'
+    }
+  },
+  ting: {
+    description: 'en genstand, objekt eller ting',
+    examples: {
+      1:   'sten, bog, blyant, kop, stol',
+      10:  'cykel, jakke, paraply, sko, taske',
+      25:  'fiskestang, skruetrækker, rygsæk, termos, kompas',
+      40:  'teleskop, brødrister, skrivemaskine, campingovn, komfur',
+      50:  'kamera, mikroskop, satellit, drone, solcellepanel',
+      60:  '3D-printer, elbil, robotstøvsuger, hybridfly, dronesværm',
+      75:  'nanorobot, kvantecomputer, superledermagnet, selvhelende materiale, autonom drone',
+      90:  'partikelaccelerator, fusionspilotanlæg, rumstation, synkrotron, neutrinoobservatorium',
+      100: 'tokamak-reaktor, LHC-detektor, gravitationsbølgeobservatorium, James Webb-teleskop, fusionskraftværk'
+    }
+  },
+  begivenhed: {
+    description: 'en historisk begivenhed, opdagelse, opfindelse eller vigtigt øjeblik',
+    examples: {
+      1: 'fødseldag, jul, sommer, nat, morgen',
+      10: 'nytår, påske, første skoledag, VM i fodbold',
+      25: 'månelandingen, OL, opdagelsen af Amerika, Titanic synker',
+      40: 'Berlinmurens fald, 2. verdenskrig, internettet opfindes, 9/11',
+      50: 'Den franske revolution, renæssancen, industrielle revolution',
+      60: 'Sorte Død, opdagelsen af penicillin, Magna Carta, Reformationen',
+      75: 'Vestfalske fred, Rosettastenen findes, DNA-struktur opdages',
+      90: 'Carrington Event, År uden sommer 1816, Tunguska-eksplosionen',
+      100: 'Toba-udbruddet, Younger Dryas, Kambrium eksplosionen'
+    }
+  }
+};
+
+const difficultyDescriptions = {
+  1: 'ekstrem begynderniveau - for de allermindste børn (3-4 år), kun de mest basale koncepter',
+  10: 'børneniveau - velkendt for børn i 5-8 års alderen',
+  25: 'let niveau - kendt af næsten alle, inklusiv børn',
+  40: 'under middel - ret velkendt for de fleste voksne',
+  50: 'middelniveau - standard voksen trivia, kræver almindelig almen viden',
+  60: 'over middel - kræver god almen viden eller interesse for emnet',
+  75: 'svært niveau - kræver omfattende viden eller specialinteresse',
+  90: 'meget svært - kun kendt af folk med dyb viden inden for området',
+  100: 'ekspertniveau - ekstremt obskurt, kendt af meget få mennesker'
+};
+
+export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20) => {
+  // Find the closest difficulty example
+  const difficultyKeys = Object.keys(categoryDescriptions[category].examples).map(Number);
+  const closestDifficulty = difficultyKeys.reduce((prev, curr) => 
+    Math.abs(curr - difficulty) < Math.abs(prev - difficulty) ? curr : prev
+  );
+
+  const categoryInfo = categoryDescriptions[category];
+  const examples = categoryInfo.examples[closestDifficulty];
+  const usedInCategory = usedItems
+    .filter(item => item.category === category)
+    .map(item => item.item);
+
+  // Find closest difficulty description
+  const descriptionKeys = Object.keys(difficultyDescriptions).map(Number);
+  const closestDescriptionKey = descriptionKeys.reduce((prev, curr) => 
+    Math.abs(curr - difficulty) < Math.abs(prev - difficulty) ? curr : prev
+  );
+
+  const themeSection = customTheme 
+    ? `\nVIGTIGT TEMA: Alle emner SKAL relatere til "${customTheme}". 
+Vælg kun emner der passer til dette tema OG den valgte kategori.
+Hvis temaet er for specifikt til at finde ${categoryInfo.description} på det givne sværhedsniveau, så tilpas sværheden en smule men hold dig til temaet.\n`
+    : '';
+
+  return `Du er vært for et ${numberOfClues} Questions spil. Din opgave er at vælge ${categoryInfo.description} som er ${difficultyDescriptions[closestDescriptionKey]}.
+
+KATEGORI: ${categories[category].name}
+SVÆRHEDSGRAD: ${difficulty}% (${getDifficultyLabel(difficulty)})
+${themeSection}
+EKSEMPLER på passende emner for denne sværhedsgrad:
+${examples}
+
+MEGET VIGTIGT - ALLEREDE BRUGTE EMNER I DENNE KATEGORI:
+${usedInCategory.length > 0 ? usedInCategory.join(', ') : 'Ingen brugte emner i denne kategori endnu'}
+
+Du MÅ ABSOLUT IKKE vælge noget der allerede er brugt!
+
+REGLER FOR VALG AF EMNE:
+1. Emnet SKAL matche sværhedsgraden præcist (${difficulty}%)
+   - 1%: Ekstrem begynder (3-4 år) - kun de mest basale ting
+   - 10%: Børneniveau (5-8 år) 
+   - 25%: Let - kendt af næsten alle
+   - 50%: Middel - standard voksen trivia
+   - 75%: Svær - kræver god viden
+   - 90%: Meget svær - kun for vidende
+   - 100%: Ekspert - ekstremt obskurt
+2. ${customTheme ? `Emnet SKAL relatere til temaet "${customTheme}"` : 'Emnet skal være internationalt relevant'}
+3. Emnet MÅ IKKE være på listen over brugte emner
+4. Match sværheden fra eksemplerne præcist
+
+MEGET VIGTIGT FOR LEDETRÅDE:
+- Tilpas ledetrådenes sværhed til målgruppen:
+  * 1-25%: Simple, konkrete ledetråde med basale ord
+  * 50%: Standard trivia-niveau ledetråde  
+  * 75-100%: Komplekse ledetråde der kræver specialviden
+- Hver ledetråd skal være HELT UAFHÆNGIG af de andre
+- Bland forskellige typer hints
+- Undgå åbenlyse sammenhænge mellem ledetråde
+
+Special-ledetråde:
+- Vælg 3 TILFÆLDIGE positioner mellem 1-${numberOfClues}
+- Indsæt disse special-ledetråde:
+  • "byt plads med forreste"
+  • "ryk 3 felter frem"
+  • "Du har 2 gæt"
+
+Svar KUN med følgende JSON format:
+{
+  "item": "det valgte emne",
+  "clues": [${numberOfClues} ledetråde${difficulty > 20 ? ' med præcis 3 special-ledetråde på tilfældige positioner' : ' uden special-ledetråde'}]
+}
+Respond ONLY with valid JSON. Do not include any markdown or explanations.`;
+};
+
+export const defaultCategories = categories;
 </file>
 
 <file path="package.json">
@@ -1798,7 +1621,7 @@ yarn-error.log*
   "version": "2.0.0",
   "description": "Enhanced 20 Questions game with improved randomization and single-page experience",
   "private": true,
-  "author": "Your Name",
+  "author": "Lukas",
   "license": "MIT",
   "dependencies": {
     "@huggingface/inference": "^4.0.3",
@@ -1868,7 +1691,7 @@ yarn-error.log*
     "eslint": "^8.48.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-react": "^7.33.2",
-    "gh-pages": "^6.0.0",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.4.24",
     "prettier": "^3.0.0",
     "source-map-explorer": "^2.5.3",
@@ -1880,26 +1703,323 @@ yarn-error.log*
 }
 </file>
 
-<file path="postcss.config.js">
-module.exports = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
+<file path="public/index.html">
+<!DOCTYPE html>
+<html lang="da">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/icons/icon-192x192.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="description" content="20 Questions - Et trivia-spil med AI-genererede ledetråde" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="20 Questions">
+    
+    <!-- iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="20 Questions">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="152x152" href="%PUBLIC_URL%/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/icons/icon-192x192.png" />
+    
+    <!-- Android/Chrome Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="%PUBLIC_URL%/icons/icon-512x512.png" />
+
+    <!-- Manifest -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <title>20 Questions</title>
+  </head>
+  <body>
+    <noscript>Du skal aktivere JavaScript for at køre denne app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
+</file>
+
+<file path="public/manifest.json">
+{
+  "short_name": "20 Questions",
+  "name": "20 Questions",
+  "description": "Et trivia-spil med AI-genererede ledetråde",
+  "icons": [
+    {
+      "src": "icons/icon-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/20-questions/",
+  "scope": "/20-questions/",
+  "display": "standalone",
+  "theme_color": "#3b82f6",
+  "background_color": "#111827",
+  "orientation": "portrait-primary",
+  "categories": ["games", "entertainment"]
 }
 </file>
 
-<file path="tailwind.config.js">
-module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  darkMode: 'class',
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
+<file path="src/components/Game.js">
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, Settings } from 'lucide-react';
+import { getPrompt } from '../utils/prompts';
+import { shuffleArray } from '../utils/gameLogic';
+import { useGame } from '../context/GameContext';
+import CategorySelector from './CategorySelector';
+import AnswerBox from './AnswerBox';
+import ActionButtons from './ActionButtons';
+import CluesGrid from './CluesGrid';
+import Instructions from './Instructions';
+import LoadingScreen from './LoadingScreen';
+import Timer from './Timer';
+import { generateCluesWithProgress } from '../utils/api';
+
+const Game = ({ theme }) => {
+  const {
+    difficulty,
+    customTheme,
+    hideAnswerOnGeneration,
+    numberOfClues,
+    enableTimer,
+    timePerClue,
+    categories,
+    usedItems,
+    addUsedItem,
+    currentGameState,
+    saveGameState,
+    clearGameState
+  } = useGame();
+
+  // Initialize state from saved game state or defaults
+  const [currentCategory, setCurrentCategory] = useState(currentGameState?.currentCategory || 'person');
+  const [currentItem, setCurrentItem] = useState(currentGameState?.currentItem || '');
+  const [clues, setClues] = useState(currentGameState?.clues || []);
+  const [revealedClues, setRevealedClues] = useState(currentGameState?.revealedClues || []);
+  const [loading, setLoading] = useState(false);
+  const [loadingCategory, setLoadingCategory] = useState('');
+  const [error, setError] = useState('');
+  const [showAnswer, setShowAnswer] = useState(currentGameState?.showAnswer ?? true);
+  const [timerPaused, setTimerPaused] = useState(true);
+  const [timerResetTrigger, setTimerResetTrigger] = useState(0);
+
+  // Save game state whenever it changes (but not during loading)
+  useEffect(() => {
+    if (currentItem && !loading) {
+      saveGameState({
+        currentCategory,
+        currentItem,
+        clues,
+        revealedClues,
+        showAnswer
+      });
+    }
+  }, [currentCategory, currentItem, clues, revealedClues, showAnswer, loading, saveGameState]);
+
+  const generateCard = async (category) => {
+    setLoading(true);
+    setLoadingCategory(category);
+    setError('');
+    setRevealedClues([]);
+    setShowAnswer(!hideAnswerOnGeneration);
+    setTimerPaused(true);
+    setTimerResetTrigger(prev => prev + 1);
+    
+    clearGameState();
+  
+    try {
+      const prompt = getPrompt(category, difficulty, usedItems, customTheme, numberOfClues);
+      
+      // Use streaming API
+      const result = await generateCluesWithProgress(prompt, {
+        onItemFound: (item) => {
+          // As soon as we have the item, set it and HIDE the loading screen
+          setCurrentItem(item);
+          if (!hideAnswerOnGeneration) {
+            setShowAnswer(true);
+          }
+          setLoading(false); // Hide loading screen immediately when answer is found!
+        },
+        onComplete: (result) => {
+          // When fully complete, set the clues
+          const shuffledClues = shuffleArray(result.clues.slice(0, numberOfClues));
+          setClues(shuffledClues);
+        }
+      });
+      
+      setCurrentCategory(category);
+      addUsedItem(category, result.item);
+      
+    } catch (err) {
+      setError(err.message || 'En fejl opstod. Prøv igen.');
+      console.error('Generation error:', err);
+      setLoading(false); // Also hide on error
+    }
+  };
+
+  const toggleClue = (index) => {
+    setRevealedClues(prev => {
+      if (prev.includes(index)) {
+        return prev.filter(i => i !== index);
+      } else {
+        // Always reset timer when revealing a new clue
+        if (enableTimer) {
+          setTimerResetTrigger(trigger => trigger + 1);
+          setTimerPaused(false);
+        }
+        return [...prev, index];
+      }
+    });
+  };
+
+  const handleTimeUp = () => {
+    setTimerPaused(true);
+  };
+
+  const pickRandomCategory = () => {
+    const keys = Object.keys(categories);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    generateCard(randomKey);
+  };
+
+  const getCategoryName = (key) => {
+    return categories[key]?.name || key;
+  };
+
+  return (
+    <>
+      {loading && <LoadingScreen category={getCategoryName(loadingCategory)} />}
+
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} text-gray-900 dark:text-white p-4 md:p-8`}>
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6 flex justify-between items-center">
+            <h1 className="text-2xl md:text-4xl font-bold">20 Questions</h1>
+            <Link
+              to="/settings"
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <Settings className="w-5 h-5" />
+            </Link>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg">
+            <CategorySelector
+              currentCategory={currentCategory}
+              onCategorySelect={generateCard}
+              loading={loading}
+              usedItems={usedItems}
+            />
+
+            <AnswerBox
+              currentItem={currentItem}
+              showAnswer={showAnswer}
+              setShowAnswer={setShowAnswer}
+            />
+
+            {enableTimer && currentItem && revealedClues.length > 0 && (
+              <Timer
+                timePerClue={timePerClue}
+                onTimeUp={handleTimeUp}
+                isPaused={timerPaused || revealedClues.length === clues.length}
+                resetTrigger={timerResetTrigger}
+              />
+            )}
+
+            {currentItem && (
+              <ActionButtons
+                onRandomCategory={pickRandomCategory}
+                loading={loading}
+              />
+            )}
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg flex items-center text-red-600 dark:text-red-400 text-sm">
+                <AlertTriangle className="mr-2 w-4 h-4 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {currentItem && clues.length === 0 && (
+              <div className="text-center mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">
+                  Genererer ledetråde...
+                </p>
+              </div>
+            )}
+
+            <CluesGrid
+              clues={clues}
+              revealedClues={revealedClues}
+              onClueClick={toggleClue}
+            />
+
+            {!currentItem && !loading && (
+              <Instructions onStartRandom={pickRandomCategory} />
+            )}
+          </div>
+
+          {customTheme && (
+            <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              Tema: {customTheme}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Game;
 </file>
 
 </files>

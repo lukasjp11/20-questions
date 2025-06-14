@@ -1,5 +1,55 @@
 .App {
   min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+/* PWA specific styles */
+html {
+  height: -webkit-fill-available;
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text selection on mobile */
+* {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection on desktop and for specific elements */
+@media (min-width: 768px) {
+  * {
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+}
+
+/* Always allow selection for input elements */
+input, textarea {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+/* iOS Safe areas */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-right {
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Slider custom styling */
@@ -110,6 +160,18 @@ button:active {
   transform: scale(0.98);
 }
 
+/* Disable button press effect on mobile for better feel */
+@media (max-width: 768px) {
+  button:active {
+    transform: scale(0.97);
+  }
+}
+
+/* iOS specific button styles */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 10px;
@@ -136,6 +198,17 @@ button:active {
   scrollbar-color: #4b5563 #1f2937;
 }
 
+/* Mobile scrollbar - hide on mobile for cleaner look */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  
+  * {
+    scrollbar-width: none;
+  }
+}
+
 /* Responsive font sizes */
 @media (max-width: 768px) {
   html {
@@ -152,5 +225,43 @@ button:active {
   
   .no-print {
     display: none !important;
+  }
+}
+
+/* PWA Install button animation */
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.install-prompt {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Prevent zoom on input focus on iOS */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Better touch targets for mobile */
+@media (max-width: 768px) {
+  button,
+  a,
+  .clickable {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
