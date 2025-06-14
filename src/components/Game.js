@@ -177,6 +177,14 @@ const Game = ({ theme }) => {
               </div>
             )}
 
+            {currentItem && clues.length === 0 && (
+              <div className="text-center mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">
+                  Genererer ledetråde...
+                </p>
+              </div>
+            )}
+
             <CluesGrid
               clues={clues}
               revealedClues={revealedClues}
