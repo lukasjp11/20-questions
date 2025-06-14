@@ -1,0 +1,202 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, Settings } from 'lucide-react';
+import { getPrompt } from '../utils/prompts';
+import { shuffleArray } from '../utils/gameLogic';
+import { useGame } from '../context/GameContext';
+import CategorySelector from './CategorySelector';
+import AnswerBox from './AnswerBox';
+import ActionButtons from './ActionButtons';
+import CluesGrid from './CluesGrid';
+import Instructions from './Instructions';
+import LoadingScreen from './LoadingScreen';
+import Timer from './Timer';
+import { generateCluesWithProgress } from '../utils/api';
+
+const Game = ({ theme }) => {
+  const {
+    difficulty,
+    customTheme,
+    hideAnswerOnGeneration,
+    numberOfClues,
+    enableTimer,
+    timePerClue,
+    categories,
+    usedItems,
+    addUsedItem,
+    currentGameState,
+    saveGameState,
+    clearGameState
+  } = useGame();
+
+  // Initialize state from saved game state or defaults
+  const [currentCategory, setCurrentCategory] = useState(currentGameState?.currentCategory || 'person');
+  const [currentItem, setCurrentItem] = useState(currentGameState?.currentItem || '');
+  const [clues, setClues] = useState(currentGameState?.clues || []);
+  const [revealedClues, setRevealedClues] = useState(currentGameState?.revealedClues || []);
+  const [loading, setLoading] = useState(false);
+  const [loadingCategory, setLoadingCategory] = useState('');
+  const [error, setError] = useState('');
+  const [showAnswer, setShowAnswer] = useState(currentGameState?.showAnswer ?? true);
+  const [timerPaused, setTimerPaused] = useState(true);
+  const [timerResetTrigger, setTimerResetTrigger] = useState(0);
+
+  // Save game state whenever it changes (but not during loading)
+  useEffect(() => {
+    if (currentItem && !loading) {
+      saveGameState({
+        currentCategory,
+        currentItem,
+        clues,
+        revealedClues,
+        showAnswer
+      });
+    }
+  }, [currentCategory, currentItem, clues, revealedClues, showAnswer, loading, saveGameState]);
+
+  const generateCard = async (category) => {
+    setLoading(true);
+    setLoadingCategory(category);
+    setError('');
+    setRevealedClues([]);
+    setShowAnswer(!hideAnswerOnGeneration);
+    setTimerPaused(true);
+    setTimerResetTrigger(prev => prev + 1);
+    
+    clearGameState();
+
+    try {
+      const prompt = getPrompt(category, difficulty, usedItems, customTheme, numberOfClues);
+      
+      // Use streaming API
+      const result = await generateCluesWithProgress(prompt, {
+        onItemFound: (item) => {
+          // As soon as we have the item, set it (this happens very fast)
+          setCurrentItem(item);
+          if (!hideAnswerOnGeneration) {
+            setShowAnswer(true);
+          }
+        },
+        onComplete: (result) => {
+          // When fully complete, set the clues
+          const shuffledClues = shuffleArray(result.clues.slice(0, numberOfClues));
+          setClues(shuffledClues);
+        }
+      });
+      
+      setCurrentCategory(category);
+      addUsedItem(category, result.item);
+      
+    } catch (err) {
+      setError(err.message || 'En fejl opstod. Prøv igen.');
+      console.error('Generation error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleClue = (index) => {
+    setRevealedClues(prev => {
+      if (prev.includes(index)) {
+        return prev.filter(i => i !== index);
+      } else {
+        // Always reset timer when revealing a new clue
+        if (enableTimer) {
+          setTimerResetTrigger(trigger => trigger + 1);
+          setTimerPaused(false);
+        }
+        return [...prev, index];
+      }
+    });
+  };
+
+  const handleTimeUp = () => {
+    setTimerPaused(true);
+  };
+
+  const pickRandomCategory = () => {
+    const keys = Object.keys(categories);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    generateCard(randomKey);
+  };
+
+  const getCategoryName = (key) => {
+    return categories[key]?.name || key;
+  };
+
+  return (
+    <>
+      {loading && <LoadingScreen category={getCategoryName(loadingCategory)} />}
+
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} text-gray-900 dark:text-white p-4 md:p-8`}>
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6 flex justify-between items-center">
+            <h1 className="text-2xl md:text-4xl font-bold">20 Questions</h1>
+            <Link
+              to="/settings"
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              <Settings className="w-5 h-5" />
+            </Link>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg">
+            <CategorySelector
+              currentCategory={currentCategory}
+              onCategorySelect={generateCard}
+              loading={loading}
+              usedItems={usedItems}
+            />
+
+            <AnswerBox
+              currentItem={currentItem}
+              showAnswer={showAnswer}
+              setShowAnswer={setShowAnswer}
+            />
+
+            {enableTimer && currentItem && revealedClues.length > 0 && (
+              <Timer
+                timePerClue={timePerClue}
+                onTimeUp={handleTimeUp}
+                isPaused={timerPaused || revealedClues.length === clues.length}
+                resetTrigger={timerResetTrigger}
+              />
+            )}
+
+            {currentItem && (
+              <ActionButtons
+                onRandomCategory={pickRandomCategory}
+                loading={loading}
+              />
+            )}
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg flex items-center text-red-600 dark:text-red-400 text-sm">
+                <AlertTriangle className="mr-2 w-4 h-4 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <CluesGrid
+              clues={clues}
+              revealedClues={revealedClues}
+              onClueClick={toggleClue}
+            />
+
+            {!currentItem && !loading && (
+              <Instructions onStartRandom={pickRandomCategory} />
+            )}
+          </div>
+
+          {customTheme && (
+            <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              Tema: {customTheme}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Game;
