@@ -1,0 +1,1 @@
+for my web app i want to be able to change the deficulty not just for the asnwer but also for the the clues, so i want two sliders in the settings and want the promt to also take clues deficulty into account.

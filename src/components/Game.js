@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Settings } from 'lucide-react';
+import { AlertTriangle, Settings, Download } from 'lucide-react';
 import { getPrompt } from '../utils/prompts';
 import { shuffleArray } from '../utils/gameLogic';
 import { useGame } from '../context/GameContext';
@@ -40,10 +40,11 @@ const Game = ({ theme }) => {
   const [showAnswer, setShowAnswer] = useState(currentGameState?.showAnswer ?? true);
   const [timerPaused, setTimerPaused] = useState(true);
   const [timerResetTrigger, setTimerResetTrigger] = useState(0);
+  const [generatingClues, setGeneratingClues] = useState(false);
 
   // Save game state whenever it changes (but not during loading)
   useEffect(() => {
-    if (currentItem && !loading) {
+    if (currentItem && !loading && !generatingClues) {
       saveGameState({
         currentCategory,
         currentItem,
@@ -52,7 +53,7 @@ const Game = ({ theme }) => {
         showAnswer
       });
     }
-  }, [currentCategory, currentItem, clues, revealedClues, showAnswer, loading, saveGameState]);
+  }, [currentCategory, currentItem, clues, revealedClues, showAnswer, loading, generatingClues, saveGameState]);
 
   const generateCard = async (category) => {
     setLoading(true);
@@ -62,6 +63,9 @@ const Game = ({ theme }) => {
     setShowAnswer(!hideAnswerOnGeneration);
     setTimerPaused(true);
     setTimerResetTrigger(prev => prev + 1);
+    setGeneratingClues(false);
+    setClues([]);
+    setCurrentItem('');
     
     clearGameState();
   
@@ -71,27 +75,30 @@ const Game = ({ theme }) => {
       // Use streaming API
       const result = await generateCluesWithProgress(prompt, {
         onItemFound: (item) => {
-          // As soon as we have the item, set it and HIDE the loading screen
+          // As soon as we have the item, set it and update category
           setCurrentItem(item);
+          setCurrentCategory(category); // Update category immediately when item is found
           if (!hideAnswerOnGeneration) {
             setShowAnswer(true);
           }
-          setLoading(false); // Hide loading screen immediately when answer is found!
+          setLoading(false); // Hide loading screen
+          setGeneratingClues(true); // Show generating clues message
         },
         onComplete: (result) => {
           // When fully complete, set the clues
           const shuffledClues = shuffleArray(result.clues.slice(0, numberOfClues));
           setClues(shuffledClues);
+          setGeneratingClues(false); // Hide generating message
         }
       });
       
-      setCurrentCategory(category);
       addUsedItem(category, result.item);
       
     } catch (err) {
       setError(err.message || 'En fejl opstod. Prøv igen.');
       console.error('Generation error:', err);
-      setLoading(false); // Also hide on error
+      setLoading(false);
+      setGeneratingClues(false);
     }
   };
 
@@ -144,7 +151,7 @@ const Game = ({ theme }) => {
             <CategorySelector
               currentCategory={currentCategory}
               onCategorySelect={generateCard}
-              loading={loading}
+              loading={loading || generatingClues}
               usedItems={usedItems}
             />
 
@@ -166,7 +173,7 @@ const Game = ({ theme }) => {
             {currentItem && (
               <ActionButtons
                 onRandomCategory={pickRandomCategory}
-                loading={loading}
+                loading={loading || generatingClues}
               />
             )}
 
@@ -177,7 +184,7 @@ const Game = ({ theme }) => {
               </div>
             )}
 
-            {currentItem && clues.length === 0 && (
+            {generatingClues && (
               <div className="text-center mb-4">
                 <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">
                   Genererer ledetråde...
