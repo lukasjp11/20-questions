@@ -1,68 +1,57 @@
 {
   "short_name": "20 Questions",
-  "name": "20 Questions - AI Trivia Spil",
+  "name": "20 Questions",
   "description": "Et trivia-spil med AI-genererede ledetråde",
-  "lang": "da",
   "icons": [
     {
       "src": "icons/icon-48x48.png",
       "sizes": "48x48",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "icons/icon-72x72.png",
       "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "icons/icon-96x96.png",
       "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "icons/icon-128x128.png",
       "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "icons/icon-144x144.png",
       "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "icons/icon-152x152.png",
       "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "icons/icon-256x256.png",
       "sizes": "256x256",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "icons/icon-384x384.png",
       "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ],
   "start_url": "/20-questions/",
@@ -70,29 +59,6 @@
   "display": "standalone",
   "theme_color": "#3b82f6",
   "background_color": "#111827",
-  "orientation": "any",
-  "categories": ["games", "entertainment"],
-  "shortcuts": [
-    {
-      "name": "Ny tilfældig kategori",
-      "short_name": "Tilfældig",
-      "description": "Start et nyt spil med tilfældig kategori",
-      "url": "/20-questions/?action=random",
-      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Indstillinger",
-      "short_name": "Indstillinger",
-      "description": "Åbn spilindstillinger",
-      "url": "/20-questions/settings",
-      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
-    }
-  ],
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "dir": "ltr",
-  "display_override": ["standalone", "minimal-ui"],
-  "edge_side_panel": {
-    "preferred_width": 400
-  }
+  "orientation": "portrait-primary",
+  "categories": ["games", "entertainment"]
 }
