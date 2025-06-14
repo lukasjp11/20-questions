@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Enhanced 20 Questions game with improved randomization and single-page experience",
   "private": true,
-  "author": "Your Name",
+  "author": "Lukas",
   "license": "MIT",
   "dependencies": {
     "@huggingface/inference": "^4.0.3",
