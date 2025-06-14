@@ -64,18 +64,19 @@ const Game = ({ theme }) => {
     setTimerResetTrigger(prev => prev + 1);
     
     clearGameState();
-
+  
     try {
       const prompt = getPrompt(category, difficulty, usedItems, customTheme, numberOfClues);
       
       // Use streaming API
       const result = await generateCluesWithProgress(prompt, {
         onItemFound: (item) => {
-          // As soon as we have the item, set it (this happens very fast)
+          // As soon as we have the item, set it and HIDE the loading screen
           setCurrentItem(item);
           if (!hideAnswerOnGeneration) {
             setShowAnswer(true);
           }
+          setLoading(false); // Hide loading screen immediately when answer is found!
         },
         onComplete: (result) => {
           // When fully complete, set the clues
@@ -90,8 +91,7 @@ const Game = ({ theme }) => {
     } catch (err) {
       setError(err.message || 'En fejl opstod. Prøv igen.');
       console.error('Generation error:', err);
-    } finally {
-      setLoading(false);
+      setLoading(false); // Also hide on error
     }
   };
 
