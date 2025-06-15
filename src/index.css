@@ -26,6 +26,12 @@ code {
     monospace;
 }
 
+/* support legacy iOS syntax too */
+body {
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+}
+
 /* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 10px;
