@@ -24,15 +24,15 @@ export const selectSpecialClues = (specialCluesConfig, count) => {
     return [];
   }
 
-  // Calculate total weight
-  const totalWeight = specialCluesConfig.reduce((sum, clue) => sum + clue.weight, 0);
-  
   const selected = [];
   const availableClues = [...specialCluesConfig];
   
   for (let i = 0; i < count && availableClues.length > 0; i++) {
+    // Calculate total weight of remaining clues
+    const totalWeight = availableClues.reduce((sum, clue) => sum + clue.weight, 0);
+    
     // Random number between 0 and totalWeight
-    let random = Math.random() * availableClues.reduce((sum, clue) => sum + clue.weight, 0);
+    let random = Math.random() * totalWeight;
     
     // Find which clue this random number corresponds to
     let weightSum = 0;
@@ -48,28 +48,6 @@ export const selectSpecialClues = (specialCluesConfig, count) => {
   }
   
   return selected;
-};
-
-// Insert special clues at random positions
-export const insertSpecialClues = (regularClues, specialClueTexts) => {
-  if (!specialClueTexts || specialClueTexts.length === 0) {
-    return regularClues;
-  }
-
-  const result = [...regularClues];
-  const availablePositions = Array.from({ length: regularClues.length }, (_, i) => i);
-  
-  // Shuffle positions to get random insertion points
-  const shuffledPositions = shuffleArray(availablePositions);
-  
-  // Insert special clues at random positions
-  specialClueTexts.forEach((specialClue, index) => {
-    if (index < shuffledPositions.length) {
-      result[shuffledPositions[index]] = specialClue;
-    }
-  });
-  
-  return result;
 };
 
 export const saveToLocalStorage = (key, value) => {

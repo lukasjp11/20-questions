@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, Settings, Download } from 'lucide-react';
 import { getPrompt } from '../utils/prompts';
-import { shuffleArray, selectSpecialClues, insertSpecialClues } from '../utils/gameLogic';
+import { shuffleArray, selectSpecialClues } from '../utils/gameLogic';
 import { useGame } from '../context/GameContext';
 import CategorySelector from './CategorySelector';
 import AnswerBox from './AnswerBox';
@@ -74,7 +74,7 @@ const Game = ({ theme }) => {
   
     try {
       // Calculate how many regular clues we need (total - special clues)
-      const regularCluesNeeded = numberOfClues - numberOfSpecialClues;
+      const regularCluesNeeded = Math.max(1, numberOfClues - numberOfSpecialClues);
       const prompt = getPrompt(category, difficulty, usedItems, customTheme, regularCluesNeeded, clueDifficulty);
       
       // Use streaming API
@@ -90,14 +90,17 @@ const Game = ({ theme }) => {
           setGeneratingClues(true);
         },
         onComplete: (result) => {
+          // Get exactly the number of regular clues we need
+          const regularClues = result.clues.slice(0, regularCluesNeeded);
+          
           // Select which special clues to use based on weights
           const selectedSpecialClues = selectSpecialClues(specialCluesConfig, numberOfSpecialClues);
           
-          // Insert special clues at random positions in the regular clues
-          const cluesWithSpecials = insertSpecialClues(result.clues, selectedSpecialClues);
+          // Combine regular and special clues
+          const allClues = [...regularClues, ...selectedSpecialClues];
           
-          // Shuffle all clues
-          const shuffledClues = shuffleArray(cluesWithSpecials);
+          // Shuffle all clues together
+          const shuffledClues = shuffleArray(allClues);
           
           setClues(shuffledClues);
           setGeneratingClues(false);
