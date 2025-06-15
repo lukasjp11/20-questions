@@ -1,5 +1,0 @@
-for my web app i want to be able to change the deficulty not just for the asnwer but also for the the clues, so i want two sliders in the settings and want the promt to also take clues deficulty into account.
-
-I also want to be able to choose in setings how many "Special-ledetråde" there are, and do like between 0 and 5 and maybe also what these are, so you can add new ones but keep the default ones. replace the non functioning configure categories section in the settings with the new way to configure "Special-ledetråde". Also sometimes the "Special-ledetråde" indicator in the clues section is wrong but i have only experienced this onece i think where it mark a regular clue with the purple "Special-ledetråde" style and vice versa. also maybe add an "experimental" label or somthing for the custom theme section in settings.
-
-I also want to add better support for android and iphone users who have added the page as a shortcut to their home screen, kinda like i have done in this other project of min "Aftensmad".
