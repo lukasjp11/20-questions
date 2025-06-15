@@ -14,9 +14,9 @@ export const useGame = () => {
 
 // Default special clues with weights (higher = more common)
 const defaultSpecialCluesConfig = [
-  { text: "ryk 3 felter frem", weight: 3 },
+  { text: "Ryk 3 felter frem", weight: 3 },
   { text: "Du har 2 gæt", weight: 2 },
-  { text: "byt plads med forreste", weight: 1 }
+  { text: "Byt plads med forreste", weight: 1 }
 ];
 
 export const GameProvider = ({ children }) => {
