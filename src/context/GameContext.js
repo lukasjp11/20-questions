@@ -12,10 +12,20 @@ export const useGame = () => {
   return context;
 };
 
+// Default special clues with weights (higher = more common)
+const defaultSpecialCluesConfig = [
+  { text: "ryk 3 felter frem", weight: 3 },
+  { text: "Du har 2 gæt", weight: 2 },
+  { text: "byt plads med forreste", weight: 1 }
+];
+
 export const GameProvider = ({ children }) => {
   // Game settings
   const [difficulty, setDifficulty] = useState(() => 
     loadFromLocalStorage('difficulty', 50)
+  );
+  const [clueDifficulty, setClueDifficulty] = useState(() => 
+    loadFromLocalStorage('clueDifficulty', 50)
   );
   const [customTheme, setCustomTheme] = useState(() =>
     loadFromLocalStorage('customTheme', '')
@@ -35,6 +45,12 @@ export const GameProvider = ({ children }) => {
   const [categories, setCategories] = useState(() =>
     loadFromLocalStorage('customCategories', defaultCategories)
   );
+  const [numberOfSpecialClues, setNumberOfSpecialClues] = useState(() =>
+    loadFromLocalStorage('numberOfSpecialClues', 3)
+  );
+  const [specialCluesConfig, setSpecialCluesConfig] = useState(() =>
+    loadFromLocalStorage('specialCluesConfig', defaultSpecialCluesConfig)
+  );
 
   // Game state
   const [usedItems, setUsedItems] = useState(() => 
@@ -51,12 +67,15 @@ export const GameProvider = ({ children }) => {
     saveToLocalStorage(key, value);
     switch(key) {
       case 'difficulty': setDifficulty(value); break;
+      case 'clueDifficulty': setClueDifficulty(value); break;
       case 'customTheme': setCustomTheme(value); break;
       case 'hideAnswerOnGeneration': setHideAnswerOnGeneration(value); break;
       case 'numberOfClues': setNumberOfClues(value); break;
       case 'enableTimer': setEnableTimer(value); break;
       case 'timePerClue': setTimePerClue(value); break;
       case 'customCategories': setCategories(value); break;
+      case 'numberOfSpecialClues': setNumberOfSpecialClues(value); break;
+      case 'specialCluesConfig': setSpecialCluesConfig(value); break;
       default: break;
     }
   }, []);
@@ -94,12 +113,15 @@ export const GameProvider = ({ children }) => {
   const value = {
     // Settings
     difficulty,
+    clueDifficulty,
     customTheme,
     hideAnswerOnGeneration,
     numberOfClues,
     enableTimer,
     timePerClue,
     categories,
+    numberOfSpecialClues,
+    specialCluesConfig,
     updateSetting,
     
     // Game state

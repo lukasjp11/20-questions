@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, Settings, Download } from 'lucide-react';
 import { getPrompt } from '../utils/prompts';
-import { shuffleArray } from '../utils/gameLogic';
+import { shuffleArray, selectSpecialClues, insertSpecialClues } from '../utils/gameLogic';
 import { useGame } from '../context/GameContext';
 import CategorySelector from './CategorySelector';
 import AnswerBox from './AnswerBox';
@@ -16,12 +16,15 @@ import { generateCluesWithProgress } from '../utils/api';
 const Game = ({ theme }) => {
   const {
     difficulty,
+    clueDifficulty,
     customTheme,
     hideAnswerOnGeneration,
     numberOfClues,
     enableTimer,
     timePerClue,
     categories,
+    numberOfSpecialClues,
+    specialCluesConfig,
     usedItems,
     addUsedItem,
     currentGameState,
@@ -70,25 +73,34 @@ const Game = ({ theme }) => {
     clearGameState();
   
     try {
-      const prompt = getPrompt(category, difficulty, usedItems, customTheme, numberOfClues);
+      // Calculate how many regular clues we need (total - special clues)
+      const regularCluesNeeded = numberOfClues - numberOfSpecialClues;
+      const prompt = getPrompt(category, difficulty, usedItems, customTheme, regularCluesNeeded, clueDifficulty);
       
       // Use streaming API
       const result = await generateCluesWithProgress(prompt, {
         onItemFound: (item) => {
           // As soon as we have the item, set it and update category
           setCurrentItem(item);
-          setCurrentCategory(category); // Update category immediately when item is found
+          setCurrentCategory(category);
           if (!hideAnswerOnGeneration) {
             setShowAnswer(true);
           }
-          setLoading(false); // Hide loading screen
-          setGeneratingClues(true); // Show generating clues message
+          setLoading(false);
+          setGeneratingClues(true);
         },
         onComplete: (result) => {
-          // When fully complete, set the clues
-          const shuffledClues = shuffleArray(result.clues.slice(0, numberOfClues));
+          // Select which special clues to use based on weights
+          const selectedSpecialClues = selectSpecialClues(specialCluesConfig, numberOfSpecialClues);
+          
+          // Insert special clues at random positions in the regular clues
+          const cluesWithSpecials = insertSpecialClues(result.clues, selectedSpecialClues);
+          
+          // Shuffle all clues
+          const shuffledClues = shuffleArray(cluesWithSpecials);
+          
           setClues(shuffledClues);
-          setGeneratingClues(false); // Hide generating message
+          setGeneratingClues(false);
         }
       });
       

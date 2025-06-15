@@ -8,9 +8,11 @@ import {
   X,
   Clock,
   Palette,
-  Grid,
   Sliders,
-  Sparkles
+  Sparkles,
+  AlertCircle,
+  TrendingUp,
+  TrendingDown
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { getDifficultyLabel, getDifficultyDescription } from '../utils/prompts';
@@ -19,12 +21,14 @@ const SettingsPage = ({ theme, setTheme }) => {
   const navigate = useNavigate();
   const {
     difficulty,
+    clueDifficulty,
     customTheme,
     hideAnswerOnGeneration,
     numberOfClues,
     enableTimer,
     timePerClue,
-    categories,
+    numberOfSpecialClues,
+    specialCluesConfig,
     updateSetting,
     resetUsedItems,
     resetAllData,
@@ -33,16 +37,18 @@ const SettingsPage = ({ theme, setTheme }) => {
 
   const [localSettings, setLocalSettings] = useState({
     difficulty,
+    clueDifficulty,
     customTheme,
     hideAnswerOnGeneration,
     numberOfClues,
     enableTimer,
     timePerClue,
-    categories: { ...categories }
+    numberOfSpecialClues,
+    specialCluesConfig: [...specialCluesConfig]
   });
 
-  const [showAddCategory, setShowAddCategory] = useState(false);
-  const [newCategory, setNewCategory] = useState({ key: '', name: '', description: '' });
+  const [showAddSpecialClue, setShowAddSpecialClue] = useState(false);
+  const [newSpecialClue, setNewSpecialClue] = useState({ text: '', weight: 2 });
   const [hasChanges, setHasChanges] = useState(false);
 
   const handleLocalChange = (key, value) => {
@@ -52,39 +58,47 @@ const SettingsPage = ({ theme, setTheme }) => {
 
   const handleSaveSettings = () => {
     Object.entries(localSettings).forEach(([key, value]) => {
-      if (key === 'categories') {
-        updateSetting('customCategories', value);
-      } else {
-        updateSetting(key, value);
-      }
+      updateSetting(key, value);
     });
     setHasChanges(false);
-    navigate(-1); // Go back to previous page instead of always going home
+    navigate(-1);
   };
 
-  const handleAddCategory = () => {
-    if (newCategory.key && newCategory.name) {
-      const updatedCategories = {
-        ...localSettings.categories,
-        [newCategory.key]: {
-          name: newCategory.name,
-          description: newCategory.description || 'Brugerdefineret kategori',
-          custom: true,
-          icon: Sparkles,
-          gradient: 'from-gray-600 to-gray-700'
-        }
-      };
-      handleLocalChange('categories', updatedCategories);
-      setNewCategory({ key: '', name: '', description: '' });
-      setShowAddCategory(false);
+  const handleAddSpecialClue = () => {
+    if (newSpecialClue.text.trim()) {
+      const updatedClues = [...localSettings.specialCluesConfig, {
+        text: newSpecialClue.text.trim(),
+        weight: newSpecialClue.weight
+      }];
+      handleLocalChange('specialCluesConfig', updatedClues);
+      setNewSpecialClue({ text: '', weight: 2 });
+      setShowAddSpecialClue(false);
     }
   };
 
-  const handleRemoveCategory = (key) => {
-    if (window.confirm(`Er du sikker på at du vil fjerne kategorien "${localSettings.categories[key].name}"?`)) {
-      const { [key]: removed, ...remaining } = localSettings.categories;
-      handleLocalChange('categories', remaining);
-    }
+  const handleRemoveSpecialClue = (index) => {
+    const updatedClues = localSettings.specialCluesConfig.filter((_, i) => i !== index);
+    handleLocalChange('specialCluesConfig', updatedClues);
+  };
+
+  const handleWeightChange = (index, newWeight) => {
+    const updatedClues = [...localSettings.specialCluesConfig];
+    updatedClues[index] = { ...updatedClues[index], weight: newWeight };
+    handleLocalChange('specialCluesConfig', updatedClues);
+  };
+
+  const getCluesDifficultyDescription = (value) => {
+    if (value <= 25) return 'Simple, konkrete ledetråde med basale ord';
+    if (value <= 50) return 'Standard trivia-niveau ledetråde';
+    if (value <= 75) return 'Komplekse ledetråde der kræver god viden';
+    return 'Meget komplekse ledetråde der kræver specialviden';
+  };
+
+  const getWeightLabel = (weight) => {
+    if (weight === 1) return 'Sjælden';
+    if (weight === 2) return 'Normal';
+    if (weight === 3) return 'Almindelig';
+    return 'Meget almindelig';
   };
 
   return (
@@ -162,7 +176,7 @@ const SettingsPage = ({ theme, setTheme }) => {
             <div className="space-y-6">
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium">Sværhedsgrad: {getDifficultyLabel(localSettings.difficulty)}</span>
+                  <span className="font-medium">Sværhedsgrad - Svar: {getDifficultyLabel(localSettings.difficulty)}</span>
                   <span className="text-sm text-gray-500">{localSettings.difficulty}%</span>
                 </div>
                 <input
@@ -171,12 +185,31 @@ const SettingsPage = ({ theme, setTheme }) => {
                   max="100"
                   value={localSettings.difficulty}
                   onChange={e => handleLocalChange('difficulty', parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                   style={{ 
                     background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${localSettings.difficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} ${localSettings.difficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} 100%)` 
                   }}
                 />
                 <p className="text-xs text-gray-500 mt-2">{getDifficultyDescription(localSettings.difficulty)}</p>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-medium">Sværhedsgrad - Ledetråde: {getDifficultyLabel(localSettings.clueDifficulty)}</span>
+                  <span className="text-sm text-gray-500">{localSettings.clueDifficulty}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={localSettings.clueDifficulty}
+                  onChange={e => handleLocalChange('clueDifficulty', parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                  style={{ 
+                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${localSettings.clueDifficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} ${localSettings.clueDifficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} 100%)` 
+                  }}
+                />
+                <p className="text-xs text-gray-500 mt-2">{getCluesDifficultyDescription(localSettings.clueDifficulty)}</p>
               </div>
 
               <div>
@@ -193,7 +226,13 @@ const SettingsPage = ({ theme, setTheme }) => {
               </div>
 
               <div>
-                <label className="block mb-2 font-medium">Tilpasset tema (valgfrit)</label>
+                <label className="block mb-2 font-medium">
+                  Tilpasset tema (valgfrit)
+                  <span className="ml-2 inline-flex items-center gap-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-2 py-0.5 rounded-full">
+                    <AlertCircle className="w-3 h-3" />
+                    Eksperimentel
+                  </span>
+                </label>
                 <input
                   type="text"
                   value={localSettings.customTheme}
@@ -237,80 +276,109 @@ const SettingsPage = ({ theme, setTheme }) => {
             </div>
           </section>
 
-          {/* Categories */}
+          {/* Special Clues */}
           <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Grid className="w-5 h-5" />
-                Kategorier
+                <Sparkles className="w-5 h-5" />
+                Special-ledetråde
               </h2>
               <button
-                onClick={() => setShowAddCategory(true)}
+                onClick={() => setShowAddSpecialClue(true)}
                 className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                Tilføj kategori
+                Tilføj
               </button>
             </div>
 
+            <div className="mb-4">
+              <label className="block mb-2 font-medium">Antal special-ledetråde per spil</label>
+              <input
+                type="number"
+                min="0"
+                max="5"
+                value={localSettings.numberOfSpecialClues}
+                onChange={e => {
+                  const value = Math.min(5, Math.max(0, parseInt(e.target.value) || 0));
+                  handleLocalChange('numberOfSpecialClues', value);
+                }}
+                className="w-20 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-center"
+              />
+              <p className="text-xs text-gray-500 mt-1">Mellem 0 og 5 special-ledetråde</p>
+            </div>
+
             <div className="space-y-2">
-              {Object.entries(localSettings.categories).map(([key, category]) => (
+              {localSettings.specialCluesConfig.map((clueConfig, index) => (
                 <div 
-                  key={key} 
+                  key={index} 
                   className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50"
                 >
-                  <div>
-                    <p className="font-medium">{category.name}</p>
-                    <p className="text-sm text-gray-500">{category.description}</p>
-                  </div>
-                  {category.custom && (
+                  <p className="text-purple-600 dark:text-purple-300 flex-1">{clueConfig.text}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500">Hyppighed:</span>
+                      <select
+                        value={clueConfig.weight}
+                        onChange={(e) => handleWeightChange(index, parseInt(e.target.value))}
+                        className="px-2 py-1 rounded bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-sm"
+                      >
+                        <option value={1}>Sjælden</option>
+                        <option value={2}>Normal</option>
+                        <option value={3}>Almindelig</option>
+                        <option value={4}>Meget almindelig</option>
+                      </select>
+                    </div>
                     <button
-                      onClick={() => handleRemoveCategory(key)}
+                      onClick={() => handleRemoveSpecialClue(index)}
                       className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
-                  )}
+                  </div>
                 </div>
               ))}
+              
+              {localSettings.specialCluesConfig.length === 0 && (
+                <p className="text-center text-gray-500 py-4">Ingen special-ledetråde tilføjet</p>
+              )}
             </div>
 
-            {showAddCategory && (
+            {showAddSpecialClue && (
               <div className="mt-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                <h3 className="font-medium mb-3">Ny kategori</h3>
+                <h3 className="font-medium mb-3">Ny special-ledetråd</h3>
                 <div className="space-y-3">
                   <input
                     type="text"
-                    placeholder="Kategori ID (f.eks. 'sport')"
-                    value={newCategory.key}
-                    onChange={e => setNewCategory(prev => ({ ...prev, key: e.target.value.toLowerCase().replace(/\s/g, '_') }))}
+                    placeholder='f.eks. "Du må åbne 2 ledetråde gratis"'
+                    value={newSpecialClue.text}
+                    onChange={e => setNewSpecialClue(prev => ({ ...prev, text: e.target.value }))}
                     className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
                   />
-                  <input
-                    type="text"
-                    placeholder="Kategori navn (f.eks. 'Sport')"
-                    value={newCategory.name}
-                    onChange={e => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Beskrivelse (valgfrit)"
-                    value={newCategory.description}
-                    onChange={e => setNewCategory(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
-                  />
+                  <div className="flex items-center gap-3">
+                    <label className="text-sm">Hyppighed:</label>
+                    <select
+                      value={newSpecialClue.weight}
+                      onChange={(e) => setNewSpecialClue(prev => ({ ...prev, weight: parseInt(e.target.value) }))}
+                      className="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                    >
+                      <option value={1}>Sjælden</option>
+                      <option value={2}>Normal</option>
+                      <option value={3}>Almindelig</option>
+                      <option value={4}>Meget almindelig</option>
+                    </select>
+                  </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={handleAddCategory}
+                      onClick={handleAddSpecialClue}
                       className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
                     >
                       Tilføj
                     </button>
                     <button
                       onClick={() => {
-                        setShowAddCategory(false);
-                        setNewCategory({ key: '', name: '', description: '' });
+                        setShowAddSpecialClue(false);
+                        setNewSpecialClue({ text: '', weight: 2 });
                       }}
                       className="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 rounded-lg transition-colors"
                     >

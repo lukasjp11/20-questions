@@ -1,9 +1,10 @@
 import React, { memo, useCallback } from 'react';
 import { CheckCircle, Circle } from 'lucide-react';
 import { isSpecialClue } from '../utils/gameLogic';
+import { useGame } from '../context/GameContext';
 
-const ClueButton = memo(({ clue, index, isRevealed, onClick }) => {
-  const isSpecial = isSpecialClue(clue);
+const ClueButton = memo(({ clue, index, isRevealed, onClick, specialCluesConfig }) => {
+  const isSpecial = isSpecialClue(clue, specialCluesConfig);
   
   const handleClick = useCallback(() => {
     onClick(index);
@@ -47,6 +48,8 @@ const ClueButton = memo(({ clue, index, isRevealed, onClick }) => {
 ClueButton.displayName = 'ClueButton';
 
 const CluesGrid = memo(({ clues, revealedClues, onClueClick }) => {
+  const { specialCluesConfig } = useGame();
+  
   if (clues.length === 0) return null;
 
   return (
@@ -66,6 +69,7 @@ const CluesGrid = memo(({ clues, revealedClues, onClueClick }) => {
             index={index}
             isRevealed={revealedClues.includes(index)}
             onClick={onClueClick}
+            specialCluesConfig={specialCluesConfig}
           />
         ))}
       </div>

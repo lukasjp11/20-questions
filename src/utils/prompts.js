@@ -118,7 +118,15 @@ const difficultyDescriptions = {
   100: 'ekspertniveau - ekstremt obskurt, kendt af meget få mennesker'
 };
 
-export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20) => {
+const clueComplexityDescriptions = {
+  1: 'Ekstrem simple og konkrete ledetråde med helt basale ord som små børn kan forstå',
+  25: 'Simple, direkte ledetråde med almindelige ord',
+  50: 'Standard trivia-niveau ledetråde med normal kompleksitet',
+  75: 'Komplekse ledetråde med avanceret ordforråd og indirekte hints',
+  100: 'Meget komplekse og kryptiske ledetråde der kræver dyb viden og logisk tænkning'
+};
+
+export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20, clueDifficulty = 50) => {
   // Find the closest difficulty example
   const difficultyKeys = Object.keys(categoryDescriptions[category].examples).map(Number);
   const closestDifficulty = difficultyKeys.reduce((prev, curr) => 
@@ -137,6 +145,12 @@ export const getPrompt = (category, difficulty, usedItems, customTheme = '', num
     Math.abs(curr - difficulty) < Math.abs(prev - difficulty) ? curr : prev
   );
 
+  // Find closest clue complexity description
+  const clueComplexityKeys = Object.keys(clueComplexityDescriptions).map(Number);
+  const closestClueComplexityKey = clueComplexityKeys.reduce((prev, curr) => 
+    Math.abs(curr - clueDifficulty) < Math.abs(prev - clueDifficulty) ? curr : prev
+  );
+
   const themeSection = customTheme 
     ? `\nVIGTIGT TEMA: Alle emner SKAL relatere til "${customTheme}". 
 Vælg kun emner der passer til dette tema OG den valgte kategori.
@@ -146,7 +160,8 @@ Hvis temaet er for specifikt til at finde ${categoryInfo.description} på det gi
   return `Du er vært for et ${numberOfClues} Questions spil. Din opgave er at vælge ${categoryInfo.description} som er ${difficultyDescriptions[closestDescriptionKey]}.
 
 KATEGORI: ${categories[category].name}
-SVÆRHEDSGRAD: ${difficulty}% (${getDifficultyLabel(difficulty)})
+SVÆRHEDSGRAD FOR SVAR: ${difficulty}% (${getDifficultyLabel(difficulty)})
+SVÆRHEDSGRAD FOR LEDETRÅDE: ${clueDifficulty}% (${getDifficultyLabel(clueDifficulty)})
 ${themeSection}
 EKSEMPLER på passende emner for denne sværhedsgrad:
 ${examples}
@@ -170,25 +185,21 @@ REGLER FOR VALG AF EMNE:
 4. Match sværheden fra eksemplerne præcist
 
 MEGET VIGTIGT FOR LEDETRÅDE:
-- Tilpas ledetrådenes sværhed til målgruppen:
+- LEDETRÅDE SVÆRHEDSGRAD: ${clueDifficulty}% - ${clueComplexityDescriptions[closestClueComplexityKey]}
+- Tilpas ledetrådenes kompleksitet til det valgte niveau:
   * 1-25%: Simple, konkrete ledetråde med basale ord
   * 50%: Standard trivia-niveau ledetråde  
   * 75-100%: Komplekse ledetråde der kræver specialviden
 - Hver ledetråd skal være HELT UAFHÆNGIG af de andre
-- Bland forskellige typer hints
+- Bland forskellige typer hints (fysiske egenskaber, kontekst, funktion, historie, osv.)
 - Undgå åbenlyse sammenhænge mellem ledetråde
-
-Special-ledetråde:
-- Vælg 3 TILFÆLDIGE positioner mellem 1-${numberOfClues}
-- Indsæt disse special-ledetråde:
-  • "byt plads med forreste"
-  • "ryk 3 felter frem"
-  • "Du har 2 gæt"
+- Progression: Start med sværere ledetråde og gør dem gradvist lettere
+- Generer præcis ${numberOfClues} almindelige ledetråde
 
 Svar KUN med følgende JSON format:
 {
   "item": "det valgte emne",
-  "clues": [${numberOfClues} ledetråde${difficulty > 20 ? ' med præcis 3 special-ledetråde på tilfældige positioner' : ' uden special-ledetråde'}]
+  "clues": [${numberOfClues} almindelige ledetråde uden special-ledetråde]
 }
 Respond ONLY with valid JSON. Do not include any markdown or explanations.`;
 };
