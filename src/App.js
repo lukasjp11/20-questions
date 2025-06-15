@@ -23,7 +23,7 @@ function App() {
 
   return (
     <GameProvider>
-      <Router>
+      <Router basename="/20-questions">
         <div className="App">
           <Routes>
             <Route path="/" element={<Game theme={theme} setTheme={setTheme} />} />
