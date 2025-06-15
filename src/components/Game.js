@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Settings, Download } from 'lucide-react';
+import { AlertTriangle, Settings } from 'lucide-react';
 import { getPrompt } from '../utils/prompts';
 import { shuffleArray, selectSpecialClues } from '../utils/gameLogic';
 import { useGame } from '../context/GameContext';

@@ -63,6 +63,9 @@ export const generateCluesWithProgress = async (prompt, callbacks = {}) => {
                 
               case 'error':
                 throw new Error(event.error);
+
+              default:
+                break;
             }
           } catch (e) {
             // Ignore JSON parse errors for incomplete data
