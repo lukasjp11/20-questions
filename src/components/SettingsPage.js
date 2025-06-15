@@ -10,9 +10,7 @@ import {
   Palette,
   Sliders,
   Sparkles,
-  AlertCircle,
-  TrendingUp,
-  TrendingDown
+  AlertCircle
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { getDifficultyLabel, getDifficultyDescription } from '../utils/prompts';
@@ -92,13 +90,6 @@ const SettingsPage = ({ theme, setTheme }) => {
     if (value <= 50) return 'Standard trivia-niveau ledetråde';
     if (value <= 75) return 'Komplekse ledetråde der kræver god viden';
     return 'Meget komplekse ledetråde der kræver specialviden';
-  };
-
-  const getWeightLabel = (weight) => {
-    if (weight === 1) return 'Sjælden';
-    if (weight === 2) return 'Normal';
-    if (weight === 3) return 'Almindelig';
-    return 'Meget almindelig';
   };
 
   return (
