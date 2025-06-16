@@ -32,7 +32,7 @@ const Game = ({ theme }) => {
     clearGameState
   } = useGame();
 
-  const [currentCategory, setCurrentCategory] = useState(currentGameState?.currentCategory || 'person');
+  const [currentCategory, setCurrentCategory] = useState(currentGameState?.currentCategory || null);
   const [currentItem, setCurrentItem] = useState(currentGameState?.currentItem || '');
   const [clues, setClues] = useState(currentGameState?.clues || []);
   const [revealedClues, setRevealedClues] = useState(currentGameState?.revealedClues || []);
