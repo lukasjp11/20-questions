@@ -474,7 +474,7 @@ const SettingsPage = ({ theme, setTheme }) => {
                 type="text"
                 value={localSettings.customTheme}
                 onChange={e => handleLocalChange('customTheme', e.target.value)}
-                placeholder='f.eks. "Marvel Universe", "90erne", "Dansk historie"'
+                placeholder='f.eks. "Marvel", "90erne", "Dansk historie"'
                 className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-500 outline-none transition-colors"
               />
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
