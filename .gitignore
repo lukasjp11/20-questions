@@ -24,4 +24,5 @@ yarn-error.log*
 # Environment variables
 .env
 repomix-output.xml
+repomix-output.txt
 tmp.txt
