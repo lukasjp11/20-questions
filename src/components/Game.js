@@ -180,7 +180,7 @@ const Game = ({ theme }) => {
               <Timer
                 timePerClue={timePerClue}
                 onTimeUp={handleTimeUp}
-                isPaused={timerPaused || revealedClues.length === clues.length}
+                isPaused={timerPaused}
                 resetTrigger={timerResetTrigger}
               />
             )}
