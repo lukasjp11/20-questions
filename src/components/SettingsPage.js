@@ -13,6 +13,7 @@ import {
   AlertCircle,
   FlaskConical,
   Gauge,
+  CheckSquare,
   ListChecks,
   Database,
   Eye,
@@ -203,7 +204,7 @@ const SettingsPage = ({ theme, setTheme }) => {
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <CheckSquare className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                     <span className="font-medium text-sm">Svar</span>
                   </div>
                   <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
@@ -231,7 +232,7 @@ const SettingsPage = ({ theme, setTheme }) => {
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <ListChecks className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                     <span className="font-medium text-sm">Ledetråde</span>
                   </div>
                   <span className="text-lg font-bold text-blue-600 dark:text-blue-400">

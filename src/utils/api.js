@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const generateCluesWithProgress = async (prompt, callbacks = {}) => {
   const {
@@ -68,7 +68,6 @@ export const generateCluesWithProgress = async (prompt, callbacks = {}) => {
                 break;
             }
           } catch (e) {
-            // Ignore JSON parse errors for incomplete data
             if (e.message.includes('JSON')) continue;
             throw e;
           }
