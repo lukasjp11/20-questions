@@ -12,7 +12,6 @@ export const useGame = () => {
   return context;
 };
 
-// Default special clues with weights (higher = more common)
 const defaultSpecialCluesConfig = [
   { text: "Ryk 3 felter frem", weight: 3 },
   { text: "Du har 2 gæt", weight: 2 },
@@ -20,7 +19,6 @@ const defaultSpecialCluesConfig = [
 ];
 
 export const GameProvider = ({ children }) => {
-  // Game settings
   const [difficulty, setDifficulty] = useState(() => 
     loadFromLocalStorage('difficulty', 50)
   );
@@ -51,18 +49,12 @@ export const GameProvider = ({ children }) => {
   const [specialCluesConfig, setSpecialCluesConfig] = useState(() =>
     loadFromLocalStorage('specialCluesConfig', defaultSpecialCluesConfig)
   );
-
-  // Game state
   const [usedItems, setUsedItems] = useState(() => 
     loadFromLocalStorage('usedItems', [])
   );
-  
-  // Current game session state
   const [currentGameState, setCurrentGameState] = useState(() =>
     loadFromLocalStorage('currentGameState', null)
   );
-
-  // Save settings when they change
   const updateSetting = useCallback((key, value) => {
     saveToLocalStorage(key, value);
     switch(key) {
@@ -98,20 +90,17 @@ export const GameProvider = ({ children }) => {
     window.location.reload();
   }, []);
   
-  // Save current game state
   const saveGameState = useCallback((gameState) => {
     setCurrentGameState(gameState);
     saveToLocalStorage('currentGameState', gameState);
   }, []);
   
-  // Clear current game state
   const clearGameState = useCallback(() => {
     setCurrentGameState(null);
     localStorage.removeItem('currentGameState');
   }, []);
 
   const value = {
-    // Settings
     difficulty,
     clueDifficulty,
     customTheme,
@@ -123,14 +112,10 @@ export const GameProvider = ({ children }) => {
     numberOfSpecialClues,
     specialCluesConfig,
     updateSetting,
-    
-    // Game state
     usedItems,
     addUsedItem,
     resetUsedItems,
     resetAllData,
-    
-    // Current game session
     currentGameState,
     saveGameState,
     clearGameState,

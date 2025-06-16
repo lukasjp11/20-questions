@@ -95,7 +95,6 @@ const SettingsPage = ({ theme, setTheme }) => {
     handleLocalChange('specialCluesConfig', updatedClues);
   };
 
-  // Toggle switch component
   const ToggleSwitch = ({ checked, onChange }) => (
     <button
       onClick={onChange}

@@ -2,7 +2,6 @@
   min-height: 100vh;
 }
 
-/* Slider custom styling */
 .slider {
   -webkit-appearance: none;
   appearance: none;
@@ -41,7 +40,6 @@
   background: #2563eb;
 }
 
-/* Loading pulse */
 @keyframes pulse {
   0%, 100% {
     opacity: 0.4;
@@ -55,7 +53,6 @@
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* Loading bounce */
 @keyframes bounce {
   0%, 100% {
     transform: translateY(0);
@@ -69,7 +66,6 @@
   animation: bounce 0.6s ease-in-out infinite;
 }
 
-/* Loading spin */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -83,19 +79,16 @@
   animation: spin 2s linear infinite;
 }
 
-/* Pulse animation */
 .animate-pulse {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* Smooth transitions */
 * {
   transition: background-color 0.2s ease, 
               border-color 0.2s ease,
               color 0.2s ease;
 }
 
-/* Focus styles */
 :focus {
   outline: none;
 }
@@ -105,12 +98,10 @@
   outline-offset: 2px;
 }
 
-/* Button press effect */
 button:active {
   transform: scale(0.98);
 }
 
-/* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -130,20 +121,17 @@ button:active {
   background: #6b7280;
 }
 
-/* Firefox scrollbar */
 * {
   scrollbar-width: thin;
   scrollbar-color: #4b5563 #1f2937;
 }
 
-/* Responsive font sizes */
 @media (max-width: 768px) {
   html {
     font-size: 14px;
   }
 }
 
-/* Print styles */
 @media print {
   body {
     background: white;

@@ -127,7 +127,6 @@ const clueComplexityDescriptions = {
 };
 
 export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20, clueDifficulty = 50) => {  
-  // Find the closest difficulty example
   const difficultyKeys = Object.keys(categoryDescriptions[category].examples).map(Number);
   const closestDifficulty = difficultyKeys.reduce((prev, curr) => 
     Math.abs(curr - difficulty) < Math.abs(prev - difficulty) ? curr : prev
@@ -139,13 +138,11 @@ export const getPrompt = (category, difficulty, usedItems, customTheme = '', num
     .filter(item => item.category === category)
     .map(item => item.item);
 
-  // Find closest difficulty description
   const descriptionKeys = Object.keys(difficultyDescriptions).map(Number);
   const closestDescriptionKey = descriptionKeys.reduce((prev, curr) => 
     Math.abs(curr - difficulty) < Math.abs(prev - difficulty) ? curr : prev
   );
 
-  // Find closest clue complexity description
   const clueComplexityKeys = Object.keys(clueComplexityDescriptions).map(Number);
   const closestClueComplexityKey = clueComplexityKeys.reduce((prev, curr) => 
     Math.abs(curr - clueDifficulty) < Math.abs(prev - clueDifficulty) ? curr : prev

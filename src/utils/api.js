@@ -36,7 +36,6 @@ export const generateCluesWithProgress = async (prompt, callbacks = {}) => {
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       
-      // Keep the last incomplete line in the buffer
       buffer = lines.pop() || '';
       
       for (const line of lines) {
@@ -52,12 +51,10 @@ export const generateCluesWithProgress = async (prompt, callbacks = {}) => {
             
             switch (event.type) {
               case 'item_found':
-                // Call this as soon as we have the item
                 onItemFound(event.item);
                 break;
                 
               case 'complete':
-                // Call this when everything is done
                 onComplete(event.result);
                 return event.result;
                 

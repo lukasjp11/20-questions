@@ -32,7 +32,6 @@ const Game = ({ theme }) => {
     clearGameState
   } = useGame();
 
-  // Initialize state from saved game state or defaults
   const [currentCategory, setCurrentCategory] = useState(currentGameState?.currentCategory || 'person');
   const [currentItem, setCurrentItem] = useState(currentGameState?.currentItem || '');
   const [clues, setClues] = useState(currentGameState?.clues || []);
@@ -45,7 +44,6 @@ const Game = ({ theme }) => {
   const [timerResetTrigger, setTimerResetTrigger] = useState(0);
   const [generatingClues, setGeneratingClues] = useState(false);
 
-  // Save game state whenever it changes (but not during loading)
   useEffect(() => {
     if (currentItem && !loading && !generatingClues) {
       saveGameState({
@@ -73,14 +71,11 @@ const Game = ({ theme }) => {
     clearGameState();
   
     try {
-      // Calculate how many regular clues we need (total - special clues)
       const regularCluesNeeded = Math.max(1, numberOfClues - numberOfSpecialClues);
       const prompt = getPrompt(category, difficulty, usedItems, customTheme, regularCluesNeeded, clueDifficulty);
       
-      // Use streaming API
       const result = await generateCluesWithProgress(prompt, {
         onItemFound: (item) => {
-          // As soon as we have the item, set it and update category
           setCurrentItem(item);
           setCurrentCategory(category);
           if (!hideAnswerOnGeneration) {
@@ -90,16 +85,12 @@ const Game = ({ theme }) => {
           setGeneratingClues(true);
         },
         onComplete: (result) => {
-          // Get exactly the number of regular clues we need
           const regularClues = result.clues.slice(0, regularCluesNeeded);
           
-          // Select which special clues to use based on weights
           const selectedSpecialClues = selectSpecialClues(specialCluesConfig, numberOfSpecialClues);
           
-          // Combine regular and special clues
           const allClues = [...regularClues, ...selectedSpecialClues];
           
-          // Shuffle all clues together
           const shuffledClues = shuffleArray(allClues);
           
           setClues(shuffledClues);
@@ -122,7 +113,6 @@ const Game = ({ theme }) => {
       if (prev.includes(index)) {
         return prev.filter(i => i !== index);
       } else {
-        // Always reset timer when revealing a new clue
         if (enableTimer) {
           setTimerResetTrigger(trigger => trigger + 1);
           setTimerPaused(false);

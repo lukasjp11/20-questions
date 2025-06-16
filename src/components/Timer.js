@@ -5,7 +5,6 @@ const Timer = ({ timePerClue, onTimeUp, isPaused, resetTrigger }) => {
   const [timeLeft, setTimeLeft] = useState(timePerClue);
   const [isTimeUp, setIsTimeUp] = useState(false);
   
-  // Reset timer when resetTrigger changes (new clue revealed)
   useEffect(() => {
     setTimeLeft(timePerClue);
     setIsTimeUp(false);

@@ -11,12 +11,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Light mode */
 body {
   background-color: #f9fafb;
 }
 
-/* Dark mode */
 body.dark {
   background-color: #111827;
 }
@@ -26,13 +24,11 @@ code {
     monospace;
 }
 
-/* support legacy iOS syntax too */
 body {
   padding-top: constant(safe-area-inset-top);
   padding-top: env(safe-area-inset-top);
 }
 
-/* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -52,25 +48,22 @@ body {
   background: #6b7280;
 }
 
-/* Firefox scrollbar */
 * {
   scrollbar-width: thin;
   scrollbar-color: #4b5563 #1f2937;
 }
 
-/* Smooth scroll behavior */
 html {
   scroll-behavior: smooth;
 }
 
-/* Chrome, Safari, Edge, Opera */
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Firefox */
 input[type=number] {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
