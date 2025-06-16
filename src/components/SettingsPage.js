@@ -10,7 +10,16 @@ import {
   Palette,
   Sliders,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  FlaskConical,
+  Gauge,
+  ListChecks,
+  Database,
+  Eye,
+  EyeOff,
+  Moon,
+  Sun,
+  Minus
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { getDifficultyLabel, getDifficultyDescription } from '../utils/prompts';
@@ -85,12 +94,50 @@ const SettingsPage = ({ theme, setTheme }) => {
     handleLocalChange('specialCluesConfig', updatedClues);
   };
 
-  const getCluesDifficultyDescription = (value) => {
-    if (value <= 25) return 'Simple, konkrete ledetråde med basale ord';
-    if (value <= 50) return 'Standard trivia-niveau ledetråde';
-    if (value <= 75) return 'Komplekse ledetråde der kræver god viden';
-    return 'Meget komplekse ledetråde der kræver specialviden';
-  };
+  // Simplified difficulty card component
+  const DifficultyCard = ({ title, value, onChange, icon: Icon, theme }) => (
+    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          <span className="font-medium text-sm">{title}</span>
+        </div>
+        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+          {getDifficultyLabel(value)}
+        </span>
+      </div>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value={value}
+        onChange={e => onChange(parseInt(e.target.value))}
+        className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+        style={{ 
+          background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${value}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} ${value}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} 100%)` 
+        }}
+      />
+      <div className="flex justify-between mt-1">
+        <span className="text-xs text-gray-500">Let</span>
+        <span className="text-xs text-gray-500">{value}%</span>
+        <span className="text-xs text-gray-500">Ekspert</span>
+      </div>
+    </div>
+  );
+
+  // Toggle switch component
+  const ToggleSwitch = ({ checked, onChange }) => (
+    <button
+      onClick={onChange}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${
+        checked ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+      }`}
+    >
+      <span className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
+        checked ? 'translate-x-6' : 'translate-x-1'
+      }`} />
+    </button>
+  );
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} text-gray-900 dark:text-white`}>
@@ -100,7 +147,7 @@ const SettingsPage = ({ theme, setTheme }) => {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate(-1)}
-              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+              className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -109,12 +156,36 @@ const SettingsPage = ({ theme, setTheme }) => {
           {hasChanges && (
             <button
               onClick={handleSaveSettings}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm hover:shadow-md transition-all"
             >
               <Save className="w-4 h-4" />
-              Gem ændringer
+              <span className="hidden sm:inline">Gem ændringer</span>
             </button>
           )}
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center shadow-sm">
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{localSettings.numberOfClues}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Ledetråde</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center shadow-sm">
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+              {Math.round((localSettings.difficulty + localSettings.clueDifficulty) / 2)}%
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Sværhed</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center shadow-sm">
+            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{usedItems.length}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Brugte kort</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center shadow-sm">
+            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+              {localSettings.enableTimer ? `${localSettings.timePerClue}s` : 'Fra'}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Timer</p>
+          </div>
         </div>
 
         {/* Settings sections */}
@@ -126,144 +197,133 @@ const SettingsPage = ({ theme, setTheme }) => {
               Udseende
             </h2>
             
-            <div className="space-y-4">
-              <label className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                <span className="font-medium">Mørk tema</span>
-                <button
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${
-                    theme === 'dark' ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
-                    theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
-              </label>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <div className="flex items-center gap-3">
+                  {theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                  <span className="font-medium">Tema</span>
+                </div>
+                <ToggleSwitch
+                  checked={theme === 'dark'}
+                  onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                />
+              </div>
 
-              <label className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                <span className="font-medium">Skjul svar ved generering</span>
-                <button
-                  onClick={() => handleLocalChange('hideAnswerOnGeneration', !localSettings.hideAnswerOnGeneration)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${
-                    localSettings.hideAnswerOnGeneration ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
-                    localSettings.hideAnswerOnGeneration ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
-              </label>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <div className="flex items-center gap-3">
+                  {localSettings.hideAnswerOnGeneration ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <span className="font-medium">Skjul svar ved start</span>
+                </div>
+                <ToggleSwitch
+                  checked={localSettings.hideAnswerOnGeneration}
+                  onChange={() => handleLocalChange('hideAnswerOnGeneration', !localSettings.hideAnswerOnGeneration)}
+                />
+              </div>
             </div>
           </section>
 
-          {/* Game Rules */}
+          {/* Game Difficulty */}
+          <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Gauge className="w-5 h-5" />
+              Sværhedsgrad
+            </h2>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <DifficultyCard
+                title="Svar"
+                value={localSettings.difficulty}
+                onChange={(value) => handleLocalChange('difficulty', value)}
+                icon={Sliders}
+                theme={theme}
+              />
+              <DifficultyCard
+                title="Ledetråde"
+                value={localSettings.clueDifficulty}
+                onChange={(value) => handleLocalChange('clueDifficulty', value)}
+                icon={ListChecks}
+                theme={theme}
+              />
+            </div>
+          </section>
+
+          {/* Basic Game Settings */}
           <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Sliders className="w-5 h-5" />
-              Spilregler
+              Grundlæggende
             </h2>
 
-            <div className="space-y-6">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium">Sværhedsgrad - Svar: {getDifficultyLabel(localSettings.difficulty)}</span>
-                  <span className="text-sm text-gray-500">{localSettings.difficulty}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={localSettings.difficulty}
-                  onChange={e => handleLocalChange('difficulty', parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-                  style={{ 
-                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${localSettings.difficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} ${localSettings.difficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} 100%)` 
-                  }}
-                />
-                <p className="text-xs text-gray-500 mt-2">{getDifficultyDescription(localSettings.difficulty)}</p>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium">Sværhedsgrad - Ledetråde: {getDifficultyLabel(localSettings.clueDifficulty)}</span>
-                  <span className="text-sm text-gray-500">{localSettings.clueDifficulty}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={localSettings.clueDifficulty}
-                  onChange={e => handleLocalChange('clueDifficulty', parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-                  style={{ 
-                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${localSettings.clueDifficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} ${localSettings.clueDifficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} 100%)` 
-                  }}
-                />
-                <p className="text-xs text-gray-500 mt-2">{getCluesDifficultyDescription(localSettings.clueDifficulty)}</p>
-              </div>
-
-              <div>
-                <label className="block mb-2 font-medium">Antal ledetråde</label>
-                <input
-                  type="number"
-                  value={localSettings.numberOfClues}
-                  onChange={e => {
-                    const value = parseInt(e.target.value) || 1;
-                    handleLocalChange('numberOfClues', value);
-                  }}
-                  className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-center"
-                />
-              </div>
-
-              <div>
-                <label className="block mb-2 font-medium">
-                  Tilpasset tema (valgfrit)
-                  <span className="ml-2 inline-flex items-center gap-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-2 py-0.5 rounded-full">
-                    <AlertCircle className="w-3 h-3" />
-                    Eksperimentel
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  value={localSettings.customTheme}
-                  onChange={e => handleLocalChange('customTheme', e.target.value)}
-                  placeholder='f.eks. "Film og serier", "Dansk historie"'
-                  className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
-                />
-              </div>
-
-              <label className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+            <div className="space-y-4">
+              {/* Number of clues */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <label className="font-medium">Antal ledetråde</label>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  <span className="font-medium">Tidsgrænse</span>
-                </div>
-                <button
-                  onClick={() => handleLocalChange('enableTimer', !localSettings.enableTimer)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${
-                    localSettings.enableTimer ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
-                    localSettings.enableTimer ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
-              </label>
-
-              {localSettings.enableTimer && (
-                <div>
-                  <label className="block mb-2 text-sm font-medium">Sekunder per ledetråd</label>
+                  <button
+                    onClick={() => handleLocalChange('numberOfClues', Math.max(1, localSettings.numberOfClues - 5))}
+                    className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
                   <input
                     type="number"
-                    value={localSettings.timePerClue}
+                    value={localSettings.numberOfClues}
                     onChange={e => {
                       const value = parseInt(e.target.value) || 1;
-                      handleLocalChange('timePerClue', value);
+                      handleLocalChange('numberOfClues', value);
                     }}
-                    className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-center"
+                    className="w-16 px-2 py-1 text-center rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
+                  />
+                  <button
+                    onClick={() => handleLocalChange('numberOfClues', localSettings.numberOfClues + 5)}
+                    className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Timer */}
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span className="font-medium">Tidsgrænse</span>
+                  </div>
+                  <ToggleSwitch
+                    checked={localSettings.enableTimer}
+                    onChange={() => handleLocalChange('enableTimer', !localSettings.enableTimer)}
                   />
                 </div>
-              )}
+                {localSettings.enableTimer && (
+                  <div className="flex items-center justify-between mt-3 pl-6">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Sekunder per ledetråd</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleLocalChange('timePerClue', Math.max(5, localSettings.timePerClue - 5))}
+                        className="w-7 h-7 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <input
+                        type="number"
+                        value={localSettings.timePerClue}
+                        onChange={e => {
+                          const value = parseInt(e.target.value) || 1;
+                          handleLocalChange('timePerClue', value);
+                        }}
+                        className="w-12 px-1 py-0.5 text-center rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm"
+                      />
+                      <button
+                        onClick={() => handleLocalChange('timePerClue', localSettings.timePerClue + 5)}
+                        className="w-7 h-7 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 
@@ -276,27 +336,30 @@ const SettingsPage = ({ theme, setTheme }) => {
               </h2>
               <button
                 onClick={() => setShowAddSpecialClue(true)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Tilføj
               </button>
             </div>
 
-            <div className="mb-4">
-              <label className="block mb-2 font-medium">Antal special-ledetråde per spil</label>
-              <input
-                type="number"
-                min="0"
-                max="5"
-                value={localSettings.numberOfSpecialClues}
-                onChange={e => {
-                  const value = Math.min(5, Math.max(0, parseInt(e.target.value) || 0));
-                  handleLocalChange('numberOfSpecialClues', value);
-                }}
-                className="w-20 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-center"
-              />
-              <p className="text-xs text-gray-500 mt-1">Mellem 0 og 5 special-ledetråde</p>
+            <div className="mb-4 flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+              <span className="font-medium text-sm">Antal per spil</span>
+              <div className="flex items-center gap-2">
+                {[0, 1, 2, 3, 4, 5].map(num => (
+                  <button
+                    key={num}
+                    onClick={() => handleLocalChange('numberOfSpecialClues', num)}
+                    className={`w-8 h-8 rounded-lg font-medium text-sm transition-all ${
+                      localSettings.numberOfSpecialClues === num
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -305,24 +368,21 @@ const SettingsPage = ({ theme, setTheme }) => {
                   key={index} 
                   className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50"
                 >
-                  <p className="text-purple-600 dark:text-purple-300 flex-1">{clueConfig.text}</p>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Hyppighed:</span>
-                      <select
-                        value={clueConfig.weight}
-                        onChange={(e) => handleWeightChange(index, parseInt(e.target.value))}
-                        className="px-2 py-1 rounded bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-sm"
-                      >
-                        <option value={1}>Sjælden</option>
-                        <option value={2}>Normal</option>
-                        <option value={3}>Almindelig</option>
-                        <option value={4}>Meget almindelig</option>
-                      </select>
-                    </div>
+                  <p className="text-gray-700 dark:text-gray-300 flex-1 text-sm">{clueConfig.text}</p>
+                  <div className="flex items-center gap-2 ml-4">
+                    <select
+                      value={clueConfig.weight}
+                      onChange={(e) => handleWeightChange(index, parseInt(e.target.value))}
+                      className="px-2 py-1 rounded bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-sm"
+                    >
+                      <option value={1}>Sjælden</option>
+                      <option value={2}>Normal</option>
+                      <option value={3}>Hyppig</option>
+                      <option value={4}>Meget hyppig</option>
+                    </select>
                     <button
                       onClick={() => handleRemoveSpecialClue(index)}
-                      className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 transition-colors"
+                      className="p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -330,8 +390,8 @@ const SettingsPage = ({ theme, setTheme }) => {
                 </div>
               ))}
               
-              {localSettings.specialCluesConfig.length === 0 && (
-                <p className="text-center text-gray-500 py-4">Ingen special-ledetråde tilføjet</p>
+              {localSettings.specialCluesConfig.length === 0 && !showAddSpecialClue && (
+                <p className="text-center text-gray-500 py-4 text-sm">Ingen special-ledetråde tilføjet</p>
               )}
             </div>
 
@@ -344,25 +404,25 @@ const SettingsPage = ({ theme, setTheme }) => {
                     placeholder='f.eks. "Du må åbne 2 ledetråde gratis"'
                     value={newSpecialClue.text}
                     onChange={e => setNewSpecialClue(prev => ({ ...prev, text: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
                   />
                   <div className="flex items-center gap-3">
                     <label className="text-sm">Hyppighed:</label>
                     <select
                       value={newSpecialClue.weight}
                       onChange={(e) => setNewSpecialClue(prev => ({ ...prev, weight: parseInt(e.target.value) }))}
-                      className="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                      className="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
                     >
                       <option value={1}>Sjælden</option>
                       <option value={2}>Normal</option>
-                      <option value={3}>Almindelig</option>
-                      <option value={4}>Meget almindelig</option>
+                      <option value={3}>Hyppig</option>
+                      <option value={4}>Meget hyppig</option>
                     </select>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={handleAddSpecialClue}
-                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
                     >
                       Tilføj
                     </button>
@@ -381,15 +441,54 @@ const SettingsPage = ({ theme, setTheme }) => {
             )}
           </section>
 
+          {/* Experimental Features */}
+          <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <FlaskConical className="w-5 h-5" />
+              Eksperimentelle funktioner
+            </h2>
+            
+            <div className="bg-yellow-100/70 dark:bg-yellow-900/20 border border-yellow-300/70 dark:border-yellow-700/50 rounded-lg p-3 mb-4">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                Disse funktioner er under udvikling og kan være ustabile
+              </p>
+            </div>
+
+            <div>
+              <label className="block mb-2 font-medium">Tilpasset tema</label>
+              <input
+                type="text"
+                value={localSettings.customTheme}
+                onChange={e => handleLocalChange('customTheme', e.target.value)}
+                placeholder='f.eks. "Marvel Universe", "90erne", "Dansk historie"'
+                className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-500 outline-none transition-colors"
+              />
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                Begrænser alle kategorier til det valgte tema
+              </p>
+            </div>
+          </section>
+
           {/* Data Management */}
           <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Data håndtering</h2>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Database className="w-5 h-5" />
+              Data
+            </h2>
             
-            <div className="space-y-4">
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">Brugte kort</span>
-                  <span className="text-2xl font-bold">{usedItems.length}</span>
+            <div className="space-y-3">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="font-medium">Brugte kort</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Nulstil for at få dem igen
+                    </p>
+                  </div>
+                  <span className="text-3xl font-bold text-gray-700 dark:text-gray-300">
+                    {usedItems.length}
+                  </span>
                 </div>
                 <button
                   onClick={() => {
@@ -397,7 +496,7 @@ const SettingsPage = ({ theme, setTheme }) => {
                       resetUsedItems();
                     }
                   }}
-                  className="w-full mt-2 py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+                  className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
                 >
                   Nulstil brugte kort
                 </button>
@@ -409,7 +508,7 @@ const SettingsPage = ({ theme, setTheme }) => {
                     resetAllData();
                   }
                 }}
-                className="w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-medium rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors flex items-center justify-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
                 Slet alle data
