@@ -56,8 +56,8 @@ const categoryDescriptions = {
       25: 'Dronning Margrethe, Donald Duck, Harry Potter, Batman, Ronaldo',
       40: 'Einstein, Leonardo da Vinci, Madonna, The Beatles, Sherlock Holmes',
       50: 'Darwin, Beethoven, Van Gogh, Winston Churchill, Cleopatra',
-      60: 'Marie Curie, Sokrates, Frida Kahlo, Nikola Tesla, Marco Polo',
-      75: 'Niels Bohr, Virginia Woolf, Archimedes, Stradivarius, Dostoyevsky',
+      60: 'Marie Curie, Niels Bohr, Frida Kahlo, Nikola Tesla, Marco Polo',
+      75: 'Virginia Woolf, Archimedes, Stradivarius, Dostoyevsky, Vermeer',
       90: 'Ada Lovelace, Ibn Khaldun, Hypatia, Tycho Brahe, Mary Anning',
       100: 'Srinivasa Ramanujan, Hedy Lamarr, Ibn al-Haytham, Lise Meitner'
     }
@@ -65,43 +65,43 @@ const categoryDescriptions = {
   sted: {
     description: 'et berømt rejsemål, monument, vartegn, bygning eller naturligt vidunder',
     examples: {
-      1: 'hjem, have, legeplads, skov, sø',
-      10: 'zoo, svømmehal, strand, bondegård, akvarium',
-      25: 'Eiffeltårnet, Frihedsgudinden, Disneyland, Taj Mahal, Stonehenge',
+      1: 'hjem, have, legeplads, skov, strand',
+      10: 'zoo, svømmehal, strand, Legoland, bibliotek',
+      25: 'Eiffeltårnet, Den Lille Havfrue, Disneyland, Taj Mahal, Stonehenge',
       40: 'Grand Canyon, Colosseum, Niagara Falls, Den Kinesiske Mur, Mount Fuji',
-      50: 'Machu Picchu, Angkor Wat, Louvre, Alhambra, Burj Khalifa',
+      50: 'Machu Picchu, Angkor Wat, Louvre, Kronborg, Burj Khalifa',
       60: 'Petra, Moai-statuerne, Uluru, Neuschwanstein, Mont Saint-Michel',
-      75: 'Socotra, Meteora, Derinkuyu, Borobudur, Pamukkale',
-      90: 'Chand Baori, Skellig Michael, Gobekli Tepe, Kiyomizu-dera, Banaue-risterrasserne',
-      100: 'Derinkuyu, Gangkhar Puensum, Antelope Canyon, Mount Roraima, Taktsang-klostret'
+      75: 'Socotra, Meteora, Borobudur, Hagia Sophia, Chichen Itza',
+      90: 'Chand Baori, Skellig Michael, Gobekli Tepe, Roskilde Domkirke, Banaue-terrasserne',
+      100: 'Derinkuyu, Newgrange, Sigiriya, Palmyra, Taktsang-klostret'
     }
   },
   ting: {
     description: 'en genstand, objekt eller ting',
     examples: {
       1:   'sten, bog, blyant, kop, stol',
-      10:  'cykel, jakke, paraply, sko, taske',
-      25:  'fiskestang, skruetrækker, rygsæk, termos, kompas',
-      40:  'teleskop, brødrister, skrivemaskine, campingovn, komfur',
-      50:  'kamera, mikroskop, satellit, drone, solcellepanel',
-      60:  '3D-printer, elbil, robotstøvsuger, hybridfly, dronesværm',
-      75:  'nanorobot, kvantecomputer, superledermagnet, selvhelende materiale, autonom drone',
-      90:  'partikelaccelerator, fusionspilotanlæg, rumstation, synkrotron, neutrinoobservatorium',
-      100: 'tokamak-reaktor, LHC-detektor, gravitationsbølgeobservatorium, James Webb-teleskop, fusionskraftværk'
+      10:  'LEGO, cykel, fodbold, mobiltelefon, computer',
+      25:  'kompas, mikroskop, barnevogn, højtaler, paraply',
+      40:  'teleskop, GPS, skrivemaskine, solpanel, vindmølle',
+      50:  'satellit, 3D-printer, MR-scanner, laser, hologram',
+      60:  'particle accelerator, insulin-pen, pacemaker, sonar, radar',
+      75:  'kvantecomputer, DNA-sekventering, radioteleskop, elektronmikroskop',
+      90:  'CRISPR, hadron collider, neutrino-detektor, tokamak-reaktor',
+      100: 'gravitationsbølge-detektor, kvantekryptografi, metamateriale, graphene-transistor'
     }
   },
   begivenhed: {
     description: 'en historisk begivenhed, opdagelse, opfindelse eller vigtigt øjeblik',
     examples: {
-      1: 'fødseldag, jul, sommer, nat, morgen',
-      10: 'nytår, påske, første skoledag, VM i fodbold',
-      25: 'månelandingen, OL, opdagelsen af Amerika, Titanic synker',
-      40: 'Berlinmurens fald, 2. verdenskrig, internettet opfindes, 9/11',
-      50: 'Den franske revolution, renæssancen, industrielle revolution',
+      1: 'fødseldag, jul, påske, nytår, ferie',
+      10: 'første skoledag, VM i fodbold, OL, halloween',
+      25: 'månelandingen, internettet opfindes, Titanic synker, Danmark vinder EM 1992',
+      40: 'Berlinmurens fald, 2. verdenskrig, 9/11, Fukushima',
+      50: 'Den franske revolution, renæssancen, industrielle revolution, Koldkrigen',
       60: 'Sorte Død, opdagelsen af penicillin, Magna Carta, Reformationen',
-      75: 'Vestfalske fred, Rosettastenen findes, DNA-struktur opdages',
-      90: 'Carrington Event, År uden sommer 1816, Tunguska-eksplosionen',
-      100: 'Toba-udbruddet, Younger Dryas, Kambrium eksplosionen'
+      75: 'Vestfalske fred, Rosettastenen findes, DNA-struktur opdages, Manhattan Project',
+      90: 'Carrington Event, År uden sommer 1816, Tunguska-eksplosionen, Slag ved Dybbøl',
+      100: 'Toba-udbruddet, Younger Dryas, Kambrium eksplosionen, Bronze Age collapse'
     }
   }
 };
@@ -111,22 +111,22 @@ const difficultyDescriptions = {
   10: 'børneniveau - velkendt for børn i 5-8 års alderen',
   25: 'let niveau - kendt af næsten alle, inklusiv børn',
   40: 'under middel - ret velkendt for de fleste voksne',
-  50: 'middelniveau - standard voksen trivia, kræver almindelig almen viden',
-  60: 'over middel - kræver god almen viden eller interesse for emnet',
+  50: 'middelniveau - standard almen viden, folkeskoleniveau',
+  60: 'over middel - kræver god almen viden eller gymnasial uddannelse',
   75: 'svært niveau - kræver omfattende viden eller specialinteresse',
-  90: 'meget svært - kun kendt af folk med dyb viden inden for området',
-  100: 'ekspertniveau - ekstremt obskurt, kendt af meget få mennesker'
+  85: 'meget svært - typisk kun kendt af folk med videregående uddannelse eller dyb interesse',
+  100: 'ekspertniveau - primært kendt af akademikere eller specialister inden for området'
 };
 
 const clueComplexityDescriptions = {
-  1: 'Ekstrem simple og konkrete ledetråde med helt basale ord som små børn kan forstå',
-  25: 'Simple, direkte ledetråde med almindelige ord',
-  50: 'Standard trivia-niveau ledetråde med normal kompleksitet',
-  75: 'Komplekse ledetråde med avanceret ordforråd og indirekte hints',
-  100: 'Meget komplekse og kryptiske ledetråde der kræver dyb viden og logisk tænkning'
+  1: 'Ekstrem simple og direkte ledetråde med helt basale ord',
+  25: 'Simple, direkte ledetråde med almindelige ord og konkrete beskrivelser',
+  50: 'Standard trivia-niveau ledetråde med normal kompleksitet og nogle indirekte hints',
+  75: 'Mere indirekte og kryptiske ledetråde der kræver sammenhænge og logisk tænkning',
+  100: 'Meget indirekte og sofistikerede ledetråde der kræver lateral tænkning og dyb forståelse'
 };
 
-export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20, clueDifficulty = 50) => {
+export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20, clueDifficulty = 50) => {  
   // Find the closest difficulty example
   const difficultyKeys = Object.keys(categoryDescriptions[category].examples).map(Number);
   const closestDifficulty = difficultyKeys.reduce((prev, curr) => 
@@ -163,10 +163,16 @@ KATEGORI: ${categories[category].name}
 SVÆRHEDSGRAD FOR SVAR: ${difficulty}% (${getDifficultyLabel(difficulty)})
 SVÆRHEDSGRAD FOR LEDETRÅDE: ${clueDifficulty}% (${getDifficultyLabel(clueDifficulty)})
 ${themeSection}
-EKSEMPLER på passende emner for denne sværhedsgrad:
+VIGTIGT: Dit publikum er primært danskere, men fokuser hovedsageligt på international/universel viden. Omkring 85% af dine valg bør være internationalt kendte, mens 15% kan være dansk/nordisk relevante.
+
+EKSEMPLER på passende emner for denne sværhedsgrad (KUN TIL REFERENCE - VÆLG IKKE DISSE DIREKTE):
 ${examples}
 
-MEGET VIGTIGT - ALLEREDE BRUGTE EMNER I DENNE KATEGORI:
+MEGET VIGTIGT: 
+- Du MÅ IKKE vælge nogen af eksemplerne direkte! De er kun til at vise sværhedsniveauet.
+- Find dit EGET emne der matcher samme sværhedsgrad som eksemplerne.
+
+ALLEREDE BRUGTE EMNER I DENNE KATEGORI:
 ${usedInCategory.length > 0 ? usedInCategory.join(', ') : 'Ingen brugte emner i denne kategori endnu'}
 
 Du MÅ ABSOLUT IKKE vælge noget der allerede er brugt!
@@ -176,25 +182,26 @@ REGLER FOR VALG AF EMNE:
    - 1%: Ekstrem begynder (3-4 år) - kun de mest basale ting
    - 10%: Børneniveau (5-8 år) 
    - 25%: Let - kendt af næsten alle
-   - 50%: Middel - standard voksen trivia
+   - 50%: Middel - standard almen viden
    - 75%: Svær - kræver god viden
    - 90%: Meget svær - kun for vidende
-   - 100%: Ekspert - ekstremt obskurt
-2. ${customTheme ? `Emnet SKAL relatere til temaet "${customTheme}"` : 'Emnet skal være internationalt relevant'}
+   - 100%: Ekspert - primært kendt af specialister
+2. ${customTheme ? `Emnet SKAL relatere til temaet "${customTheme}"` : 'Prioriter internationalt kendte emner (85%) med enkelte danske/nordiske elementer (15%)'}
 3. Emnet MÅ IKKE være på listen over brugte emner
-4. Match sværheden fra eksemplerne præcist
+4. Emnet MÅ IKKE være et af eksemplerne
 
 MEGET VIGTIGT FOR LEDETRÅDE:
 - LEDETRÅDE SVÆRHEDSGRAD: ${clueDifficulty}% - ${clueComplexityDescriptions[closestClueComplexityKey]}
-- Tilpas ledetrådenes kompleksitet til det valgte niveau:
-  * 1-25%: Simple, konkrete ledetråde med basale ord
-  * 50%: Standard trivia-niveau ledetråde  
-  * 75-100%: Komplekse ledetråde der kræver specialviden
+- Fokus på INDHOLD over ordkompleksitet:
+  * 1-25%: Direkte, konkrete ledetråde med simple ord
+  * 50%: Balancerede ledetråde med nogle indirekte elementer
+  * 75-100%: Fokus på indirekte hints, sammenhænge og logiske spring
+- Brug primært almindelige ord, men gør selve ledetråden mere kryptisk ved højere sværhed, dog stadig nogle komplekse ord tilladt ved 70-100%
 - Hver ledetråd skal være HELT UAFHÆNGIG af de andre
 - Bland forskellige typer hints (fysiske egenskaber, kontekst, funktion, historie, osv.)
 - Undgå åbenlyse sammenhænge mellem ledetråde
-- Progression: Start med sværere ledetråde og gør dem gradvist lettere
 - Generer præcis ${numberOfClues} almindelige ledetråde
+- Svar KUN på dansk
 
 Svar KUN med følgende JSON format:
 {
