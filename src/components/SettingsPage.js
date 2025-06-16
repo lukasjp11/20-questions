@@ -22,7 +22,7 @@ import {
   Minus
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
-import { getDifficultyLabel, getDifficultyDescription } from '../utils/prompts';
+import { getDifficultyLabel } from '../utils/prompts';
 
 const SettingsPage = ({ theme, setTheme }) => {
   const navigate = useNavigate();
@@ -93,37 +93,6 @@ const SettingsPage = ({ theme, setTheme }) => {
     updatedClues[index] = { ...updatedClues[index], weight: newWeight };
     handleLocalChange('specialCluesConfig', updatedClues);
   };
-
-  // Simplified difficulty card component
-  const DifficultyCard = ({ title, value, onChange, icon: Icon, theme }) => (
-    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-          <span className="font-medium text-sm">{title}</span>
-        </div>
-        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-          {getDifficultyLabel(value)}
-        </span>
-      </div>
-      <input
-        type="range"
-        min="0"
-        max="100"
-        value={value}
-        onChange={e => onChange(parseInt(e.target.value))}
-        className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-        style={{ 
-          background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${value}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} ${value}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} 100%)` 
-        }}
-      />
-      <div className="flex justify-between mt-1">
-        <span className="text-xs text-gray-500">Let</span>
-        <span className="text-xs text-gray-500">{value}%</span>
-        <span className="text-xs text-gray-500">Ekspert</span>
-      </div>
-    </div>
-  );
 
   // Toggle switch component
   const ToggleSwitch = ({ checked, onChange }) => (
@@ -230,20 +199,63 @@ const SettingsPage = ({ theme, setTheme }) => {
             </h2>
             
             <div className="grid md:grid-cols-2 gap-4">
-              <DifficultyCard
-                title="Svar"
-                value={localSettings.difficulty}
-                onChange={(value) => handleLocalChange('difficulty', value)}
-                icon={Sliders}
-                theme={theme}
-              />
-              <DifficultyCard
-                title="Ledetråde"
-                value={localSettings.clueDifficulty}
-                onChange={(value) => handleLocalChange('clueDifficulty', value)}
-                icon={ListChecks}
-                theme={theme}
-              />
+
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <span className="font-medium text-sm">Svar</span>
+                  </div>
+                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                    {getDifficultyLabel(localSettings.difficulty)}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={localSettings.difficulty}
+                  onChange={e => handleLocalChange('difficulty', parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                  style={{ 
+                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${localSettings.difficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} ${localSettings.difficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} 100%)` 
+                  }}
+                />
+                <div className="flex justify-between mt-1">
+                  <span className="text-xs text-gray-500">Let</span>
+                  <span className="text-xs text-gray-500">{localSettings.difficulty}%</span>
+                  <span className="text-xs text-gray-500">Ekspert</span>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <span className="font-medium text-sm">Ledetråde</span>
+                  </div>
+                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                    {getDifficultyLabel(localSettings.clueDifficulty)}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={localSettings.clueDifficulty}
+                  onChange={e => handleLocalChange('clueDifficulty', parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                  style={{ 
+                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${localSettings.clueDifficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} ${localSettings.clueDifficulty}%, ${theme === 'dark' ? '#374151' : '#e5e7eb'} 100%)` 
+                  }}
+                />
+                <div className="flex justify-between mt-1">
+                  <span className="text-xs text-gray-500">Let</span>
+                  <span className="text-xs text-gray-500">{localSettings.clueDifficulty}%</span>
+                  <span className="text-xs text-gray-500">Ekspert</span>
+                </div>
+              </div>
+
             </div>
           </section>
 
