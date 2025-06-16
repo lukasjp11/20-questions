@@ -414,7 +414,7 @@ const SettingsPage = ({ theme, setTheme }) => {
                 <div className="space-y-3">
                   <input
                     type="text"
-                    placeholder='f.eks. "Du må åbne 2 ledetråde gratis"'
+                    placeholder='f.eks. "Ryk 3 felter tilbage"'
                     value={newSpecialClue.text}
                     onChange={e => setNewSpecialClue(prev => ({ ...prev, text: e.target.value }))}
                     className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
