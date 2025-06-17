@@ -133,13 +133,7 @@ const clueComplexityDescriptions = {
 };
 
 export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20, clueDifficulty = 50) => {  
-  const difficultyKeys = Object.keys(categoryDescriptions[category].examples).map(Number);
-  const closestDifficulty = difficultyKeys.reduce((prev, curr) => 
-    Math.abs(curr - difficulty) < Math.abs(prev - difficulty) ? curr : prev
-  );
-
   const categoryInfo = categoryDescriptions[category];
-  const examples = categoryInfo.examples[closestDifficulty];
   const usedInCategory = usedItems
     .filter(item => item.category === category)
     .map(item => item.item);
@@ -147,11 +141,6 @@ export const getPrompt = (category, difficulty, usedItems, customTheme = '', num
   const descriptionKeys = Object.keys(difficultyDescriptions).map(Number);
   const closestDescriptionKey = descriptionKeys.reduce((prev, curr) => 
     Math.abs(curr - difficulty) < Math.abs(prev - difficulty) ? curr : prev
-  );
-
-  const clueComplexityKeys = Object.keys(clueComplexityDescriptions).map(Number);
-  const closestClueComplexityKey = clueComplexityKeys.reduce((prev, curr) => 
-    Math.abs(curr - clueDifficulty) < Math.abs(prev - clueDifficulty) ? curr : prev
   );
 
   const themeSection = customTheme 
@@ -167,25 +156,39 @@ export const getPrompt = (category, difficulty, usedItems, customTheme = '', num
 - **Antal ledetråde**: ${numberOfClues}
 ${themeSection}
 ## MÅLGRUPPE
-Primært danske spillere, mest fokus på international viden (80% international, 20% dansk/nordisk)
+Primært danske spillere, men mest fokus på international viden (80% international, 20% dansk/nordisk)
 
-## SVÆRHEDSGRAD DEFINITION
+## SVÆRHEDSGRAD FOR SVAR: ${difficulty}%
 ${difficultyDescriptions[closestDescriptionKey]}
 
-### Eksempler på passende emner (KUN TIL REFERENCE - BRUG IKKE DISSE):
-${examples}
+### Fuld sværhedsskala for ${categories[category].name} (BRUG IKKE DISSE EKSEMPLER DIREKTE):
+${Object.entries(categoryInfo.examples).map(([level, exampleList]) => {
+    const levelNum = parseInt(level);
+    const isClosest = Math.abs(levelNum - difficulty) === Math.min(...Object.keys(categoryInfo.examples).map(k => Math.abs(parseInt(k) - difficulty)));
+    return `${isClosest ? '**→' : '  '} ${level}%: ${exampleList}${isClosest ? ' ←**' : ''}`;
+  }).join('\n')}
+
+**VIGTIGT**: Find dit eget emne på præcis ${difficulty}% niveau ved at se på eksemplerne over og under dette niveau.
 
 ## ALLEREDE BRUGTE EMNER
 ${usedInCategory.length > 0 ? `UNDGÅ DISSE: ${usedInCategory.join(', ')}` : 'Ingen brugte emner endnu'}
 
 ## LEDETRÅDS-INSTRUKTIONER
 
-### Sværhedsgrad: ${clueDifficulty}%
-${clueComplexityDescriptions[closestClueComplexityKey]}
+### Sværhedsgrad for ledetråde: ${clueDifficulty}%
+
+### Fuld sværhedsskala for ledetråde:
+${Object.entries(clueComplexityDescriptions).map(([level, description]) => {
+    const levelNum = parseInt(level);
+    const isClosest = Math.abs(levelNum - clueDifficulty) === Math.min(...Object.keys(clueComplexityDescriptions).map(k => Math.abs(parseInt(k) - clueDifficulty)));
+    return `${isClosest ? '**→' : '  '} ${level}%: ${description}${isClosest ? ' ←**' : ''}`;
+  }).join('\n')}
+
+**VIGTIGT**: Kalibrer dine ledetråde til præcis ${clueDifficulty}% ved at se forskellen mellem niveauerne.
 
 ### Ledetråds-principper:
 1. **Fakta-fokus**: Baser ledetråde på faktuel viden, men også nogle gange abstrakte beskrivelser
-2. **Variation**: Bland forskellige typer fakta (historiske, geografiske, tekniske, kulturelle)
+2. **Variation**: Bland forskellige typer fakta (historiske, geografiske, tekniske, kulturelle, osv.)
 3. **Uafhængighed**: Hver ledetråd skal kunne stå alene
 4. **Obskuritet ved høj sværhed**: Ved 60%+ brug mere specialiseret viden
 
@@ -193,16 +196,20 @@ ${clueComplexityDescriptions[closestClueComplexityKey]}
 
 ### Du SKAL:
 1. Vælge ét emne der matcher sværhedsgraden ${difficulty}% præcist
-2. ${customTheme ? `Sikre emnet relaterer til "${customTheme}"` : 'Prioritere internationalt kendte emner'}
-3. Generere præcis ${numberOfClues} ledetråde
-4. Følge ledetråds-sværheden ${clueDifficulty}%
-5. Svare KUN med JSON-format
+2. Bruge den fulde sværhedsskala som reference - se hvad der er lettere og sværere
+3. ${customTheme ? `Sikre emnet relaterer til "${customTheme}"` : 'Prioritere internationalt kendte emner'}
+4. Generere præcis ${numberOfClues} ledetråde
+5. Følge ledetråds-sværheden ${clueDifficulty}% - se skalaen ovenfor
+6. Ved høj sværhed (70%+): Gør ledetrådene KRYPTISKE og INDIREKTE, ikke bare obskure
+7. Svar kun på dansk
+8. Svare KUN med JSON-format
 
 ### Du MÅ IKKE:
 1. Bruge eksemplerne direkte
 2. Genbruge emner fra listen over brugte emner
 3. Inkludere forklaringer eller markdown
 4. Lave ledetråde der afslører hinanden
+5. Ved høj sværhed: Gøre det let ved at nævne navnet eller for direkte hints
 
 ## SVAR-FORMAT
 {
@@ -215,7 +222,7 @@ ${clueComplexityDescriptions[closestClueComplexityKey]}
   ]
 }
 
-**VIGTIGT**: Svar KUN på dansk og med ren JSON. Ingen markdown, ingen forklaringer.`
+**VIGTIGT**: Svar KUN med ren JSON. Ingen markdown, ingen forklaringer.`
 };
 
 export const defaultCategories = categories;
