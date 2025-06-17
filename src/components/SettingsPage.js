@@ -340,34 +340,40 @@ const SettingsPage = ({ theme, setTheme }) => {
           <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
+                <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 Special-ledetråde
               </h2>
               <button
                 onClick={() => setShowAddSpecialClue(true)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm transition-colors hover:shadow-sm"
               >
                 <Plus className="w-4 h-4" />
-                Tilføj
+                <span className="hidden sm:inline">Tilføj</span>
               </button>
             </div>
 
-            <div className="mb-4 flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-              <span className="font-medium text-sm">Antal per spil</span>
-              <div className="flex items-center gap-2">
-                {[0, 1, 2, 3, 4, 5].map(num => (
-                  <button
-                    key={num}
-                    onClick={() => handleLocalChange('numberOfSpecialClues', num)}
-                    className={`w-8 h-8 rounded-lg font-medium text-sm transition-all ${
-                      localSettings.numberOfSpecialClues === num
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500'
-                    }`}
-                  >
-                    {num}
-                  </button>
-                ))}
+            {/* Number per game selector */}
+            <div className="mb-5 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-purple-50/50 dark:from-gray-700/50 dark:to-gray-700/30 border border-purple-100 dark:border-gray-600">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <span className="font-medium text-sm">Antal per spil</span>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Vælg hvor mange der skal med</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  {[0, 1, 2, 3, 4, 5].map(num => (
+                    <button
+                      key={num}
+                      onClick={() => handleLocalChange('numberOfSpecialClues', num)}
+                      className={`w-9 h-9 rounded-lg font-medium text-sm transition-all ${
+                        localSettings.numberOfSpecialClues === num
+                          ? 'bg-purple-600 text-white shadow-sm'
+                          : 'bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -375,14 +381,26 @@ const SettingsPage = ({ theme, setTheme }) => {
               {localSettings.specialCluesConfig.map((clueConfig, index) => (
                 <div 
                   key={index} 
-                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+                  className="group flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-colors"
                 >
-                  <p className="text-gray-700 dark:text-gray-300 flex-1 text-sm">{clueConfig.text}</p>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex-1">
+                    <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">{clueConfig.text}</p>
+                    <span className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium ${
+                      clueConfig.weight === 1 ? 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300' :
+                      clueConfig.weight === 2 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                      clueConfig.weight === 3 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300' :
+                      'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                    }`}>
+                      {clueConfig.weight === 1 ? 'Sjælden' : 
+                      clueConfig.weight === 2 ? 'Normal' : 
+                      clueConfig.weight === 3 ? 'Hyppig' : 'Meget hyppig'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 self-end sm:self-center">
                     <select
                       value={clueConfig.weight}
                       onChange={(e) => handleWeightChange(index, parseInt(e.target.value))}
-                      className="px-2 py-1 rounded bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-sm"
+                      className="px-2 py-1 rounded bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-sm cursor-pointer hover:border-purple-400 dark:hover:border-purple-400 transition-colors"
                     >
                       <option value={1}>Sjælden</option>
                       <option value={2}>Normal</option>
@@ -391,7 +409,7 @@ const SettingsPage = ({ theme, setTheme }) => {
                     </select>
                     <button
                       onClick={() => handleRemoveSpecialClue(index)}
-                      className="p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600"
+                      className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -400,38 +418,56 @@ const SettingsPage = ({ theme, setTheme }) => {
               ))}
               
               {localSettings.specialCluesConfig.length === 0 && !showAddSpecialClue && (
-                <p className="text-center text-gray-500 py-4 text-sm">Ingen special-ledetråde tilføjet</p>
+                <div className="text-center py-8 px-4 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
+                  <Sparkles className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">Ingen special-ledetråde tilføjet</p>
+                </div>
               )}
             </div>
 
             {showAddSpecialClue && (
-              <div className="mt-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                <h3 className="font-medium mb-3">Ny special-ledetråd</h3>
+              <div className="mt-4 p-4 rounded-lg bg-purple-50/50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800/50">
+                <h3 className="font-medium mb-3 text-gray-900 dark:text-white">Ny special-ledetråd</h3>
                 <div className="space-y-3">
                   <input
                     type="text"
-                    placeholder='f.eks. "Ryk 3 felter tilbage"'
+                    placeholder='f.eks. "Ryk 3 felter tilbage" eller "Tag en ekstra tur"'
                     value={newSpecialClue.text}
                     onChange={e => setNewSpecialClue(prev => ({ ...prev, text: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
+                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:border-purple-400 dark:focus:border-purple-400 outline-none transition-colors"
+                    autoFocus
                   />
-                  <div className="flex items-center gap-3">
-                    <label className="text-sm">Hyppighed:</label>
-                    <select
-                      value={newSpecialClue.weight}
-                      onChange={(e) => setNewSpecialClue(prev => ({ ...prev, weight: parseInt(e.target.value) }))}
-                      className="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
-                    >
-                      <option value={1}>Sjælden</option>
-                      <option value={2}>Normal</option>
-                      <option value={3}>Hyppig</option>
-                      <option value={4}>Meget hyppig</option>
-                    </select>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <label className="text-sm font-medium">Hyppighed:</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {[
+                        { value: 1, label: 'Sjælden', color: 'gray' },
+                        { value: 2, label: 'Normal', color: 'blue' },
+                        { value: 3, label: 'Hyppig', color: 'orange' },
+                        { value: 4, label: 'Meget hyppig', color: 'red' }
+                      ].map(({ value, label, color }) => (
+                        <button
+                          key={value}
+                          onClick={() => setNewSpecialClue(prev => ({ ...prev, weight: value }))}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                            newSpecialClue.weight === value
+                              ? color === 'gray' ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200' :
+                                color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                                color === 'orange' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300' :
+                                'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-1">
                     <button
                       onClick={handleAddSpecialClue}
-                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                      disabled={!newSpecialClue.text.trim()}
+                      className="flex-1 sm:flex-initial px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white rounded-lg transition-colors font-medium disabled:cursor-not-allowed"
                     >
                       Tilføj
                     </button>
@@ -440,7 +476,7 @@ const SettingsPage = ({ theme, setTheme }) => {
                         setShowAddSpecialClue(false);
                         setNewSpecialClue({ text: '', weight: 2 });
                       }}
-                      className="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 rounded-lg transition-colors"
+                      className="flex-1 sm:flex-initial px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 rounded-lg transition-colors"
                     >
                       Annuller
                     </button>
