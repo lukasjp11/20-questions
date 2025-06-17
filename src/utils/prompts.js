@@ -119,11 +119,17 @@ const difficultyDescriptions = {
 };
 
 const clueComplexityDescriptions = {
-  1: 'Ekstrem simple og direkte ledetråde med helt basale ord',
-  25: 'Simple, direkte ledetråde med almindelige ord og konkrete beskrivelser',
-  50: 'Standard trivia-niveau ledetråde med normal kompleksitet og nogle indirekte hints',
-  75: 'Mere indirekte og kryptiske ledetråde der kræver sammenhænge og logisk tænkning',
-  100: 'Meget indirekte og sofistikerede ledetråde der kræver lateral tænkning og dyb forståelse'
+  1: 'Børneniveau: Ekstrem simple fakta som alle kender. Brug kun de mest basale beskrivelser. Eksempel: "Det er gult og skinner på himlen" for solen.',
+  10: 'Meget basale fakta: Brug almindelig hverdagsviden og direkte beskrivelser. Fokuser på universelt kendte egenskaber. Eksempel: "Hovedstaden i Frankrig kendt for Eiffeltårnet" for Paris.',
+  20: 'Almindelige fakta: Anvend bred almen viden som de fleste voksne kender. Simple historiske eller kulturelle referencer. Eksempel: "Den amerikanske præsident under borgerkrigen" for Lincoln.',
+  30: 'Standard fakta: Brug fakta fra almindelig skoleundervisning og populærkultur. Kan inkludere årstal og navne. Eksempel: "Elementet med atomnummer 79 brugt i smykker" for guld.',
+  40: 'Moderate fakta: Kombiner almindelig viden med mindre kendte detaljer. Inkluder sekundære fakta om kendte emner. Eksempel: "Napoleons eksilø i Middelhavet før Elba" for Korsika.',
+  50: 'Dybere fakta: Standard trivia-niveau med specifikke detaljer og mindre kendte sammenhænge. Eksempel: "Den byzantinske kejser der genskabte Romerriget kortvarigt i 500-tallet" for Justinian.',
+  60: 'Specialiserede fakta: Mere obskure historiske, videnskabelige eller kulturelle detaljer. Kræver bredere viden. Eksempel: "Opdageren af bakteriofager i 1915" for Frederick Twort.',
+  70: 'Obskure fakta: Nicheområder og sjældent omtalte begivenheder. Kombiner flere vidensområder. Eksempel: "Den persiske matematiker der først beskrev binomialkoefficienter i 1000-tallet" for Al-Karaji.',
+  80: 'Meget obskure fakta: Highly specialiseret viden med komplekse referencer. Kræver ekspertviden inden for områder. Eksempel: "Enzymet der katalyserer det hastighedsbegrænsende trin i heme-biosyntesen" for ALA-syntase.',
+  90: 'Ekstremt obskure fakta: Ultra-niche viden kendt kun af specialister. Historiske footnotes og glemte detaljer. Eksempel: "Den tredje underskriver af Treaty of Waitangi der senere trak sin støtte tilbage" for Marupō.',
+  100: 'Maksimal obskuritet: Næsten ukendte fakta kombineret med kryptiske formuleringer. Eksempel: "Författaren av den förlorade isländska sagan om Þorsteinn uxafótr" for ukendt forfatter.'
 };
 
 export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20, clueDifficulty = 50) => {  
@@ -149,63 +155,67 @@ export const getPrompt = (category, difficulty, usedItems, customTheme = '', num
   );
 
   const themeSection = customTheme 
-    ? `\nVIGTIGT TEMA: Alle emner SKAL relatere til "${customTheme}". 
-Vælg kun emner der passer til dette tema OG den valgte kategori.
-Hvis temaet er for specifikt til at finde ${categoryInfo.description} på det givne sværhedsniveau, så tilpas sværheden en smule men hold dig til temaet.\n`
+    ? `\n## TEMA-KRAV\nAlle emner SKAL relatere til: "${customTheme}"\n- Vælg kun emner der passer både til temaet OG kategorien\n- Hvis temaet er for specifikt, tilpas sværheden lidt men hold fast i temaet\n`
     : '';
 
-  return `Du er vært for et ${numberOfClues} Questions spil. Din opgave er at vælge ${categoryInfo.description} som er ${difficultyDescriptions[closestDescriptionKey]}.
+  return `# OPGAVE: ${numberOfClues} Spørgsmål Spil
 
-KATEGORI: ${categories[category].name}
-SVÆRHEDSGRAD FOR SVAR: ${difficulty}% (${getDifficultyLabel(difficulty)})
-SVÆRHEDSGRAD FOR LEDETRÅDE: ${clueDifficulty}% (${getDifficultyLabel(clueDifficulty)})
+## SPIL-PARAMETRE
+- **Kategori**: ${categories[category].name} - ${categoryInfo.description}
+- **Sværhedsgrad for svar**: ${difficulty}% (${getDifficultyLabel(difficulty)})
+- **Sværhedsgrad for ledetråde**: ${clueDifficulty}% (${getDifficultyLabel(clueDifficulty)})
+- **Antal ledetråde**: ${numberOfClues}
 ${themeSection}
-VIGTIGT: Dit publikum er primært danskere, men fokuser hovedsageligt på international/universel viden. Omkring 85% af dine valg bør være internationalt kendte, mens 15% kan være dansk/nordisk relevante.
+## MÅLGRUPPE
+Primært danske spillere, mest fokus på international viden (80% international, 20% dansk/nordisk)
 
-EKSEMPLER på passende emner for denne sværhedsgrad (KUN TIL REFERENCE - VÆLG IKKE DISSE DIREKTE):
+## SVÆRHEDSGRAD DEFINITION
+${difficultyDescriptions[closestDescriptionKey]}
+
+### Eksempler på passende emner (KUN TIL REFERENCE - BRUG IKKE DISSE):
 ${examples}
 
-MEGET VIGTIGT: 
-- Du MÅ IKKE vælge nogen af eksemplerne direkte! De er kun til at vise sværhedsniveauet.
-- Find dit EGET emne der matcher samme sværhedsgrad som eksemplerne.
+## ALLEREDE BRUGTE EMNER
+${usedInCategory.length > 0 ? `UNDGÅ DISSE: ${usedInCategory.join(', ')}` : 'Ingen brugte emner endnu'}
 
-ALLEREDE BRUGTE EMNER I DENNE KATEGORI:
-${usedInCategory.length > 0 ? usedInCategory.join(', ') : 'Ingen brugte emner i denne kategori endnu'}
+## LEDETRÅDS-INSTRUKTIONER
 
-Du MÅ ABSOLUT IKKE vælge noget der allerede er brugt!
+### Sværhedsgrad: ${clueDifficulty}%
+${clueComplexityDescriptions[closestClueComplexityKey]}
 
-REGLER FOR VALG AF EMNE:
-1. Emnet SKAL matche sværhedsgraden præcist (${difficulty}%)
-   - 1%: Ekstrem begynder (3-4 år) - kun de mest basale ting
-   - 10%: Børneniveau (5-8 år) 
-   - 25%: Let - kendt af næsten alle
-   - 50%: Middel - standard almen viden
-   - 75%: Svær - kræver god viden
-   - 90%: Meget svær - kun for vidende
-   - 100%: Ekspert - primært kendt af specialister
-2. ${customTheme ? `Emnet SKAL relatere til temaet "${customTheme}"` : 'Prioriter internationalt kendte emner (85%) med enkelte danske/nordiske elementer (15%)'}
-3. Emnet MÅ IKKE være på listen over brugte emner
-4. Emnet MÅ IKKE være et af eksemplerne
+### Ledetråds-principper:
+1. **Fakta-fokus**: Baser ledetråde på faktuel viden, men også nogle gange abstrakte beskrivelser
+2. **Variation**: Bland forskellige typer fakta (historiske, geografiske, tekniske, kulturelle)
+3. **Uafhængighed**: Hver ledetråd skal kunne stå alene
+4. **Obskuritet ved høj sværhed**: Ved 60%+ brug mere specialiseret viden
 
-MEGET VIGTIGT FOR LEDETRÅDE:
-- LEDETRÅDE SVÆRHEDSGRAD: ${clueDifficulty}% - ${clueComplexityDescriptions[closestClueComplexityKey]}
-- Fokus på INDHOLD over ordkompleksitet:
-  * 1-25%: Direkte, konkrete ledetråde med simple ord
-  * 50%: Balancerede ledetråde med nogle indirekte elementer
-  * 75-100%: Fokus på indirekte hints, sammenhænge og logiske spring
-- Brug primært almindelige ord, men gør selve ledetråden mere kryptisk ved højere sværhed, dog stadig nogle komplekse ord tilladt ved 70-100%
-- Hver ledetråd skal være HELT UAFHÆNGIG af de andre
-- Bland forskellige typer hints (fysiske egenskaber, kontekst, funktion, historie, osv.)
-- Undgå åbenlyse sammenhænge mellem ledetråde
-- Generer præcis ${numberOfClues} almindelige ledetråde
-- Svar KUN på dansk
+## KRAV TIL OUTPUT
 
-Svar KUN med følgende JSON format:
+### Du SKAL:
+1. Vælge ét emne der matcher sværhedsgraden ${difficulty}% præcist
+2. ${customTheme ? `Sikre emnet relaterer til "${customTheme}"` : 'Prioritere internationalt kendte emner'}
+3. Generere præcis ${numberOfClues} ledetråde
+4. Følge ledetråds-sværheden ${clueDifficulty}%
+5. Svare KUN med JSON-format
+
+### Du MÅ IKKE:
+1. Bruge eksemplerne direkte
+2. Genbruge emner fra listen over brugte emner
+3. Inkludere forklaringer eller markdown
+4. Lave ledetråde der afslører hinanden
+
+## SVAR-FORMAT
 {
   "item": "det valgte emne",
-  "clues": [${numberOfClues} almindelige ledetråde uden special-ledetråde]
+  "clues": [
+    "ledetråd 1",
+    "ledetråd 2",
+    ...
+    "ledetråd ${numberOfClues}"
+  ]
 }
-Respond ONLY with valid JSON. Do not include any markdown or explanations.`;
+
+**VIGTIGT**: Svar KUN på dansk og med ren JSON. Ingen markdown, ingen forklaringer.`
 };
 
 export const defaultCategories = categories;
