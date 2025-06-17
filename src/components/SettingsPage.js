@@ -95,19 +95,6 @@ const SettingsPage = ({ theme, setTheme }) => {
     handleLocalChange('specialCluesConfig', updatedClues);
   };
 
-  const ToggleSwitch = ({ checked, onChange }) => (
-    <button
-      onClick={onChange}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${
-        checked ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
-      }`}
-    >
-      <span className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
-        checked ? 'translate-x-6' : 'translate-x-1'
-      }`} />
-    </button>
-  );
-
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} text-gray-900 dark:text-white`}>
       <div className="max-w-4xl mx-auto p-4 md:p-8">
@@ -172,10 +159,16 @@ const SettingsPage = ({ theme, setTheme }) => {
                   {theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
                   <span className="font-medium">Tema</span>
                 </div>
-                <ToggleSwitch
-                  checked={theme === 'dark'}
-                  onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                />
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${
+                    theme === 'dark' ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
+                    theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
               </div>
 
               <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -183,10 +176,16 @@ const SettingsPage = ({ theme, setTheme }) => {
                   {localSettings.hideAnswerOnGeneration ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   <span className="font-medium">Skjul svar ved start</span>
                 </div>
-                <ToggleSwitch
-                  checked={localSettings.hideAnswerOnGeneration}
-                  onChange={() => handleLocalChange('hideAnswerOnGeneration', !localSettings.hideAnswerOnGeneration)}
-                />
+                <button
+                  onClick={() => handleLocalChange('hideAnswerOnGeneration', !localSettings.hideAnswerOnGeneration)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${
+                    localSettings.hideAnswerOnGeneration ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
+                    localSettings.hideAnswerOnGeneration ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
               </div>
             </div>
           </section>
@@ -302,10 +301,16 @@ const SettingsPage = ({ theme, setTheme }) => {
                     <Clock className="w-4 h-4" />
                     <span className="font-medium">Tidsgrænse</span>
                   </div>
-                  <ToggleSwitch
-                    checked={localSettings.enableTimer}
-                    onChange={() => handleLocalChange('enableTimer', !localSettings.enableTimer)}
-                  />
+                  <button
+                  onClick={() => handleLocalChange('enableTimer', !localSettings.enableTimer)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${
+                    localSettings.enableTimer ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
+                    localSettings.enableTimer ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
                 </div>
                 {localSettings.enableTimer && (
                   <div className="flex items-center justify-between mt-3 pl-6">
