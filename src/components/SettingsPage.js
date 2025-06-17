@@ -146,18 +146,47 @@ const SettingsPage = ({ theme, setTheme }) => {
 
         {/* Settings sections */}
         <div className="space-y-6">
-          {/* Appearance */}
+          {/* Basic Game Settings */}
           <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Palette className="w-5 h-5" />
-              Udseende
+              <Sliders className="w-5 h-5" />
+              Grundlæggende
             </h2>
-            
-            <div className="space-y-3">
+
+            <div className="space-y-4">
+              {/* Number of clues */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <label className="font-medium">Antal ledetråde</label>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleLocalChange('numberOfClues', Math.max(1, localSettings.numberOfClues - 5))}
+                    className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <input
+                    type="number"
+                    value={localSettings.numberOfClues}
+                    onChange={e => {
+                      const value = parseInt(e.target.value) || 1;
+                      handleLocalChange('numberOfClues', value);
+                    }}
+                    className="w-16 px-2 py-1 text-center rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
+                  />
+                  <button
+                    onClick={() => handleLocalChange('numberOfClues', localSettings.numberOfClues + 5)}
+                    className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Dark Mode */}
               <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                 <div className="flex items-center gap-3">
                   {theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                  <span className="font-medium">Tema</span>
+                  <span className="font-medium">Dark mode</span>
                 </div>
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -171,6 +200,7 @@ const SettingsPage = ({ theme, setTheme }) => {
                 </button>
               </div>
 
+              {/* Hide Answer */}
               <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                 <div className="flex items-center gap-3">
                   {localSettings.hideAnswerOnGeneration ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -186,6 +216,54 @@ const SettingsPage = ({ theme, setTheme }) => {
                     localSettings.hideAnswerOnGeneration ? 'translate-x-6' : 'translate-x-1'
                   }`} />
                 </button>
+              </div>
+
+              {/* Timer */}
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span className="font-medium">Tidsgrænse</span>
+                  </div>
+                  <button
+                  onClick={() => handleLocalChange('enableTimer', !localSettings.enableTimer)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${
+                    localSettings.enableTimer ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
+                    localSettings.enableTimer ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
+                </div>
+                {localSettings.enableTimer && (
+                  <div className="flex items-center justify-between mt-3 pl-6">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Sekunder per ledetråd</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleLocalChange('timePerClue', Math.max(5, localSettings.timePerClue - 5))}
+                        className="w-7 h-7 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <input
+                        type="number"
+                        value={localSettings.timePerClue}
+                        onChange={e => {
+                          const value = parseInt(e.target.value) || 1;
+                          handleLocalChange('timePerClue', value);
+                        }}
+                        className="w-12 px-1 py-0.5 text-center rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm"
+                      />
+                      <button
+                        onClick={() => handleLocalChange('timePerClue', localSettings.timePerClue + 5)}
+                        className="w-7 h-7 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </section>
@@ -255,92 +333,6 @@ const SettingsPage = ({ theme, setTheme }) => {
                 </div>
               </div>
 
-            </div>
-          </section>
-
-          {/* Basic Game Settings */}
-          <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Sliders className="w-5 h-5" />
-              Grundlæggende
-            </h2>
-
-            <div className="space-y-4">
-              {/* Number of clues */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                <label className="font-medium">Antal ledetråde</label>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleLocalChange('numberOfClues', Math.max(1, localSettings.numberOfClues - 5))}
-                    className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <input
-                    type="number"
-                    value={localSettings.numberOfClues}
-                    onChange={e => {
-                      const value = parseInt(e.target.value) || 1;
-                      handleLocalChange('numberOfClues', value);
-                    }}
-                    className="w-16 px-2 py-1 text-center rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
-                  />
-                  <button
-                    onClick={() => handleLocalChange('numberOfClues', localSettings.numberOfClues + 5)}
-                    className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Timer */}
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    <span className="font-medium">Tidsgrænse</span>
-                  </div>
-                  <button
-                  onClick={() => handleLocalChange('enableTimer', !localSettings.enableTimer)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${
-                    localSettings.enableTimer ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
-                    localSettings.enableTimer ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
-                </div>
-                {localSettings.enableTimer && (
-                  <div className="flex items-center justify-between mt-3 pl-6">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Sekunder per ledetråd</span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleLocalChange('timePerClue', Math.max(5, localSettings.timePerClue - 5))}
-                        className="w-7 h-7 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                      <input
-                        type="number"
-                        value={localSettings.timePerClue}
-                        onChange={e => {
-                          const value = parseInt(e.target.value) || 1;
-                          handleLocalChange('timePerClue', value);
-                        }}
-                        className="w-12 px-1 py-0.5 text-center rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm"
-                      />
-                      <button
-                        onClick={() => handleLocalChange('timePerClue', localSettings.timePerClue + 5)}
-                        className="w-7 h-7 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center justify-center transition-colors"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           </section>
 
