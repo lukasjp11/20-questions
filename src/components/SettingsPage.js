@@ -352,7 +352,7 @@ const SettingsPage = () => {
                         const val = Math.min(parseInt(e.target.value), localSettings.ageRangeMax - 1);
                         handleLocalChange('ageRangeMin', val);
                       }}
-                      className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-[3px] [&::-webkit-slider-thumb]:bg-board-gold [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-[3px] [&::-moz-range-thumb]:bg-[#d4a854] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow [&::-moz-range-thumb]:cursor-pointer"
+                      className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:rounded-[3px] [&::-webkit-slider-thumb]:bg-board-gold [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:h-[18px] [&::-moz-range-thumb]:rounded-[3px] [&::-moz-range-thumb]:bg-[#d4a854] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow [&::-moz-range-thumb]:cursor-pointer"
                       style={{ zIndex: localSettings.ageRangeMin > 70 ? 5 : 3 }}
                     />
                     {/* Max thumb */}
@@ -365,7 +365,7 @@ const SettingsPage = () => {
                         const val = Math.max(parseInt(e.target.value), localSettings.ageRangeMin + 1);
                         handleLocalChange('ageRangeMax', val);
                       }}
-                      className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-[3px] [&::-webkit-slider-thumb]:bg-board-gold [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-[3px] [&::-moz-range-thumb]:bg-[#d4a854] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow [&::-moz-range-thumb]:cursor-pointer"
+                      className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:rounded-[3px] [&::-webkit-slider-thumb]:bg-board-gold [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:h-[18px] [&::-moz-range-thumb]:rounded-[3px] [&::-moz-range-thumb]:bg-[#d4a854] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow [&::-moz-range-thumb]:cursor-pointer"
                       style={{ zIndex: 2 }}
                     />
                   </div>
@@ -375,9 +375,6 @@ const SettingsPage = () => {
                 <span className="text-xs text-board-text-faint">5 år</span>
                 <span className="text-xs text-board-text-faint">80 år</span>
               </div>
-              <p className="text-xs text-board-text-dimmer mt-2">
-                Tilpas svar og ledetråde til jeres generations viden og oplevelser
-              </p>
             </div>
           </section>
 
