@@ -13,11 +13,7 @@ export const generateCluesWithProgress = async (prompt, callbacks = {}) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        prompt,
-        max_tokens: 1024,
-        temperature: 0.7
-      })
+      body: JSON.stringify({ prompt })
     });
 
     if (!response.ok) {

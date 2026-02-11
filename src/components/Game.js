@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, Settings } from 'lucide-react';
 import { getPrompt } from '../utils/prompts';
-import { shuffleArray, selectSpecialClues } from '../utils/gameLogic';
+import { shuffleArray, selectSpecialClues, isItemUsed } from '../utils/gameLogic';
 import { useGame } from '../context/GameContext';
 import CategorySelector from './CategorySelector';
 import AnswerBox from './AnswerBox';
@@ -56,6 +56,8 @@ const Game = ({ theme }) => {
     }
   }, [currentCategory, currentItem, clues, revealedClues, showAnswer, loading, generatingClues, saveGameState]);
 
+  const MAX_RETRIES = 3;
+
   const generateCard = async (category) => {
     setLoading(true);
     setLoadingCategory(category);
@@ -67,45 +69,61 @@ const Game = ({ theme }) => {
     setGeneratingClues(false);
     setClues([]);
     setCurrentItem('');
-    
+
     clearGameState();
-  
-    try {
-      const regularCluesNeeded = Math.max(1, numberOfClues - numberOfSpecialClues);
-      const prompt = getPrompt(category, difficulty, usedItems, customTheme, regularCluesNeeded, clueDifficulty);
-      
-      const result = await generateCluesWithProgress(prompt, {
-        onItemFound: (item) => {
-          setCurrentItem(item);
-          setCurrentCategory(category);
-          if (!hideAnswerOnGeneration) {
-            setShowAnswer(true);
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const regularCluesNeeded = Math.max(1, numberOfClues - numberOfSpecialClues);
+        const prompt = getPrompt(category, difficulty, usedItems, customTheme, regularCluesNeeded, clueDifficulty);
+
+        let isDuplicate = false;
+
+        const result = await generateCluesWithProgress(prompt, {
+          onItemFound: (item) => {
+            if (isItemUsed(item, usedItems, category)) {
+              isDuplicate = true;
+              return;
+            }
+            setCurrentItem(item);
+            setCurrentCategory(category);
+            if (!hideAnswerOnGeneration) {
+              setShowAnswer(true);
+            }
+            setLoading(false);
+            setGeneratingClues(true);
+          },
+          onComplete: (result) => {
+            if (isDuplicate) return;
+            const regularClues = result.clues.slice(0, regularCluesNeeded);
+            const selectedSpecialClues = selectSpecialClues(specialCluesConfig, numberOfSpecialClues);
+            const allClues = [...regularClues, ...selectedSpecialClues];
+            const shuffledClues = shuffleArray(allClues);
+            setClues(shuffledClues);
+            setGeneratingClues(false);
           }
-          setLoading(false);
-          setGeneratingClues(true);
-        },
-        onComplete: (result) => {
-          const regularClues = result.clues.slice(0, regularCluesNeeded);
-          
-          const selectedSpecialClues = selectSpecialClues(specialCluesConfig, numberOfSpecialClues);
-          
-          const allClues = [...regularClues, ...selectedSpecialClues];
-          
-          const shuffledClues = shuffleArray(allClues);
-          
-          setClues(shuffledClues);
-          setGeneratingClues(false);
+        });
+
+        if (isDuplicate) {
+          console.log(`Duplicate item detected (attempt ${attempt + 1}/${MAX_RETRIES}), retrying...`);
+          continue;
         }
-      });
-      
-      addUsedItem(category, result.item);
-      
-    } catch (err) {
-      setError(err.message || 'En fejl opstod. Prøv igen.');
-      console.error('Generation error:', err);
-      setLoading(false);
-      setGeneratingClues(false);
+
+        addUsedItem(category, result.item);
+        return;
+
+      } catch (err) {
+        setError(err.message || 'En fejl opstod. Prøv igen.');
+        console.error('Generation error:', err);
+        setLoading(false);
+        setGeneratingClues(false);
+        return;
+      }
     }
+
+    setError('Kunne ikke finde et nyt svar efter flere forsøg. Prøv igen.');
+    setLoading(false);
+    setGeneratingClues(false);
   };
 
   const toggleClue = (index) => {

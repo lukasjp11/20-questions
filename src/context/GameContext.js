@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { loadFromLocalStorage, saveToLocalStorage } from '../utils/gameLogic';
+import { loadFromLocalStorage, saveToLocalStorage, normalizeItem } from '../utils/gameLogic';
 import { defaultCategories } from '../utils/prompts';
 
 const GameContext = createContext();
@@ -77,9 +77,18 @@ export const GameProvider = ({ children }) => {
     localStorage.removeItem('usedItems');
   }, []);
 
+  const MAX_USED_ITEMS = 200;
+
   const addUsedItem = useCallback((category, item) => {
     setUsedItems(prev => {
-      const updated = [...prev, { category, item }];
+      const normalized = normalizeItem(item);
+      if (prev.some(u => u.category === category && normalizeItem(u.item) === normalized)) {
+        return prev;
+      }
+      let updated = [...prev, { category, item }];
+      if (updated.length > MAX_USED_ITEMS) {
+        updated = updated.slice(updated.length - MAX_USED_ITEMS);
+      }
       saveToLocalStorage('usedItems', updated);
       return updated;
     });

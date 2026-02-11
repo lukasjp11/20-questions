@@ -1,3 +1,20 @@
+export const normalizeItem = (item) => {
+  return item
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ');
+};
+
+export const isItemUsed = (item, usedItems, category = null) => {
+  const normalized = normalizeItem(item);
+  return usedItems.some(used => {
+    if (category && used.category !== category) return false;
+    return normalizeItem(used.item) === normalized;
+  });
+};
+
 export const shuffleArray = (array) => {
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
