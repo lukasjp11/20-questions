@@ -104,7 +104,7 @@ export const GameProvider = ({ children }) => {
 
   const resetAllData = useCallback(() => {
     localStorage.clear();
-    window.location.reload();
+    window.location.href = (process.env.PUBLIC_URL || '') + '/';
   }, []);
   
   const saveGameState = useCallback((gameState) => {
