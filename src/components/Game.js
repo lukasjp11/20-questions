@@ -13,7 +13,7 @@ import LoadingScreen from './LoadingScreen';
 import Timer from './Timer';
 import { generateCluesWithProgress } from '../utils/api';
 
-const Game = ({ theme }) => {
+const Game = () => {
   const {
     difficulty,
     clueDifficulty,
@@ -160,19 +160,19 @@ const Game = ({ theme }) => {
     <>
       {loading && <LoadingScreen category={getCategoryName(loadingCategory)} />}
 
-      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} text-gray-900 dark:text-white p-4 md:p-8`}>
+      <div className="min-h-screen bg-board-bg text-board-text p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 flex justify-between items-center">
-            <h1 className="text-2xl md:text-4xl font-bold">20 Questions</h1>
+            <h1 className="text-2xl md:text-4xl font-bold font-heading text-board-gold">20 Questions</h1>
             <Link
               to="/settings"
-              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+              className="p-2 rounded-board bg-board-surface border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] text-board-text-dim hover:text-board-gold transition-colors"
             >
               <Settings className="w-5 h-5" />
             </Link>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg">
+          <div className="bg-board-surface rounded-board p-4 md:p-6 border border-[rgba(212,168,84,0.06)]">
             <CategorySelector
               currentCategory={currentCategory}
               onCategorySelect={generateCard}
@@ -203,7 +203,7 @@ const Game = ({ theme }) => {
             )}
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg flex items-center text-red-600 dark:text-red-400 text-sm">
+              <div className="mb-4 p-3 bg-[rgba(200,132,90,0.1)] border border-[rgba(200,132,90,0.2)] rounded-board flex items-center text-board-special text-sm">
                 <AlertTriangle className="mr-2 w-4 h-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -211,7 +211,7 @@ const Game = ({ theme }) => {
 
             {generatingClues && (
               <div className="text-center mb-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">
+                <p className="text-sm text-board-text-muted animate-pulse">
                   Genererer ledetråde...
                 </p>
               </div>
@@ -229,7 +229,7 @@ const Game = ({ theme }) => {
           </div>
 
           {customTheme && (
-            <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+            <div className="mt-4 text-center text-sm text-board-text-dimmer">
               Tema: {customTheme}
             </div>
           )}

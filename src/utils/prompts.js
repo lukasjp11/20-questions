@@ -4,25 +4,21 @@ export const categories = {
   person: {
     name: 'Person',
     icon: Brain,
-    gradient: 'from-blue-600 to-indigo-700',
     description: 'Berømte personer, karakterer & erhverv'
   },
   sted: {
     name: 'Sted',
     icon: MapPin,
-    gradient: 'from-emerald-600 to-teal-700',
     description: 'Geografiske lokationer & steder'
   },
   ting: {
     name: 'Ting',
     icon: Lightbulb,
-    gradient: 'from-amber-600 to-orange-700',
     description: 'Objekter, koncepter & idéer'
   },
   begivenhed: {
     name: 'Begivenhed',
     icon: Swords,
-    gradient: 'from-purple-600 to-pink-700',
     description: 'Historiske begivenheder & øjeblikke'
   }
 };

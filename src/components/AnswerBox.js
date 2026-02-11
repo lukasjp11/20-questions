@@ -7,29 +7,23 @@ const AnswerBox = ({ currentItem, showAnswer, setShowAnswer }) => {
   return (
     <button
       onClick={() => setShowAnswer(!showAnswer)}
-      className="
-        w-full mb-6 p-4 bg-white dark:bg-gray-700
-        rounded-lg transition-all text-left
-        hover:bg-gray-100 dark:hover:bg-gray-600
-        transform hover:scale-[1.01] active:scale-[0.99]
-        border border-gray-200 dark:border-transparent
-      "
+      className="w-full mb-6 p-4 rounded-board transition-all text-left bg-board-gold shadow-[0_3px_12px_rgba(0,0,0,0.25)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.3)] transform hover:scale-[1.01] active:scale-[0.99]"
       aria-label={showAnswer ? 'Skjul svar' : 'Vis svar'}
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-sm text-gray-500 dark:text-gray-400">Svar:</span>
+          <span className="text-[10px] uppercase tracking-[1.5px] font-bold text-[#2c2520]/50">Svar:</span>
           {showAnswer ? (
-            <span className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+            <span className="text-xl md:text-2xl font-bold font-heading text-[#2c2520]">
               {currentItem}
             </span>
           ) : (
-            <span className="text-xl md:text-2xl font-bold text-gray-400 dark:text-gray-500">
+            <span className="text-xl md:text-2xl font-bold text-[#2c2520]/40">
               • • • • •
             </span>
           )}
         </div>
-        <div className="flex-shrink-0 text-gray-500 dark:text-gray-400">
+        <div className="flex-shrink-0 text-[#2c2520]/35">
           {showAnswer ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
         </div>
       </div>

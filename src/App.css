@@ -12,32 +12,34 @@
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
-  background: #3b82f6;
+  width: 18px;
+  height: 18px;
+  background: #d4a854;
   cursor: pointer;
-  border-radius: 50%;
+  border-radius: 3px;
   transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 .slider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  background: #2563eb;
+  transform: scale(1.1);
+  background: #b8963e;
 }
 
 .slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  background: #3b82f6;
+  width: 18px;
+  height: 18px;
+  background: #d4a854;
   cursor: pointer;
-  border-radius: 50%;
+  border-radius: 3px;
   border: none;
   transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 .slider::-moz-range-thumb:hover {
-  transform: scale(1.2);
-  background: #2563eb;
+  transform: scale(1.1);
+  background: #b8963e;
 }
 
 @keyframes pulse {
@@ -88,7 +90,7 @@
 }
 
 :focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #d4a854;
   outline-offset: 2px;
 }
 
@@ -127,8 +129,8 @@ button:active {
   display: inline-block;
   width: 40px;
   height: 20px;
-  background-color: #ccc;
-  border-radius: 20px;
+  background-color: rgba(212,168,84,0.08);
+  border-radius: 4px;
   transition: background-color 0.3s ease-in-out;
 }
 
@@ -145,8 +147,8 @@ button:active {
   left: 2px;
   width: 16px;
   height: 16px;
-  background-color: white;
-  border-radius: 50%;
+  background-color: #2c2520;
+  border-radius: 3px;
   transition: transform 0.3s ease-in-out;
 }
 
@@ -155,5 +157,5 @@ button:active {
 }
 
 .toggle-switch input:checked + .toggle-switch {
-  background-color: #4caf50;
+  background-color: #d4a854;
 }
