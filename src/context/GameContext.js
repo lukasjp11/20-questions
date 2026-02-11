@@ -49,7 +49,13 @@ export const GameProvider = ({ children }) => {
   const [specialCluesConfig, setSpecialCluesConfig] = useState(() =>
     loadFromLocalStorage('specialCluesConfig', defaultSpecialCluesConfig)
   );
-  const [usedItems, setUsedItems] = useState(() => 
+  const [ageRangeMin, setAgeRangeMin] = useState(() =>
+    loadFromLocalStorage('ageRangeMin', 18)
+  );
+  const [ageRangeMax, setAgeRangeMax] = useState(() =>
+    loadFromLocalStorage('ageRangeMax', 50)
+  );
+  const [usedItems, setUsedItems] = useState(() =>
     loadFromLocalStorage('usedItems', [])
   );
   const [currentGameState, setCurrentGameState] = useState(() =>
@@ -68,6 +74,8 @@ export const GameProvider = ({ children }) => {
       case 'customCategories': setCategories(value); break;
       case 'numberOfSpecialClues': setNumberOfSpecialClues(value); break;
       case 'specialCluesConfig': setSpecialCluesConfig(value); break;
+      case 'ageRangeMin': setAgeRangeMin(value); break;
+      case 'ageRangeMax': setAgeRangeMax(value); break;
       default: break;
     }
   }, []);
@@ -120,6 +128,8 @@ export const GameProvider = ({ children }) => {
     categories,
     numberOfSpecialClues,
     specialCluesConfig,
+    ageRangeMin,
+    ageRangeMax,
     updateSetting,
     usedItems,
     addUsedItem,

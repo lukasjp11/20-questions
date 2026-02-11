@@ -213,7 +213,7 @@ const getRandomFlavor = () => {
   return flavorAngles[Math.floor(Math.random() * flavorAngles.length)];
 };
 
-export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20, clueDifficulty = 50) => {
+export const getPrompt = (category, difficulty, usedItems, customTheme = '', numberOfClues = 20, clueDifficulty = 50, ageRangeMin = 18, ageRangeMax = 50) => {
   const categoryInfo = categoryDescriptions[category];
 
   const usedInCategory = usedItems
@@ -252,6 +252,11 @@ ${categoryInfo.subTypes.map(s => `- ${s}`).join('\n')}
 
 ## MÅLGRUPPE
 Primært danske spillere, men med fokus på international viden (80% international, 20% dansk/nordisk)
+
+## SPILLERNES ALDER
+Spillerne er mellem ${ageRangeMin} og ${ageRangeMax} år gamle (født ca. ${new Date().getFullYear() - ageRangeMax}–${new Date().getFullYear() - ageRangeMin}).
+Du må gerne vælge svar og ledetråde der relaterer til deres generation — f.eks. populærkultur, teknologi, begivenheder eller trends fra deres opvækst og ungdom.
+Dette er en bonus, ikke et krav — emner fra hele historien er stadig velkomne.
 
 ## SVÆRHEDSGRAD FOR SVAR: ${difficulty}%
 ${difficultyDescriptions[closestDescriptionKey]}

@@ -20,7 +20,8 @@ import {
   EyeOff,
   Moon,
   Sun,
-  Minus
+  Minus,
+  Users
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { getDifficultyLabel } from '../utils/prompts';
@@ -37,6 +38,8 @@ const SettingsPage = ({ theme, setTheme }) => {
     timePerClue,
     numberOfSpecialClues,
     specialCluesConfig,
+    ageRangeMin,
+    ageRangeMax,
     updateSetting,
     resetUsedItems,
     resetAllData,
@@ -52,7 +55,9 @@ const SettingsPage = ({ theme, setTheme }) => {
     enableTimer,
     timePerClue,
     numberOfSpecialClues,
-    specialCluesConfig: [...specialCluesConfig]
+    specialCluesConfig: [...specialCluesConfig],
+    ageRangeMin,
+    ageRangeMax
   });
 
   const [showAddSpecialClue, setShowAddSpecialClue] = useState(false);
@@ -333,6 +338,60 @@ const SettingsPage = ({ theme, setTheme }) => {
                 </div>
               </div>
 
+            </div>
+
+            {/* Age Range */}
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mt-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <span className="font-medium text-sm">Spillernes alder</span>
+                </div>
+                <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  {localSettings.ageRangeMin}–{localSettings.ageRangeMax} år
+                </span>
+              </div>
+              <div className="relative h-8 flex items-center">
+                <div
+                  className="absolute h-2 rounded-full top-1/2 -translate-y-1/2"
+                  style={{
+                    left: `${((localSettings.ageRangeMin - 5) / 75) * 100}%`,
+                    right: `${100 - ((localSettings.ageRangeMax - 5) / 75) * 100}%`,
+                    background: '#3b82f6'
+                  }}
+                />
+                <input
+                  type="range"
+                  min="5"
+                  max="80"
+                  value={localSettings.ageRangeMin}
+                  onChange={e => {
+                    const val = Math.min(parseInt(e.target.value), localSettings.ageRangeMax - 1);
+                    handleLocalChange('ageRangeMin', val);
+                  }}
+                  className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-blue-600 [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-blue-600 [&::-moz-range-thumb]:shadow [&::-moz-range-thumb]:cursor-pointer"
+                  style={{ zIndex: localSettings.ageRangeMin > 70 ? 5 : 3 }}
+                />
+                <input
+                  type="range"
+                  min="5"
+                  max="80"
+                  value={localSettings.ageRangeMax}
+                  onChange={e => {
+                    const val = Math.max(parseInt(e.target.value), localSettings.ageRangeMin + 1);
+                    handleLocalChange('ageRangeMax', val);
+                  }}
+                  className="absolute w-full h-2 appearance-none bg-gray-200 dark:bg-gray-600 rounded-lg pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-blue-600 [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-blue-600 [&::-moz-range-thumb]:shadow [&::-moz-range-thumb]:cursor-pointer"
+                  style={{ zIndex: 2 }}
+                />
+              </div>
+              <div className="flex justify-between mt-1">
+                <span className="text-xs text-gray-500">5 år</span>
+                <span className="text-xs text-gray-500">80 år</span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                AI'en tilpasser svar og ledetråde til jeres generations viden og oplevelser
+              </p>
             </div>
           </section>
 

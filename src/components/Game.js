@@ -25,6 +25,8 @@ const Game = ({ theme }) => {
     categories,
     numberOfSpecialClues,
     specialCluesConfig,
+    ageRangeMin,
+    ageRangeMax,
     usedItems,
     addUsedItem,
     currentGameState,
@@ -75,7 +77,7 @@ const Game = ({ theme }) => {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
         const regularCluesNeeded = Math.max(1, numberOfClues - numberOfSpecialClues);
-        const prompt = getPrompt(category, difficulty, usedItems, customTheme, regularCluesNeeded, clueDifficulty);
+        const prompt = getPrompt(category, difficulty, usedItems, customTheme, regularCluesNeeded, clueDifficulty, ageRangeMin, ageRangeMax);
 
         let isDuplicate = false;
 
