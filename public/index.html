@@ -9,6 +9,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <meta name="description" content="20 Questions - Et trivia-spil med AI-genererede ledetråde" />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="20 Questions" />
+    <meta property="og:description" content="Et trivia-spil med AI-genererede ledetråde" />
+    <meta property="og:url" content="https://lukasjp11.github.io/20-questions/" />
+    <meta property="og:image" content="https://lukasjp11.github.io/20-questions/icons/icon-512x512.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="20 Questions" />
+    <meta name="twitter:description" content="Et trivia-spil med AI-genererede ledetråde" />
+    <meta name="twitter:image" content="https://lukasjp11.github.io/20-questions/icons/icon-512x512.png" />
+
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="20 Questions">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -26,10 +38,8 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
-          navigator.serviceWorker.register('%PUBLIC_URL%/service-worker.js').then(function(registration) {
-            console.log('ServiceWorker registration successful');
-          }, function(err) {
-            console.log('ServiceWorker registration failed: ', err);
+          navigator.serviceWorker.register('%PUBLIC_URL%/service-worker.js').catch(function(err) {
+            console.error('ServiceWorker registration failed: ', err);
           });
         });
       }

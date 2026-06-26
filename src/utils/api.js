@@ -1,6 +1,6 @@
 const API_URL = process.env.REACT_APP_API_URL;
 
-export const generateCluesWithProgress = async (prompt, callbacks = {}) => {
+export const generateCluesWithProgress = async (prompt, callbacks = {}, signal) => {
   const {
     onItemFound = () => {},
     onComplete = () => {},
@@ -8,12 +8,16 @@ export const generateCluesWithProgress = async (prompt, callbacks = {}) => {
   } = callbacks;
 
   try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (process.env.REACT_APP_API_KEY) {
+      headers['x-api-key'] = process.env.REACT_APP_API_KEY;
+    }
+
     const response = await fetch(`${API_URL}/api/generate-stream`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt })
+      headers,
+      body: JSON.stringify({ prompt }),
+      signal
     });
 
     if (!response.ok) {

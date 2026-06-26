@@ -41,7 +41,7 @@ const Game = () => {
   const [loading, setLoading] = useState(false);
   const [loadingCategory, setLoadingCategory] = useState('');
   const [error, setError] = useState('');
-  const [showAnswer, setShowAnswer] = useState(currentGameState?.showAnswer ?? true);
+  const [showAnswer, setShowAnswer] = useState(currentGameState?.showAnswer ?? !hideAnswerOnGeneration);
   const [timerPaused, setTimerPaused] = useState(true);
   const [timerResetTrigger, setTimerResetTrigger] = useState(0);
   const [generatingClues, setGeneratingClues] = useState(false);
@@ -75,16 +75,22 @@ const Game = () => {
     clearGameState();
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        const regularCluesNeeded = Math.max(1, numberOfClues - numberOfSpecialClues);
-        const prompt = getPrompt(category, difficulty, usedItems, customTheme, regularCluesNeeded, clueDifficulty, ageRangeMin, ageRangeMax);
+      // Never request more special clues than fit, so the board total stays at numberOfClues.
+      const specialCluesToUse = Math.min(numberOfSpecialClues, Math.max(0, numberOfClues - 1));
+      const regularCluesNeeded = Math.max(1, numberOfClues - specialCluesToUse);
 
-        let isDuplicate = false;
+      let isDuplicate = false;
+      const controller = new AbortController();
+
+      try {
+        const prompt = getPrompt(category, difficulty, usedItems, customTheme, regularCluesNeeded, clueDifficulty, ageRangeMin, ageRangeMax);
 
         const result = await generateCluesWithProgress(prompt, {
           onItemFound: (item) => {
             if (isItemUsed(item, usedItems, category)) {
+              // Stop the (paid) stream as soon as we know it's a duplicate.
               isDuplicate = true;
+              controller.abort();
               return;
             }
             setCurrentItem(item);
@@ -98,13 +104,13 @@ const Game = () => {
           onComplete: (result) => {
             if (isDuplicate) return;
             const regularClues = result.clues.slice(0, regularCluesNeeded);
-            const selectedSpecialClues = selectSpecialClues(specialCluesConfig, numberOfSpecialClues);
+            const selectedSpecialClues = selectSpecialClues(specialCluesConfig, specialCluesToUse);
             const allClues = [...regularClues, ...selectedSpecialClues];
             const shuffledClues = shuffleArray(allClues);
             setClues(shuffledClues);
             setGeneratingClues(false);
           }
-        });
+        }, controller.signal);
 
         if (isDuplicate) {
           console.log(`Duplicate item detected (attempt ${attempt + 1}/${MAX_RETRIES}), retrying...`);
@@ -115,6 +121,11 @@ const Game = () => {
         return;
 
       } catch (err) {
+        // An abort is our own duplicate-retry signal, not a real failure.
+        if (isDuplicate || err.name === 'AbortError') {
+          console.log(`Duplicate item detected (attempt ${attempt + 1}/${MAX_RETRIES}), retrying...`);
+          continue;
+        }
         setError(err.message || 'En fejl opstod. Prøv igen.');
         console.error('Generation error:', err);
         setLoading(false);

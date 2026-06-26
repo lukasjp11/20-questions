@@ -7,7 +7,6 @@ import {
   Plus,
   X,
   Clock,
-  Palette,
   Sliders,
   Sparkles,
   AlertCircle,
@@ -57,6 +56,9 @@ const SettingsPage = () => {
     ageRangeMin,
     ageRangeMax
   });
+
+  const MIN_CLUES = 1;
+  const MAX_CLUES = 30;
 
   const [showAddSpecialClue, setShowAddSpecialClue] = useState(false);
   const [newSpecialClue, setNewSpecialClue] = useState({ text: '', weight: 2 });
@@ -162,22 +164,25 @@ const SettingsPage = () => {
                 <label className="font-medium">Antal ledetråde</label>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleLocalChange('numberOfClues', Math.max(1, localSettings.numberOfClues - 5))}
+                    onClick={() => handleLocalChange('numberOfClues', Math.max(MIN_CLUES, localSettings.numberOfClues - 5))}
                     className="w-8 h-8 rounded-board bg-board-surface-active border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] text-board-text-muted hover:text-board-gold flex items-center justify-center transition-colors"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
                   <input
                     type="number"
+                    min={MIN_CLUES}
+                    max={MAX_CLUES}
                     value={localSettings.numberOfClues}
                     onChange={e => {
-                      const value = parseInt(e.target.value) || 1;
+                      const parsed = parseInt(e.target.value) || MIN_CLUES;
+                      const value = Math.min(MAX_CLUES, Math.max(MIN_CLUES, parsed));
                       handleLocalChange('numberOfClues', value);
                     }}
                     className="w-16 px-2 py-1 text-center rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] text-board-text"
                   />
                   <button
-                    onClick={() => handleLocalChange('numberOfClues', localSettings.numberOfClues + 5)}
+                    onClick={() => handleLocalChange('numberOfClues', Math.min(MAX_CLUES, localSettings.numberOfClues + 5))}
                     className="w-8 h-8 rounded-board bg-board-surface-active border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] text-board-text-muted hover:text-board-gold flex items-center justify-center transition-colors"
                   >
                     <Plus className="w-4 h-4" />
@@ -402,19 +407,23 @@ const SettingsPage = () => {
                   <p className="text-xs text-board-text-dimmer mt-0.5">Vælg hvor mange der skal med</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  {[0, 1, 2, 3, 4, 5].map(num => (
-                    <button
-                      key={num}
-                      onClick={() => handleLocalChange('numberOfSpecialClues', num)}
-                      className={`w-9 h-9 rounded-board font-medium text-sm transition-all ${
-                        localSettings.numberOfSpecialClues === num
-                          ? 'bg-board-gold text-board-bg shadow-sm'
-                          : 'bg-board-surface-active hover:bg-board-surface-active text-board-text-muted hover:text-board-text-secondary border border-[rgba(212,168,84,0.08)]'
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
+                  {[0, 1, 2, 3, 4, 5].map(num => {
+                    const disabled = num > localSettings.numberOfClues - 1;
+                    return (
+                      <button
+                        key={num}
+                        disabled={disabled}
+                        onClick={() => handleLocalChange('numberOfSpecialClues', num)}
+                        className={`w-9 h-9 rounded-board font-medium text-sm transition-all ${
+                          localSettings.numberOfSpecialClues === num
+                            ? 'bg-board-gold text-board-bg shadow-sm'
+                            : 'bg-board-surface-active hover:bg-board-surface-active text-board-text-muted hover:text-board-text-secondary border border-[rgba(212,168,84,0.08)]'
+                        } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
+                      >
+                        {num}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
