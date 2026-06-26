@@ -19,20 +19,20 @@ const defaultSpecialCluesConfig = [
 ];
 
 export const GameProvider = ({ children }) => {
-  const [difficulty, setDifficulty] = useState(() => 
-    loadFromLocalStorage('difficulty', 50)
+  const [difficulty, setDifficulty] = useState(() =>
+    loadFromLocalStorage('difficulty', 40)
   );
-  const [clueDifficulty, setClueDifficulty] = useState(() => 
-    loadFromLocalStorage('clueDifficulty', 50)
+  const [clueDifficulty, setClueDifficulty] = useState(() =>
+    loadFromLocalStorage('clueDifficulty', 80)
   );
   const [customTheme, setCustomTheme] = useState(() =>
     loadFromLocalStorage('customTheme', '')
   );
   const [hideAnswerOnGeneration, setHideAnswerOnGeneration] = useState(() =>
-    loadFromLocalStorage('hideAnswerOnGeneration', false)
+    loadFromLocalStorage('hideAnswerOnGeneration', true)
   );
   const [numberOfClues, setNumberOfClues] = useState(() =>
-    loadFromLocalStorage('numberOfClues', 20)
+    loadFromLocalStorage('numberOfClues', 10)
   );
   const [enableTimer, setEnableTimer] = useState(() =>
     loadFromLocalStorage('enableTimer', false)
@@ -44,16 +44,16 @@ export const GameProvider = ({ children }) => {
     loadFromLocalStorage('customCategories', defaultCategories)
   );
   const [numberOfSpecialClues, setNumberOfSpecialClues] = useState(() =>
-    loadFromLocalStorage('numberOfSpecialClues', 3)
+    loadFromLocalStorage('numberOfSpecialClues', 0)
   );
   const [specialCluesConfig, setSpecialCluesConfig] = useState(() =>
     loadFromLocalStorage('specialCluesConfig', defaultSpecialCluesConfig)
   );
   const [ageRangeMin, setAgeRangeMin] = useState(() =>
-    loadFromLocalStorage('ageRangeMin', 18)
+    loadFromLocalStorage('ageRangeMin', 10)
   );
   const [ageRangeMax, setAgeRangeMax] = useState(() =>
-    loadFromLocalStorage('ageRangeMax', 50)
+    loadFromLocalStorage('ageRangeMax', 40)
   );
   const [usedItems, setUsedItems] = useState(() =>
     loadFromLocalStorage('usedItems', [])
