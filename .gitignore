@@ -26,3 +26,6 @@ yarn-error.log*
 repomix-output.xml
 repomix-output.txt
 tmp.txt
+
+# Clue/answer prompt R&D harness (not part of the app build)
+/experiments
