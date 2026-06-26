@@ -75,7 +75,6 @@ const Game = () => {
     clearGameState();
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      // Never request more special clues than fit, so the board total stays at numberOfClues.
       const specialCluesToUse = Math.min(numberOfSpecialClues, Math.max(0, numberOfClues - 1));
       const regularCluesNeeded = Math.max(1, numberOfClues - specialCluesToUse);
 
@@ -88,7 +87,6 @@ const Game = () => {
         const result = await generateCluesWithProgress(prompt, {
           onItemFound: (item) => {
             if (isItemUsed(item, usedItems, category)) {
-              // Stop the (paid) stream as soon as we know it's a duplicate.
               isDuplicate = true;
               controller.abort();
               return;
@@ -121,7 +119,6 @@ const Game = () => {
         return;
 
       } catch (err) {
-        // An abort is our own duplicate-retry signal, not a real failure.
         if (isDuplicate || err.name === 'AbortError') {
           console.log(`Duplicate item detected (attempt ${attempt + 1}/${MAX_RETRIES}), retrying...`);
           continue;
