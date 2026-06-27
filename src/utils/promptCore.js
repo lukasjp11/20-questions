@@ -222,8 +222,11 @@ Regler:
 - Ligner to ledetråde hinanden? Er der mindst to meget korte? Ret det.
 - Tæl efter: skal man op på ${guessPoint(clueDifficulty, numberOfClues)} for at være sikker? Hvis svaret falder for hurtigt, gør de skarpeste ledetråde vagere eller bredere.
 
+## GYLDIGE SVAR (accept)
+Lav til sidst en liste på 1-10 gyldige måder at skrive svaret på — FORSKELLIGE korrekte formuleringer, IKKE stavefejl. Første element er ALTID det nøjagtige svar præcis som i "item". Medtag fx: bestemt og ubestemt form (elefant/elefanten), gængse alternative danske navne eller forkortelser, og for personer evt. kun efternavn hvis det entydigt peger på personen. KUN dansk. Medtag ALDRIG oversættelser til andre sprog, beslægtede-men-forkerte svar, eller bredere/delvise kategorier. Hvis kun det nøjagtige svar er gyldigt (fx "Træ"), så lad listen kun indeholde det ene svar.
+
 ## OUTPUT
 Svar KUN med ren JSON på én linje, "item" FØRST, ingen markdown, ingen forklaring.
 Brug ALDRIG dobbelt-anførselstegn (") inde i en ledetråd — brug enkelt-anførselstegn (') hvis du skal citere. Ellers bryder svaret.
-{"item":"...","clues":["...", ... ${numberOfClues} stk]}`;
+{"item":"...","clues":["...", ... ${numberOfClues} stk],"accept":["...", ... 1-10 stk, item først]}`;
 };

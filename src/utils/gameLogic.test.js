@@ -5,6 +5,9 @@ import {
   isSpecialClue,
   selectSpecialClues,
   shuffleArray,
+  normalizeGuess,
+  buildAcceptedAnswers,
+  isCorrectGuess,
 } from './gameLogic';
 
 describe('normalizeItem', () => {
@@ -93,5 +96,53 @@ describe('shuffleArray', () => {
     expect(result).toHaveLength(input.length);
     expect([...result].sort()).toEqual([...input].sort());
     expect(input).toEqual([1, 2, 3, 4, 5]);
+  });
+});
+
+describe('normalizeGuess', () => {
+  it('lowercases, strips accents and punctuation, and collapses whitespace', () => {
+    expect(normalizeGuess('  H.C.  Andersen ')).toBe('hc andersen');
+    expect(normalizeGuess('Café')).toBe('cafe');
+  });
+});
+
+describe('buildAcceptedAnswers', () => {
+  it('always puts the exact item first and dedupes case/accent variants', () => {
+    const list = buildAcceptedAnswers('Elefant', ['elefant', 'Elefanten', 'Elephant']);
+    expect(list[0]).toBe('Elefant');
+    expect(list).toEqual(['Elefant', 'Elefanten', 'Elephant']);
+  });
+
+  it('falls back to just the item when accept is missing or empty', () => {
+    expect(buildAcceptedAnswers('Træ')).toEqual(['Træ']);
+    expect(buildAcceptedAnswers('Træ', [])).toEqual(['Træ']);
+    expect(buildAcceptedAnswers('Træ', undefined)).toEqual(['Træ']);
+  });
+
+  it('caps the list length', () => {
+    const many = Array.from({ length: 20 }, (_, i) => `svar ${i}`);
+    expect(buildAcceptedAnswers('Item', many)).toHaveLength(10);
+  });
+});
+
+describe('isCorrectGuess', () => {
+  const accepted = buildAcceptedAnswers('Elefant', ['Elefanten']);
+
+  it('accepts exact and normalized variants', () => {
+    expect(isCorrectGuess('elefant', accepted)).toBe(true);
+    expect(isCorrectGuess('  Elefant ', accepted)).toBe(true);
+    expect(isCorrectGuess('Elefanten', accepted)).toBe(true);
+  });
+
+  it('rejects typos and wrong answers (no fuzzy matching)', () => {
+    expect(isCorrectGuess('elefnat', accepted)).toBe(false);
+    expect(isCorrectGuess('næsehorn', accepted)).toBe(false);
+    expect(isCorrectGuess('', accepted)).toBe(false);
+  });
+
+  it('matches punctuation/spacing variants of names', () => {
+    const names = buildAcceptedAnswers('H.C. Andersen', ['Hans Christian Andersen']);
+    expect(isCorrectGuess('hc andersen', names)).toBe(true);
+    expect(isCorrectGuess('Hans Christian Andersen', names)).toBe(true);
   });
 });

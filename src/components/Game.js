@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, Settings } from 'lucide-react';
 import { getPrompt } from '../utils/prompts';
-import { shuffleArray, selectSpecialClues, isItemUsed } from '../utils/gameLogic';
+import { shuffleArray, selectSpecialClues, isItemUsed, buildAcceptedAnswers } from '../utils/gameLogic';
 import { useGame } from '../context/GameContext';
 import CategorySelector from './CategorySelector';
 import AnswerBox from './AnswerBox';
@@ -36,6 +36,7 @@ const Game = () => {
 
   const [currentCategory, setCurrentCategory] = useState(currentGameState?.currentCategory || null);
   const [currentItem, setCurrentItem] = useState(currentGameState?.currentItem || '');
+  const [acceptedAnswers, setAcceptedAnswers] = useState(currentGameState?.acceptedAnswers || []);
   const [clues, setClues] = useState(currentGameState?.clues || []);
   const [revealedClues, setRevealedClues] = useState(currentGameState?.revealedClues || []);
   const [loading, setLoading] = useState(false);
@@ -51,12 +52,13 @@ const Game = () => {
       saveGameState({
         currentCategory,
         currentItem,
+        acceptedAnswers,
         clues,
         revealedClues,
         showAnswer
       });
     }
-  }, [currentCategory, currentItem, clues, revealedClues, showAnswer, loading, generatingClues, saveGameState]);
+  }, [currentCategory, currentItem, acceptedAnswers, clues, revealedClues, showAnswer, loading, generatingClues, saveGameState]);
 
   const MAX_RETRIES = 3;
 
@@ -71,6 +73,7 @@ const Game = () => {
     setGeneratingClues(false);
     setClues([]);
     setCurrentItem('');
+    setAcceptedAnswers([]);
 
     clearGameState();
 
@@ -101,6 +104,7 @@ const Game = () => {
           },
           onComplete: (result) => {
             if (isDuplicate) return;
+            setAcceptedAnswers(buildAcceptedAnswers(result.item, result.accept));
             const regularClues = result.clues.slice(0, regularCluesNeeded);
             const selectedSpecialClues = selectSpecialClues(specialCluesConfig, specialCluesToUse);
             const allClues = [...regularClues, ...selectedSpecialClues];
@@ -192,6 +196,7 @@ const Game = () => {
               currentItem={currentItem}
               showAnswer={showAnswer}
               setShowAnswer={setShowAnswer}
+              acceptedAnswers={acceptedAnswers}
             />
 
             {enableTimer && currentItem && revealedClues.length > 0 && (

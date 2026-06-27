@@ -7,6 +7,38 @@ export const normalizeItem = (item) => {
     .replace(/\s+/g, ' ');
 };
 
+export const normalizeGuess = (value) => {
+  return (value || '')
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+export const buildAcceptedAnswers = (item, accept = [], max = 10) => {
+  const candidates = [item, ...(Array.isArray(accept) ? accept : [])]
+    .filter(value => typeof value === 'string' && value.trim());
+  const seen = new Set();
+  const result = [];
+  for (const candidate of candidates) {
+    const key = normalizeGuess(candidate);
+    if (key && !seen.has(key)) {
+      seen.add(key);
+      result.push(candidate.trim());
+    }
+  }
+  return result.slice(0, max);
+};
+
+export const isCorrectGuess = (guess, acceptedAnswers = []) => {
+  const normalized = normalizeGuess(guess);
+  if (!normalized) return false;
+  return acceptedAnswers.some(answer => normalizeGuess(answer) === normalized);
+};
+
 export const isItemUsed = (item, usedItems, category = null) => {
   const normalized = normalizeItem(item);
   return usedItems.some(used => {
