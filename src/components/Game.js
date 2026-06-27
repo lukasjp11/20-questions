@@ -188,13 +188,13 @@ const Game = () => {
             <h1 className="text-2xl md:text-4xl font-bold font-heading text-board-gold">20 Questions</h1>
             <Link
               to="/settings"
-              className="p-2 rounded-board bg-board-surface border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] text-board-text-dim hover:text-board-gold transition-colors"
+              className="p-2.5 rounded-2xl bg-board-surface hover:bg-board-surface-active text-board-text-dim hover:text-board-gold transition-colors"
             >
               <Settings className="w-5 h-5" />
             </Link>
           </div>
 
-          <div className="bg-board-surface rounded-board p-4 md:p-6 border border-[rgba(212,168,84,0.06)]">
+          <div>
             <CategorySelector
               currentCategory={currentCategory}
               onCategorySelect={generateCard}
@@ -226,7 +226,7 @@ const Game = () => {
             )}
 
             {error && (
-              <div className="mb-4 p-3 bg-[rgba(200,132,90,0.1)] border border-[rgba(200,132,90,0.2)] rounded-board flex items-center text-board-special text-sm">
+              <div className="mb-4 p-3 bg-[rgba(229,155,115,0.12)] border-2 border-[rgba(229,155,115,0.25)] rounded-2xl flex items-center text-board-special text-sm">
                 <AlertTriangle className="mr-2 w-4 h-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>

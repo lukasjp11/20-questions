@@ -32,7 +32,7 @@ const Timer = ({ timePerClue, onTimeUp, isPaused, resetTrigger }) => {
 
   if (isTimeUp) {
     return (
-      <div className="w-full mb-4 p-3 bg-[rgba(200,132,90,0.1)] border border-[rgba(200,132,90,0.2)] rounded-board">
+      <div className="w-full mb-4 p-3 bg-[rgba(229,155,115,0.1)] border border-[rgba(229,155,115,0.2)] rounded-board">
         <div className="flex items-center justify-center gap-2 text-board-special">
           <AlertCircle className="w-5 h-5" />
           <span className="font-medium">Tiden er udløbet!</span>
@@ -52,7 +52,7 @@ const Timer = ({ timePerClue, onTimeUp, isPaused, resetTrigger }) => {
           {timeLeft}s
         </span>
       </div>
-      <div className="w-full bg-[rgba(212,168,84,0.08)] rounded-board h-2 overflow-hidden">
+      <div className="w-full bg-[rgba(230,193,104,0.08)] rounded-board h-2 overflow-hidden">
         <div
           className={`h-full rounded-board transition-all duration-1000 ${
             isLow ? 'bg-board-special' : 'bg-board-gold'
