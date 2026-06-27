@@ -1,6 +1,6 @@
 const API_URL = process.env.REACT_APP_API_URL;
 
-export const generateCluesWithProgress = async (prompt, callbacks = {}, signal) => {
+export const generateCluesWithProgress = async (requestBody, callbacks = {}, signal) => {
   const {
     onItemFound = () => {},
     onComplete = () => {},
@@ -16,7 +16,7 @@ export const generateCluesWithProgress = async (prompt, callbacks = {}, signal) 
     const response = await fetch(`${API_URL}/api/generate-stream`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify(requestBody),
       signal
     });
 

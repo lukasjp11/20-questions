@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, Settings } from 'lucide-react';
-import { getPrompt } from '../utils/prompts';
 import { shuffleArray, selectSpecialClues, isItemUsed, buildAcceptedAnswers } from '../utils/gameLogic';
 import { useGame } from '../context/GameContext';
 import CategorySelector from './CategorySelector';
@@ -85,9 +84,20 @@ const Game = () => {
       const controller = new AbortController();
 
       try {
-        const prompt = getPrompt(category, difficulty, usedItems, customTheme, regularCluesNeeded, clueDifficulty, ageRangeMin, ageRangeMax);
+        const requestBody = {
+          category,
+          settings: {
+            difficulty,
+            clueDifficulty,
+            customTheme,
+            numberOfClues: regularCluesNeeded,
+            ageRangeMin,
+            ageRangeMax,
+            usedItems: usedItems.filter(u => u.category === category).slice(-20)
+          }
+        };
 
-        const result = await generateCluesWithProgress(prompt, {
+        const result = await generateCluesWithProgress(requestBody, {
           onItemFound: (item) => {
             if (isItemUsed(item, usedItems, category)) {
               isDuplicate = true;

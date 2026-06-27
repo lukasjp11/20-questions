@@ -1,5 +1,5 @@
 import { Brain, MapPin, Lightbulb, Swords } from 'lucide-react';
-import { getPrompt, getDifficultyLabel } from './promptCore';
+import { getDifficultyLabel } from './promptCore';
 
 export const categories = {
   person: {
@@ -24,5 +24,5 @@ export const categories = {
   }
 };
 
-export { getPrompt, getDifficultyLabel };
+export { getDifficultyLabel };
 export const defaultCategories = categories;
