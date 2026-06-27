@@ -14,13 +14,13 @@ const ClueButton = memo(({ clue, index, isRevealed, onClick, specialCluesConfig 
     <button
       onClick={handleClick}
       className={`
-        p-3.5 rounded-2xl transition-all text-left
+        p-3 rounded-board transition-all text-left
         ${isRevealed
           ? (isSpecial
-            ? 'bg-[rgba(229,155,115,0.14)] border-2 border-[rgba(229,155,115,0.32)]'
-            : 'bg-board-surface border-2 border-[rgba(230,193,104,0.3)]'
+            ? 'bg-[rgba(200,132,90,0.1)] border border-[rgba(200,132,90,0.2)]'
+            : 'bg-board-surface-active border border-[rgba(212,168,84,0.15)]'
           )
-          : 'bg-board-surface-alt border-2 border-transparent hover:bg-board-surface hover:border-[rgba(230,193,104,0.12)]'
+          : 'bg-board-surface-alt border border-[rgba(212,168,84,0.05)] hover:bg-board-surface-active hover:border-[rgba(212,168,84,0.1)]'
         }
         transform hover:scale-[1.02] active:scale-[0.98]
       `}
@@ -32,7 +32,7 @@ const ClueButton = memo(({ clue, index, isRevealed, onClick, specialCluesConfig 
         ) : (
           <Circle className="w-4 h-4 text-board-text-faint flex-shrink-0" />
         )}
-        <span className={`font-extrabold ${isRevealed ? 'text-board-gold' : 'text-board-text-dimmest'}`}>
+        <span className={`font-semibold ${isRevealed ? 'text-board-gold' : 'text-board-text-faint'}`}>
           #{index + 1}
         </span>
         {isRevealed && (
@@ -54,14 +54,14 @@ const CluesGrid = memo(({ clues, revealedClues, onClueClick }) => {
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="text-base font-semibold font-heading text-board-text">Ledetråde</h3>
-        <span className="text-sm text-board-text-dimmer">
-          <span className="text-board-gold font-extrabold">{revealedClues.length}</span> / {clues.length} afsløret
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-[11px] font-bold text-board-text-dimmer uppercase tracking-[1.5px]">Ledetråde</h3>
+        <span className="text-xs text-board-text-faint">
+          <span className="text-board-gold font-bold">{revealedClues.length}</span> / {clues.length} afsløret
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {clues.map((clue, index) => (
           <ClueButton
             key={index}

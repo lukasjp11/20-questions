@@ -14,7 +14,7 @@
   appearance: none;
   width: 18px;
   height: 18px;
-  background: #e6c168;
+  background: #d4a854;
   cursor: pointer;
   border-radius: 3px;
   transition: all 0.2s;
@@ -23,13 +23,13 @@
 
 .slider::-webkit-slider-thumb:hover {
   transform: scale(1.1);
-  background: #cfa544;
+  background: #b8963e;
 }
 
 .slider::-moz-range-thumb {
   width: 18px;
   height: 18px;
-  background: #e6c168;
+  background: #d4a854;
   cursor: pointer;
   border-radius: 3px;
   border: none;
@@ -39,7 +39,7 @@
 
 .slider::-moz-range-thumb:hover {
   transform: scale(1.1);
-  background: #cfa544;
+  background: #b8963e;
 }
 
 .dual-range-slider {
@@ -54,7 +54,7 @@
   appearance: none;
   width: 18px;
   height: 18px;
-  background: #e6c168;
+  background: #d4a854;
   cursor: pointer;
   border-radius: 3px;
   transition: all 0.2s;
@@ -64,13 +64,13 @@
 
 .dual-range-slider::-webkit-slider-thumb:hover {
   transform: scale(1.1);
-  background: #cfa544;
+  background: #b8963e;
 }
 
 .dual-range-slider::-moz-range-thumb {
   width: 18px;
   height: 18px;
-  background: #e6c168;
+  background: #d4a854;
   cursor: pointer;
   border-radius: 3px;
   border: none;
@@ -81,7 +81,7 @@
 
 .dual-range-slider::-moz-range-thumb:hover {
   transform: scale(1.1);
-  background: #cfa544;
+  background: #b8963e;
 }
 
 @keyframes pulse {
@@ -132,7 +132,7 @@
 }
 
 :focus-visible {
-  outline: 2px solid #e6c168;
+  outline: 2px solid #d4a854;
   outline-offset: 2px;
 }
 
@@ -189,7 +189,7 @@ button:active {
   left: 2px;
   width: 16px;
   height: 16px;
-  background-color: #28201a;
+  background-color: #2c2520;
   border-radius: 3px;
   transition: transform 0.3s ease-in-out;
 }
@@ -199,5 +199,5 @@ button:active {
 }
 
 .toggle-switch input:checked + .toggle-switch {
-  background-color: #e6c168;
+  background-color: #d4a854;
 }

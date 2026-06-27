@@ -108,7 +108,7 @@ const SettingsPage = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 rounded-board bg-board-surface border border-[rgba(230,193,104,0.08)] hover:border-[rgba(230,193,104,0.2)] transition-all"
+              className="p-2 rounded-board bg-board-surface border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] transition-all"
             >
               <ArrowLeft className="w-5 h-5 text-board-text-dim" />
             </button>
@@ -127,21 +127,21 @@ const SettingsPage = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div className="bg-board-surface-alt rounded-board p-3 text-center border border-[rgba(230,193,104,0.06)]">
+          <div className="bg-board-surface-alt rounded-board p-3 text-center border border-[rgba(212,168,84,0.06)]">
             <p className="text-2xl font-bold text-board-gold">{localSettings.numberOfClues}</p>
             <p className="text-xs text-board-text-dimmer">Ledetråde</p>
           </div>
-          <div className="bg-board-surface-alt rounded-board p-3 text-center border border-[rgba(230,193,104,0.06)]">
+          <div className="bg-board-surface-alt rounded-board p-3 text-center border border-[rgba(212,168,84,0.06)]">
             <p className="text-2xl font-bold text-board-gold">
               {Math.round((localSettings.difficulty + localSettings.clueDifficulty) / 2)}%
             </p>
             <p className="text-xs text-board-text-dimmer">Sværhed</p>
           </div>
-          <div className="bg-board-surface-alt rounded-board p-3 text-center border border-[rgba(230,193,104,0.06)]">
+          <div className="bg-board-surface-alt rounded-board p-3 text-center border border-[rgba(212,168,84,0.06)]">
             <p className="text-2xl font-bold text-board-gold">{usedItems.length}</p>
             <p className="text-xs text-board-text-dimmer">Brugte kort</p>
           </div>
-          <div className="bg-board-surface-alt rounded-board p-3 text-center border border-[rgba(230,193,104,0.06)]">
+          <div className="bg-board-surface-alt rounded-board p-3 text-center border border-[rgba(212,168,84,0.06)]">
             <p className="text-2xl font-bold text-board-gold">
               {localSettings.enableTimer ? `${localSettings.timePerClue}s` : 'Fra'}
             </p>
@@ -152,7 +152,7 @@ const SettingsPage = () => {
         {/* Settings sections */}
         <div className="space-y-6">
           {/* Basic Game Settings */}
-          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(230,193,104,0.06)]">
+          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 font-heading text-board-text">
               <Sliders className="w-5 h-5 text-board-text-dim" />
               Grundlæggende
@@ -165,7 +165,7 @@ const SettingsPage = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleLocalChange('numberOfClues', Math.max(MIN_CLUES, localSettings.numberOfClues - 5))}
-                    className="w-8 h-8 rounded-board bg-board-surface-active border border-[rgba(230,193,104,0.08)] hover:border-[rgba(230,193,104,0.2)] text-board-text-muted hover:text-board-gold flex items-center justify-center transition-colors"
+                    className="w-8 h-8 rounded-board bg-board-surface-active border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] text-board-text-muted hover:text-board-gold flex items-center justify-center transition-colors"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
@@ -179,11 +179,11 @@ const SettingsPage = () => {
                       const value = Math.min(MAX_CLUES, Math.max(MIN_CLUES, parsed));
                       handleLocalChange('numberOfClues', value);
                     }}
-                    className="w-16 px-2 py-1 text-center rounded-board bg-board-bg border border-[rgba(230,193,104,0.08)] text-board-text"
+                    className="w-16 px-2 py-1 text-center rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] text-board-text"
                   />
                   <button
                     onClick={() => handleLocalChange('numberOfClues', Math.min(MAX_CLUES, localSettings.numberOfClues + 5))}
-                    className="w-8 h-8 rounded-board bg-board-surface-active border border-[rgba(230,193,104,0.08)] hover:border-[rgba(230,193,104,0.2)] text-board-text-muted hover:text-board-gold flex items-center justify-center transition-colors"
+                    className="w-8 h-8 rounded-board bg-board-surface-active border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] text-board-text-muted hover:text-board-gold flex items-center justify-center transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -199,7 +199,7 @@ const SettingsPage = () => {
                 <button
                   onClick={() => handleLocalChange('hideAnswerOnGeneration', !localSettings.hideAnswerOnGeneration)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-[4px] transition-all ${
-                    localSettings.hideAnswerOnGeneration ? 'bg-board-gold' : 'bg-[rgba(230,193,104,0.08)]'
+                    localSettings.hideAnswerOnGeneration ? 'bg-board-gold' : 'bg-[rgba(212,168,84,0.08)]'
                   }`}
                 >
                   <span className={`inline-block h-4 w-4 rounded-[3px] bg-board-bg transform transition-transform ${
@@ -218,7 +218,7 @@ const SettingsPage = () => {
                   <button
                   onClick={() => handleLocalChange('enableTimer', !localSettings.enableTimer)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-[4px] transition-all ${
-                    localSettings.enableTimer ? 'bg-board-gold' : 'bg-[rgba(230,193,104,0.08)]'
+                    localSettings.enableTimer ? 'bg-board-gold' : 'bg-[rgba(212,168,84,0.08)]'
                   }`}
                 >
                   <span className={`inline-block h-4 w-4 rounded-[3px] bg-board-bg transform transition-transform ${
@@ -232,7 +232,7 @@ const SettingsPage = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleLocalChange('timePerClue', Math.max(5, localSettings.timePerClue - 5))}
-                        className="w-7 h-7 rounded-board bg-board-surface-active border border-[rgba(230,193,104,0.08)] hover:border-[rgba(230,193,104,0.2)] text-board-text-muted hover:text-board-gold flex items-center justify-center transition-colors"
+                        className="w-7 h-7 rounded-board bg-board-surface-active border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] text-board-text-muted hover:text-board-gold flex items-center justify-center transition-colors"
                       >
                         <Minus className="w-3 h-3" />
                       </button>
@@ -243,11 +243,11 @@ const SettingsPage = () => {
                           const value = parseInt(e.target.value) || 1;
                           handleLocalChange('timePerClue', value);
                         }}
-                        className="w-12 px-1 py-0.5 text-center rounded-board bg-board-bg border border-[rgba(230,193,104,0.08)] text-sm text-board-text"
+                        className="w-12 px-1 py-0.5 text-center rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] text-sm text-board-text"
                       />
                       <button
                         onClick={() => handleLocalChange('timePerClue', localSettings.timePerClue + 5)}
-                        className="w-7 h-7 rounded-board bg-board-surface-active border border-[rgba(230,193,104,0.08)] hover:border-[rgba(230,193,104,0.2)] text-board-text-muted hover:text-board-gold flex items-center justify-center transition-colors"
+                        className="w-7 h-7 rounded-board bg-board-surface-active border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] text-board-text-muted hover:text-board-gold flex items-center justify-center transition-colors"
                       >
                         <Plus className="w-3 h-3" />
                       </button>
@@ -259,7 +259,7 @@ const SettingsPage = () => {
           </section>
 
           {/* Game Difficulty */}
-          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(230,193,104,0.06)]">
+          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 font-heading text-board-text">
               <Gauge className="w-5 h-5 text-board-text-dim" />
               Sværhedsgrad
@@ -285,7 +285,7 @@ const SettingsPage = () => {
                   onChange={e => handleLocalChange('difficulty', parseInt(e.target.value))}
                   className="w-full h-2 rounded-board appearance-none cursor-pointer slider"
                   style={{
-                    background: `linear-gradient(to right, #e6c168 0%, #e6c168 ${localSettings.difficulty}%, rgba(230,193,104,0.08) ${localSettings.difficulty}%, rgba(230,193,104,0.08) 100%)`
+                    background: `linear-gradient(to right, #d4a854 0%, #d4a854 ${localSettings.difficulty}%, rgba(212,168,84,0.08) ${localSettings.difficulty}%, rgba(212,168,84,0.08) 100%)`
                   }}
                 />
                 <div className="flex justify-between mt-1">
@@ -313,7 +313,7 @@ const SettingsPage = () => {
                   onChange={e => handleLocalChange('clueDifficulty', parseInt(e.target.value))}
                   className="w-full h-2 rounded-board appearance-none cursor-pointer slider"
                   style={{
-                    background: `linear-gradient(to right, #e6c168 0%, #e6c168 ${localSettings.clueDifficulty}%, rgba(230,193,104,0.08) ${localSettings.clueDifficulty}%, rgba(230,193,104,0.08) 100%)`
+                    background: `linear-gradient(to right, #d4a854 0%, #d4a854 ${localSettings.clueDifficulty}%, rgba(212,168,84,0.08) ${localSettings.clueDifficulty}%, rgba(212,168,84,0.08) 100%)`
                   }}
                 />
                 <div className="flex justify-between mt-1">
@@ -339,8 +339,8 @@ const SettingsPage = () => {
               {(() => {
                 const minPct = ((localSettings.ageRangeMin - 5) / 75) * 100;
                 const maxPct = ((localSettings.ageRangeMax - 5) / 75) * 100;
-                const trackBg = 'rgba(230,193,104,0.08)';
-                const trackFill = `linear-gradient(to right, ${trackBg} ${minPct}%, #e6c168 ${minPct}%, #e6c168 ${maxPct}%, ${trackBg} ${maxPct}%)`;
+                const trackBg = 'rgba(212,168,84,0.08)';
+                const trackFill = `linear-gradient(to right, ${trackBg} ${minPct}%, #d4a854 ${minPct}%, #d4a854 ${maxPct}%, ${trackBg} ${maxPct}%)`;
                 return (
                   <div className="relative h-2">
                     <div
@@ -384,7 +384,7 @@ const SettingsPage = () => {
           </section>
 
           {/* Special Clues */}
-          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(230,193,104,0.06)]">
+          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2 font-heading text-board-text">
                 <Sparkles className="w-5 h-5 text-board-special" />
@@ -400,7 +400,7 @@ const SettingsPage = () => {
             </div>
 
             {/* Number per game selector */}
-            <div className="mb-5 p-3 rounded-board bg-board-surface border border-[rgba(230,193,104,0.06)]">
+            <div className="mb-5 p-3 rounded-board bg-board-surface border border-[rgba(212,168,84,0.06)]">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <span className="font-medium text-sm">Antal per spil</span>
@@ -417,7 +417,7 @@ const SettingsPage = () => {
                         className={`w-9 h-9 rounded-board font-medium text-sm transition-all ${
                           localSettings.numberOfSpecialClues === num
                             ? 'bg-board-gold text-board-bg shadow-sm'
-                            : 'bg-board-surface-active hover:bg-board-surface-active text-board-text-muted hover:text-board-text-secondary border border-[rgba(230,193,104,0.08)]'
+                            : 'bg-board-surface-active hover:bg-board-surface-active text-board-text-muted hover:text-board-text-secondary border border-[rgba(212,168,84,0.08)]'
                         } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
                       >
                         {num}
@@ -438,9 +438,9 @@ const SettingsPage = () => {
                     <p className="text-board-text-secondary text-sm font-medium">{clueConfig.text}</p>
                     <span className={`inline-block mt-1 px-2 py-0.5 rounded-board text-xs font-medium ${
                       clueConfig.weight === 1 ? 'bg-board-surface-active text-board-text-dim' :
-                      clueConfig.weight === 2 ? 'bg-[rgba(230,193,104,0.1)] text-board-gold' :
-                      clueConfig.weight === 3 ? 'bg-[rgba(229,155,115,0.12)] text-board-special' :
-                      'bg-[rgba(229,155,115,0.16)] text-board-special'
+                      clueConfig.weight === 2 ? 'bg-[rgba(212,168,84,0.1)] text-board-gold' :
+                      clueConfig.weight === 3 ? 'bg-[rgba(200,132,90,0.12)] text-board-special' :
+                      'bg-[rgba(200,132,90,0.16)] text-board-special'
                     }`}>
                       {clueConfig.weight === 1 ? 'Sjælden' :
                       clueConfig.weight === 2 ? 'Normal' :
@@ -451,7 +451,7 @@ const SettingsPage = () => {
                     <select
                       value={clueConfig.weight}
                       onChange={(e) => handleWeightChange(index, parseInt(e.target.value))}
-                      className="px-2 py-1 rounded-board bg-board-bg border border-[rgba(230,193,104,0.08)] hover:border-board-gold text-sm cursor-pointer transition-colors text-board-text"
+                      className="px-2 py-1 rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] hover:border-board-gold text-sm cursor-pointer transition-colors text-board-text"
                     >
                       <option value={1}>Sjælden</option>
                       <option value={2}>Normal</option>
@@ -460,7 +460,7 @@ const SettingsPage = () => {
                     </select>
                     <button
                       onClick={() => handleRemoveSpecialClue(index)}
-                      className="p-1.5 rounded-board hover:bg-[rgba(229,155,115,0.1)] text-board-special transition-colors"
+                      className="p-1.5 rounded-board hover:bg-[rgba(200,132,90,0.1)] text-board-special transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -469,7 +469,7 @@ const SettingsPage = () => {
               ))}
 
               {localSettings.specialCluesConfig.length === 0 && !showAddSpecialClue && (
-                <div className="text-center py-8 px-4 rounded-board border-2 border-dashed border-[rgba(230,193,104,0.1)]">
+                <div className="text-center py-8 px-4 rounded-board border-2 border-dashed border-[rgba(212,168,84,0.1)]">
                   <Sparkles className="w-8 h-8 mx-auto text-board-text-faint mb-2" />
                   <p className="text-board-text-muted text-sm">Ingen special-ledetråde tilføjet</p>
                 </div>
@@ -477,7 +477,7 @@ const SettingsPage = () => {
             </div>
 
             {showAddSpecialClue && (
-              <div className="mt-4 p-4 rounded-board bg-board-surface border border-[rgba(230,193,104,0.1)]">
+              <div className="mt-4 p-4 rounded-board bg-board-surface border border-[rgba(212,168,84,0.1)]">
                 <h3 className="font-medium mb-3 text-board-text">Ny special-ledetråd</h3>
                 <div className="space-y-3">
                   <input
@@ -485,7 +485,7 @@ const SettingsPage = () => {
                     placeholder='f.eks. "Ryk 3 felter tilbage" eller "Tag en ekstra tur"'
                     value={newSpecialClue.text}
                     onChange={e => setNewSpecialClue(prev => ({ ...prev, text: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-board bg-board-bg border border-[rgba(230,193,104,0.08)] focus:border-board-gold outline-none transition-colors text-board-text placeholder-board-text-faint"
+                    className="w-full px-3 py-2 rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] focus:border-board-gold outline-none transition-colors text-board-text placeholder-board-text-faint"
                     autoFocus
                   />
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -502,7 +502,7 @@ const SettingsPage = () => {
                           onClick={() => setNewSpecialClue(prev => ({ ...prev, weight: value }))}
                           className={`px-3 py-1.5 rounded-board text-sm font-medium transition-all ${
                             newSpecialClue.weight === value
-                              ? 'bg-[rgba(230,193,104,0.12)] text-board-gold'
+                              ? 'bg-[rgba(212,168,84,0.12)] text-board-gold'
                               : 'bg-board-surface-active text-board-text-muted hover:bg-board-surface-active hover:text-board-text-secondary'
                           }`}
                         >
@@ -535,13 +535,13 @@ const SettingsPage = () => {
           </section>
 
           {/* Experimental Features */}
-          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(230,193,104,0.06)]">
+          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 font-heading text-board-text">
               <FlaskConical className="w-5 h-5 text-board-text-dim" />
               Eksperimentelle funktioner
             </h2>
 
-            <div className="bg-[rgba(230,193,104,0.06)] border border-[rgba(230,193,104,0.15)] rounded-board p-3 mb-4">
+            <div className="bg-[rgba(212,168,84,0.06)] border border-[rgba(212,168,84,0.15)] rounded-board p-3 mb-4">
               <p className="text-sm text-board-gold-muted flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 Disse funktioner er under udvikling og kan være ustabile
@@ -555,7 +555,7 @@ const SettingsPage = () => {
                 value={localSettings.customTheme}
                 onChange={e => handleLocalChange('customTheme', e.target.value)}
                 placeholder='f.eks. "Marvel", "90erne", "Dansk historie"'
-                className="w-full px-3 py-2 rounded-board bg-board-bg border border-[rgba(230,193,104,0.08)] focus:border-board-gold outline-none transition-colors text-board-text placeholder-board-text-faint"
+                className="w-full px-3 py-2 rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] focus:border-board-gold outline-none transition-colors text-board-text placeholder-board-text-faint"
               />
               <p className="text-xs text-board-text-dimmer mt-2">
                 Begrænser alle kategorier til det valgte tema
@@ -564,7 +564,7 @@ const SettingsPage = () => {
           </section>
 
           {/* Data Management */}
-          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(230,193,104,0.06)]">
+          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 font-heading text-board-text">
               <Database className="w-5 h-5 text-board-text-dim" />
               Data
@@ -601,7 +601,7 @@ const SettingsPage = () => {
                     resetAllData();
                   }
                 }}
-                className="w-full py-3 px-4 bg-[rgba(229,155,115,0.1)] border-2 border-[rgba(229,155,115,0.2)] text-board-special font-medium rounded-board hover:bg-[rgba(229,155,115,0.15)] transition-colors flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 bg-[rgba(200,132,90,0.1)] border-2 border-[rgba(200,132,90,0.2)] text-board-special font-medium rounded-board hover:bg-[rgba(200,132,90,0.15)] transition-colors flex items-center justify-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
                 Slet alle data
