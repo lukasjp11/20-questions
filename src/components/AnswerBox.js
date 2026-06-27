@@ -74,7 +74,7 @@ const AnswerBox = ({ currentItem, showAnswer, setShowAnswer, acceptedAnswers = [
             </button>
           </form>
           {wrong && (
-            <p className="mt-2 text-sm text-board-special">Ikke helt — prøv igen</p>
+            <p className="mt-2 text-sm text-board-special">Ikke helt, prøv igen</p>
           )}
           <p className="mt-2 text-xs text-board-text-dimmer">
             Tryk på svar-feltet for at give op og afsløre svaret.
