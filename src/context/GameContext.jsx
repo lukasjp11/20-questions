@@ -1,16 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { loadFromLocalStorage, saveToLocalStorage, normalizeItem } from '../utils/gameLogic';
 import { defaultCategories } from '../utils/prompts';
-
-const GameContext = createContext();
-
-export const useGame = () => {
-  const context = useContext(GameContext);
-  if (!context) {
-    throw new Error('useGame must be used within a GameProvider');
-  }
-  return context;
-};
+import { GameContext } from './useGame';
 
 const defaultSpecialCluesConfig = [
   { text: "Ryk 3 felter frem", weight: 3 },
@@ -104,7 +95,7 @@ export const GameProvider = ({ children }) => {
 
   const resetAllData = useCallback(() => {
     localStorage.clear();
-    window.location.href = (process.env.PUBLIC_URL || '') + '/';
+    window.location.href = import.meta.env.BASE_URL;
   }, []);
   
   const saveGameState = useCallback((gameState) => {

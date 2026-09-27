@@ -1,7 +1,7 @@
-import React, { memo, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { CheckCircle, Circle } from 'lucide-react';
 import { isSpecialClue } from '../utils/gameLogic';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/useGame';
 
 const ClueButton = memo(({ clue, index, isRevealed, onClick, specialCluesConfig }) => {
   const isSpecial = isSpecialClue(clue, specialCluesConfig);

@@ -1,15 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { isCorrectGuess } from '../utils/gameLogic';
 
 const AnswerBox = ({ currentItem, showAnswer, setShowAnswer, acceptedAnswers = [] }) => {
   const [guess, setGuess] = useState('');
   const [wrong, setWrong] = useState(false);
-
-  useEffect(() => {
-    setGuess('');
-    setWrong(false);
-  }, [currentItem]);
 
   if (!currentItem) return null;
 

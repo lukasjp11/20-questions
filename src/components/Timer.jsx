@@ -1,31 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Clock, AlertCircle } from 'lucide-react';
 
-const Timer = ({ timePerClue, onTimeUp, isPaused, resetTrigger }) => {
+const Timer = ({ timePerClue, onTimeUp, isPaused }) => {
   const [timeLeft, setTimeLeft] = useState(timePerClue);
-  const [isTimeUp, setIsTimeUp] = useState(false);
+  const isTimeUp = timeLeft === 0;
+  const onTimeUpRef = useRef(onTimeUp);
 
   useEffect(() => {
-    setTimeLeft(timePerClue);
-    setIsTimeUp(false);
-  }, [resetTrigger, timePerClue]);
+    onTimeUpRef.current = onTimeUp;
+  }, [onTimeUp]);
 
   useEffect(() => {
     if (isPaused || isTimeUp) return;
-
     const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          setIsTimeUp(true);
-          onTimeUp();
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTimeLeft(prev => Math.max(0, prev - 1));
     }, 1000);
-
     return () => clearInterval(interval);
-  }, [timePerClue, onTimeUp, isPaused, isTimeUp]);
+  }, [isPaused, isTimeUp]);
+
+  useEffect(() => {
+    if (isTimeUp) onTimeUpRef.current?.();
+  }, [isTimeUp]);
 
   const percentage = (timeLeft / timePerClue) * 100;
   const isLow = timeLeft <= 5 && timeLeft > 0;

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router';
 import { AlertTriangle, Settings } from 'lucide-react';
 import { shuffleArray, selectSpecialClues, isItemUsed, buildAcceptedAnswers } from '../utils/gameLogic';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/useGame';
 import CategorySelector from './CategorySelector';
 import AnswerBox from './AnswerBox';
 import ActionButtons from './ActionButtons';
@@ -203,6 +203,7 @@ const Game = () => {
             />
 
             <AnswerBox
+              key={currentItem}
               currentItem={currentItem}
               showAnswer={showAnswer}
               setShowAnswer={setShowAnswer}
@@ -211,10 +212,10 @@ const Game = () => {
 
             {enableTimer && currentItem && revealedClues.length > 0 && (
               <Timer
+                key={`${timerResetTrigger}-${timePerClue}`}
                 timePerClue={timePerClue}
                 onTimeUp={handleTimeUp}
                 isPaused={timerPaused}
-                resetTrigger={timerResetTrigger}
               />
             )}
 

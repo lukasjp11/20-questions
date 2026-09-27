@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import {
   ArrowLeft,
   Save,
@@ -20,7 +20,7 @@ import {
   Minus,
   Users
 } from 'lucide-react';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/useGame';
 import { getDifficultyLabel } from '../utils/prompts';
 
 const SettingsPage = () => {

@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const generateCluesWithProgress = async (requestBody, callbacks = {}, signal) => {
   const {
@@ -8,14 +8,9 @@ export const generateCluesWithProgress = async (requestBody, callbacks = {}, sig
   } = callbacks;
 
   try {
-    const headers = { 'Content-Type': 'application/json' };
-    if (process.env.REACT_APP_API_KEY) {
-      headers['x-api-key'] = process.env.REACT_APP_API_KEY;
-    }
-
     const response = await fetch(`${API_URL}/api/generate-stream`, {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),
       signal
     });
