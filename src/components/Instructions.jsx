@@ -1,4 +1,3 @@
-import React from 'react';
 import { Shuffle } from 'lucide-react';
 
 const Instructions = ({ onStartRandom }) => {

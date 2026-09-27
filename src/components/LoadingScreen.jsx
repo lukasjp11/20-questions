@@ -1,4 +1,3 @@
-import React from 'react';
 import { Sparkles } from 'lucide-react';
 
 const LoadingScreen = ({ category }) => {
@@ -16,7 +15,7 @@ const LoadingScreen = ({ category }) => {
           Genererer nyt spørgsmål
         </h2>
         <p className="text-board-text-muted">
-          Finder det perfekte emne i kategorien "{category}"
+          Finder det perfekte emne i kategorien »{category}«
         </p>
 
         <div className="flex justify-center gap-2 mt-8">
