@@ -108,6 +108,17 @@ describe('useCardGenerator', () => {
     expect(dispatch.mock.calls.at(-1)[0].item).toBe('Petra');
   });
 
+  it('stops prefetching when the server says it cannot afford it', async () => {
+    generateCluesWithProgress.mockImplementationOnce(async (_body, { onItemFound }) => {
+      onItemFound('Walkman');
+      return { item: 'Walkman', clues: ['a', 'b', 'c', 'd'], accept: ['Walkman'], prefetch: false };
+    });
+    const { result } = renderHook(() => useCardGenerator(vi.fn(), settings, [], vi.fn()));
+    await act(() => result.current.generate('ting'));
+    act(() => result.current.prefetch('sted'));
+    expect(generateCluesWithProgress).toHaveBeenCalledTimes(1);
+  });
+
   it('reports server errors', async () => {
     generateCluesWithProgress.mockRejectedValueOnce(new Error('Too many requests'));
     const dispatch = vi.fn();
