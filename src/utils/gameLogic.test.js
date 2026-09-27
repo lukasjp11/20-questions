@@ -8,6 +8,7 @@ import {
   normalizeGuess,
   buildAcceptedAnswers,
   isCorrectGuess,
+  isCloseGuess,
 } from './gameLogic';
 
 describe('normalizeItem', () => {
@@ -134,6 +135,13 @@ describe('isCorrectGuess', () => {
     expect(isCorrectGuess('Elefanten', accepted)).toBe(true);
   });
 
+  it('accepts Danish definite and plural endings', () => {
+    expect(isCorrectGuess('kassettebåndet', buildAcceptedAnswers('Kassettebånd'))).toBe(true);
+    expect(isCorrectGuess('elefanterne', buildAcceptedAnswers('Elefant'))).toBe(true);
+    expect(isCorrectGuess('elefantx', buildAcceptedAnswers('Elefant'))).toBe(false);
+    expect(isCorrectGuess('isen', buildAcceptedAnswers('Is'))).toBe(false);
+  });
+
   it('rejects typos and wrong answers (no fuzzy matching)', () => {
     expect(isCorrectGuess('elefnat', accepted)).toBe(false);
     expect(isCorrectGuess('næsehorn', accepted)).toBe(false);
@@ -144,5 +152,25 @@ describe('isCorrectGuess', () => {
     const names = buildAcceptedAnswers('H.C. Andersen', ['Hans Christian Andersen']);
     expect(isCorrectGuess('hc andersen', names)).toBe(true);
     expect(isCorrectGuess('Hans Christian Andersen', names)).toBe(true);
+  });
+});
+
+describe('isCloseGuess', () => {
+  it('flags small typos without accepting them', () => {
+    const accepted = buildAcceptedAnswers('Diskette');
+    expect(isCloseGuess('disketet', accepted)).toBe(true);
+    expect(isCloseGuess('diskete', accepted)).toBe(true);
+    expect(isCloseGuess('diskette', accepted)).toBe(false);
+  });
+
+  it('flags a guess that shares a real word with the answer', () => {
+    expect(isCloseGuess('Ørsted', buildAcceptedAnswers('H.C. Ørsted'))).toBe(true);
+    expect(isCloseGuess('en gammel diskette', buildAcceptedAnswers('Diskette'))).toBe(true);
+  });
+
+  it('does not flag unrelated or very short guesses', () => {
+    expect(isCloseGuess('kassettebånd', buildAcceptedAnswers('Diskette'))).toBe(false);
+    expect(isCloseGuess('is', buildAcceptedAnswers('Is'))).toBe(false);
+    expect(isCloseGuess('ko', buildAcceptedAnswers('Ål'))).toBe(false);
   });
 });

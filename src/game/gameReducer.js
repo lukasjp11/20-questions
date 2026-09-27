@@ -1,7 +1,9 @@
-import { isCorrectGuess, isSpecialClue, normalizeGuess } from '../utils/gameLogic';
+import { isCloseGuess, isCorrectGuess, isSpecialClue, normalizeGuess } from '../utils/gameLogic';
 
 export const initialGame = {
   status: 'idle',
+  mode: 'guess',
+  teamCount: 0,
   category: null,
   item: '',
   acceptedAnswers: [],
@@ -9,6 +11,10 @@ export const initialGame = {
   revealed: [],
   answerVisible: false,
   wrongGuesses: [],
+  lastGuess: null,
+  turn: 0,
+  awaitingReveal: false,
+  solvedBy: null,
   error: '',
 };
 
@@ -16,16 +22,29 @@ const ACTIVE = new Set(['playing', 'solved', 'gaveUp']);
 
 export const isCardActive = (game) => ACTIVE.has(game.status);
 export const isGenerating = (game) => game.status === 'loading' || game.status === 'streaming';
+export const hasTeams = (game) => game.mode === 'guess' && game.teamCount >= 2;
+export const cluesLeft = (game) => game.clues.length - game.revealed.length;
+
+const nextTurn = (state) => ({
+  ...state,
+  turn: (state.turn + 1) % state.teamCount,
+  awaitingReveal: cluesLeft(state) > 0,
+});
 
 export function gameReducer(state, action) {
   switch (action.type) {
-    case 'start':
+    case 'start': {
+      const teamCount = action.mode === 'guess' && action.teamCount >= 2 ? action.teamCount : 0;
       return {
         ...initialGame,
         status: 'loading',
+        mode: action.mode,
+        teamCount,
+        turn: teamCount ? action.firstTurn % teamCount : 0,
         category: action.category,
-        answerVisible: action.answerVisible,
+        answerVisible: action.mode === 'reader',
       };
+    }
 
     case 'itemFound':
       if (state.status !== 'loading') return state;
@@ -39,35 +58,68 @@ export function gameReducer(state, action) {
         item: action.item,
         acceptedAnswers: action.acceptedAnswers,
         clues: action.clues,
+        awaitingReveal: hasTeams(state),
       };
 
     case 'failed':
-      return { ...initialGame, error: action.error };
+      return { ...initialGame, mode: state.mode, error: action.error };
 
     case 'toggleClue': {
-      if (!isCardActive(state)) return state;
+      if (state.mode !== 'reader' || !isCardActive(state)) return state;
       const revealed = state.revealed.includes(action.index)
         ? state.revealed.filter(i => i !== action.index)
         : [...state.revealed, action.index];
       return { ...state, revealed };
     }
 
-    case 'guess': {
-      if (state.status !== 'playing') return state;
-      if (isCorrectGuess(action.text, state.acceptedAnswers)) {
-        return { ...state, status: 'solved', answerVisible: true };
-      }
-      const key = normalizeGuess(action.text);
-      if (!key || state.wrongGuesses.some(g => normalizeGuess(g) === key)) return state;
-      return { ...state, wrongGuesses: [...state.wrongGuesses, action.text.trim()] };
+    case 'revealNext': {
+      if (state.mode !== 'guess' || !isCardActive(state) || cluesLeft(state) === 0) return state;
+      if (state.status === 'playing' && hasTeams(state) && !state.awaitingReveal) return state;
+      return {
+        ...state,
+        revealed: [...state.revealed, state.revealed.length],
+        awaitingReveal: false,
+        lastGuess: null,
+      };
     }
+
+    case 'guess': {
+      if (state.status !== 'playing' || state.mode !== 'guess') return state;
+      if (hasTeams(state) && state.awaitingReveal) return state;
+      const text = action.text.trim();
+      if (!normalizeGuess(text)) return state;
+
+      if (isCorrectGuess(text, state.acceptedAnswers)) {
+        return {
+          ...state,
+          status: 'solved',
+          answerVisible: true,
+          lastGuess: null,
+          solvedBy: hasTeams(state) ? state.turn : null,
+        };
+      }
+
+      const lastGuess = { text, close: isCloseGuess(text, state.acceptedAnswers) };
+      const seen = state.wrongGuesses.some(g => normalizeGuess(g) === normalizeGuess(text));
+      const next = { ...state, lastGuess, wrongGuesses: seen ? state.wrongGuesses : [...state.wrongGuesses, text] };
+      return hasTeams(state) ? nextTurn(next) : next;
+    }
+
+    case 'pass':
+      if (state.status !== 'playing' || !hasTeams(state) || state.awaitingReveal) return state;
+      return nextTurn({ ...state, lastGuess: null });
 
     case 'giveUp':
       if (state.status !== 'playing') return state;
-      return { ...state, status: 'gaveUp', answerVisible: true };
+      return { ...state, status: 'gaveUp', answerVisible: true, lastGuess: null };
+
+    case 'readerResult':
+      if (state.status !== 'playing' || state.mode !== 'reader') return state;
+      return { ...state, status: action.solved ? 'solved' : 'gaveUp', answerVisible: true };
 
     case 'setAnswerVisible':
       if (!isCardActive(state) && !isGenerating(state)) return state;
+      if (state.mode === 'guess' && state.status === 'playing' && action.visible) return state;
       return { ...state, answerVisible: action.visible };
 
     default:
@@ -86,6 +138,7 @@ export function restoreGame(saved, specialCluesConfig = []) {
     return {
       ...initialGame,
       status: 'playing',
+      mode: 'reader',
       category: saved.currentCategory ?? null,
       item: saved.currentItem,
       acceptedAnswers: saved.acceptedAnswers?.length ? saved.acceptedAnswers : [saved.currentItem],

@@ -33,10 +33,43 @@ export const buildAcceptedAnswers = (item, accept = [], max = 10) => {
   return result.slice(0, max);
 };
 
+const DANISH_ENDINGS = ['erne', 'ene', 'er', 'en', 'et', 'ne', 'e', 'n', 't'];
+
+const sameAnswer = (guess, answer) => {
+  if (guess === answer) return true;
+  if (answer.length < 4 || !guess.startsWith(answer)) return false;
+  return DANISH_ENDINGS.includes(guess.slice(answer.length));
+};
+
 export const isCorrectGuess = (guess, acceptedAnswers = []) => {
   const normalized = normalizeGuess(guess);
   if (!normalized) return false;
-  return acceptedAnswers.some(answer => normalizeGuess(answer) === normalized);
+  return acceptedAnswers.some(answer => sameAnswer(normalized, normalizeGuess(answer)));
+};
+
+const editDistance = (a, b) => {
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i];
+    for (let j = 1; j <= b.length; j++) {
+      row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = row;
+  }
+  return prev[b.length];
+};
+
+export const isCloseGuess = (guess, acceptedAnswers = []) => {
+  const g = normalizeGuess(guess);
+  if (!g || isCorrectGuess(guess, acceptedAnswers)) return false;
+  const guessWords = g.split(' ');
+  return acceptedAnswers.some(answer => {
+    const a = normalizeGuess(answer);
+    const limit = a.length >= 8 ? 2 : a.length >= 4 ? 1 : 0;
+    if (limit && editDistance(g, a) <= limit) return true;
+    const answerWords = a.split(' ').filter(w => w.length >= 4);
+    return guessWords.some(w => answerWords.includes(w));
+  });
 };
 
 export const isItemUsed = (item, usedItems, category = null) => {

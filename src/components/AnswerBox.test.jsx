@@ -13,15 +13,7 @@ const playing = {
 
 const Harness = () => {
   const [game, dispatch] = useReducer(gameReducer, playing);
-  return (
-    <AnswerBox
-      item={game.item}
-      status={game.status}
-      answerVisible={game.answerVisible}
-      wrongGuesses={game.wrongGuesses}
-      dispatch={dispatch}
-    />
-  );
+  return <AnswerBox game={game} dispatch={dispatch} />;
 };
 
 describe('AnswerBox', () => {
@@ -50,7 +42,12 @@ describe('AnswerBox', () => {
     const input = screen.getByRole('textbox', { name: 'Dit gæt' });
     fireEvent.change(input, { target: { value: 'floppy' } });
     fireEvent.click(screen.getByRole('button', { name: 'Gæt' }));
-    expect(screen.getByText('Ikke helt, prøv igen')).toBeInTheDocument();
+    expect(screen.getByText('»floppy« er forkert.')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Forkerte gæt' })).toHaveTextContent('floppy');
+
+    fireEvent.change(input, { target: { value: 'disket' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Gæt' }));
+    expect(screen.getByText(/Tæt på!/)).toBeInTheDocument();
 
     fireEvent.change(input, { target: { value: 'disketten' } });
     fireEvent.click(screen.getByRole('button', { name: 'Gæt' }));
