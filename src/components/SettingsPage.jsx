@@ -21,6 +21,7 @@ import {
 import { useGame } from '../context/useGame';
 import { getDifficultyLabel } from '../utils/categories';
 import { summarize } from '../game/scoring';
+import { DIFFICULTY_PRESETS, matchPreset, presetValues } from '../game/presets';
 import Toggle from './Toggle';
 
 const MODES = [
@@ -326,6 +327,35 @@ const SettingsPage = () => {
               <Gauge className="w-5 h-5 text-board-text-dim" />
               Sværhedsgrad
             </h2>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4" role="radiogroup" aria-label="Sværhedsniveau">
+              {DIFFICULTY_PRESETS.map(preset => {
+                const active = matchPreset(localSettings)?.id === preset.id;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => {
+                      setLocalSettings(prev => ({ ...prev, ...presetValues(preset) }));
+                      setHasChanges(true);
+                    }}
+                    className={`text-left p-3 rounded-board border-[1.5px] transition-colors ${
+                      active
+                        ? 'bg-board-surface-active border-board-gold'
+                        : 'bg-board-surface border-[rgba(212,168,84,0.1)] hover:border-[rgba(212,168,84,0.25)]'
+                    }`}
+                  >
+                    <span className={`block font-semibold ${active ? 'text-board-text' : 'text-board-text-secondary'}`}>{preset.label}</span>
+                    <span className="block text-xs text-board-text-dim mt-1">{preset.description}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-board-text-dimmer mb-4">
+              {matchPreset(localSettings) ? 'Du kan finjustere nedenfor.' : 'Egne indstillinger. Vælg et niveau ovenfor for at starte forfra.'}
+            </p>
 
             <div className="flex items-center justify-between gap-4 p-3 mb-4 rounded-board bg-board-surface">
               <div>
