@@ -101,6 +101,7 @@ export function useCardGenerator(dispatch, settings, usedItems, addUsedItem) {
   const activeRef = useRef(null);
   const prefetchRef = useRef(null);
   const [prefetchedCategory, setPrefetchedCategory] = useState(null);
+  const [prefetchAllowed, setPrefetchAllowed] = useState(true);
 
   useEffect(() => () => {
     activeRef.current?.abort();
@@ -114,6 +115,7 @@ export function useCardGenerator(dispatch, settings, usedItems, addUsedItem) {
       ...buildCard(result, { mode: settings.mode, regularCount: clueCounts(settings).regularCount, specialTexts }),
     });
     addUsedItem(category, result.item);
+    setPrefetchAllowed(result.prefetch !== false);
   }, [dispatch, settings, addUsedItem]);
 
   const generate = useCallback(async (category, { firstTurn = 0 } = {}) => {
@@ -153,6 +155,7 @@ export function useCardGenerator(dispatch, settings, usedItems, addUsedItem) {
   }, [dispatch, settings, usedItems, deliver]);
 
   const prefetch = useCallback((category, alsoAvoid = []) => {
+    if (!prefetchAllowed) return;
     const key = requestKey(category, settings);
     const current = prefetchRef.current;
     if (current && current.key === key && closeEnough(current.settings, settings)) return;
@@ -176,7 +179,7 @@ export function useCardGenerator(dispatch, settings, usedItems, addUsedItem) {
     );
     prefetchRef.current = entry;
     setPrefetchedCategory(null);
-  }, [settings, usedItems]);
+  }, [settings, usedItems, prefetchAllowed]);
 
   return { generate, prefetch, prefetchedCategory };
 }
