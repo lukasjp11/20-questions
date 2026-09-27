@@ -1,66 +1,52 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { loadFromLocalStorage, saveToLocalStorage, normalizeItem } from '../utils/gameLogic';
+import { addToHistory } from '../game/scoring';
 import { GameContext } from './useGame';
 
-const defaultSpecialCluesConfig = [
-  { text: "Ryk 3 felter frem", weight: 3 },
-  { text: "Du har 2 gæt", weight: 2 },
-  { text: "Byt plads med forreste", weight: 1 }
-];
+const MAX_USED_ITEMS = 200;
+
+const SETTING_DEFAULTS = {
+  mode: 'guess',
+  difficulty: 40,
+  clueDifficulty: 80,
+  customTheme: '',
+  numberOfClues: 10,
+  enableTimer: false,
+  timePerClue: 30,
+  numberOfSpecialClues: 0,
+  specialCluesConfig: [
+    { text: 'Ryk 3 felter frem', weight: 3 },
+    { text: 'Du har 2 gæt', weight: 2 },
+    { text: 'Byt plads med forreste', weight: 1 },
+  ],
+  ageRangeMin: 10,
+  ageRangeMax: 40,
+  autoDifficulty: false,
+  teamsEnabled: false,
+  teamNames: ['Hold 1', 'Hold 2'],
+};
+
+function loadSettings() {
+  const settings = {};
+  for (const [key, fallback] of Object.entries(SETTING_DEFAULTS)) {
+    settings[key] = loadFromLocalStorage(key, fallback);
+  }
+  if (localStorage.getItem('mode') === null && loadFromLocalStorage('hideAnswerOnGeneration', true) === false) {
+    settings.mode = 'reader';
+  }
+  return settings;
+}
 
 export const GameProvider = ({ children }) => {
-  const [difficulty, setDifficulty] = useState(() =>
-    loadFromLocalStorage('difficulty', 40)
-  );
-  const [clueDifficulty, setClueDifficulty] = useState(() =>
-    loadFromLocalStorage('clueDifficulty', 80)
-  );
-  const [customTheme, setCustomTheme] = useState(() =>
-    loadFromLocalStorage('customTheme', '')
-  );
-  const [hideAnswerOnGeneration, setHideAnswerOnGeneration] = useState(() =>
-    loadFromLocalStorage('hideAnswerOnGeneration', true)
-  );
-  const [numberOfClues, setNumberOfClues] = useState(() =>
-    loadFromLocalStorage('numberOfClues', 10)
-  );
-  const [enableTimer, setEnableTimer] = useState(() =>
-    loadFromLocalStorage('enableTimer', false)
-  );
-  const [timePerClue, setTimePerClue] = useState(() =>
-    loadFromLocalStorage('timePerClue', 30)
-  );
-  const [numberOfSpecialClues, setNumberOfSpecialClues] = useState(() =>
-    loadFromLocalStorage('numberOfSpecialClues', 0)
-  );
-  const [specialCluesConfig, setSpecialCluesConfig] = useState(() =>
-    loadFromLocalStorage('specialCluesConfig', defaultSpecialCluesConfig)
-  );
-  const [ageRangeMin, setAgeRangeMin] = useState(() =>
-    loadFromLocalStorage('ageRangeMin', 10)
-  );
-  const [ageRangeMax, setAgeRangeMax] = useState(() =>
-    loadFromLocalStorage('ageRangeMax', 40)
-  );
-  const [usedItems, setUsedItems] = useState(() =>
-    loadFromLocalStorage('usedItems', [])
-  );
+  const [settings, setSettings] = useState(loadSettings);
+  const [usedItems, setUsedItems] = useState(() => loadFromLocalStorage('usedItems', []));
+  const [history, setHistory] = useState(() => loadFromLocalStorage('history', []));
+  const [teamScores, setTeamScores] = useState(() => loadFromLocalStorage('teamScores', []));
+
   const updateSetting = useCallback((key, value) => {
+    if (!Object.hasOwn(SETTING_DEFAULTS, key)) return;
     saveToLocalStorage(key, value);
-    switch(key) {
-      case 'difficulty': setDifficulty(value); break;
-      case 'clueDifficulty': setClueDifficulty(value); break;
-      case 'customTheme': setCustomTheme(value); break;
-      case 'hideAnswerOnGeneration': setHideAnswerOnGeneration(value); break;
-      case 'numberOfClues': setNumberOfClues(value); break;
-      case 'enableTimer': setEnableTimer(value); break;
-      case 'timePerClue': setTimePerClue(value); break;
-      case 'numberOfSpecialClues': setNumberOfSpecialClues(value); break;
-      case 'specialCluesConfig': setSpecialCluesConfig(value); break;
-      case 'ageRangeMin': setAgeRangeMin(value); break;
-      case 'ageRangeMax': setAgeRangeMax(value); break;
-      default: break;
-    }
+    setSettings(prev => (prev[key] === value ? prev : { ...prev, [key]: value }));
   }, []);
 
   const resetUsedItems = useCallback(() => {
@@ -68,47 +54,59 @@ export const GameProvider = ({ children }) => {
     localStorage.removeItem('usedItems');
   }, []);
 
-  const MAX_USED_ITEMS = 200;
-
   const addUsedItem = useCallback((category, item) => {
     setUsedItems(prev => {
       const normalized = normalizeItem(item);
-      if (prev.some(u => u.category === category && normalizeItem(u.item) === normalized)) {
-        return prev;
-      }
-      let updated = [...prev, { category, item }];
-      if (updated.length > MAX_USED_ITEMS) {
-        updated = updated.slice(updated.length - MAX_USED_ITEMS);
-      }
+      if (prev.some(u => u.category === category && normalizeItem(u.item) === normalized)) return prev;
+      const updated = [...prev, { category, item }].slice(-MAX_USED_ITEMS);
       saveToLocalStorage('usedItems', updated);
       return updated;
     });
+  }, []);
+
+  const recordResult = useCallback((result, category, item) => {
+    setHistory(prev => {
+      const updated = addToHistory(prev, result, category, item);
+      saveToLocalStorage('history', updated);
+      return updated;
+    });
+  }, []);
+
+  const addTeamPoints = useCallback((team, points) => {
+    setTeamScores(prev => {
+      const updated = [...prev];
+      while (updated.length <= team) updated.push(0);
+      updated[team] += points;
+      saveToLocalStorage('teamScores', updated);
+      return updated;
+    });
+  }, []);
+
+  const resetTeamScores = useCallback(() => {
+    setTeamScores([]);
+    localStorage.removeItem('teamScores');
   }, []);
 
   const resetAllData = useCallback(() => {
     localStorage.clear();
     window.location.href = import.meta.env.BASE_URL;
   }, []);
-  
 
-  const value = {
-    difficulty,
-    clueDifficulty,
-    customTheme,
-    hideAnswerOnGeneration,
-    numberOfClues,
-    enableTimer,
-    timePerClue,
-    numberOfSpecialClues,
-    specialCluesConfig,
-    ageRangeMin,
-    ageRangeMax,
+  const value = useMemo(() => ({
+    ...settings,
+    settings,
     updateSetting,
     usedItems,
     addUsedItem,
     resetUsedItems,
+    history,
+    recordResult,
+    teamScores,
+    addTeamPoints,
+    resetTeamScores,
     resetAllData,
-  };
+  }), [settings, updateSetting, usedItems, addUsedItem, resetUsedItems, history, recordResult,
+    teamScores, addTeamPoints, resetTeamScores, resetAllData]);
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 };

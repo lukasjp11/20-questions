@@ -15,47 +15,30 @@ import {
   CheckSquare,
   ListChecks,
   Database,
-  Eye,
-  EyeOff,
   Minus,
   Users
 } from 'lucide-react';
 import { useGame } from '../context/useGame';
 import { getDifficultyLabel } from '../utils/categories';
+import { summarize } from '../game/scoring';
+import Toggle from './Toggle';
+
+const MODES = [
+  { value: 'guess', label: 'Gæt selv', description: 'Solo eller på skift. Svaret er skjult, og I gætter i appen.' },
+  { value: 'reader', label: 'Oplæser', description: 'Til brætspillet. Du ser svaret og læser ledetrådene op.' },
+];
+const MAX_TEAMS = 4;
 
 const SettingsPage = () => {
   const navigate = useNavigate();
-  const {
-    difficulty,
-    clueDifficulty,
-    customTheme,
-    hideAnswerOnGeneration,
-    numberOfClues,
-    enableTimer,
-    timePerClue,
-    numberOfSpecialClues,
-    specialCluesConfig,
-    ageRangeMin,
-    ageRangeMax,
-    updateSetting,
-    resetUsedItems,
-    resetAllData,
-    usedItems
-  } = useGame();
+  const { settings, updateSetting, resetUsedItems, resetAllData, usedItems, history, resetTeamScores } = useGame();
 
-  const [localSettings, setLocalSettings] = useState({
-    difficulty,
-    clueDifficulty,
-    customTheme,
-    hideAnswerOnGeneration,
-    numberOfClues,
-    enableTimer,
-    timePerClue,
-    numberOfSpecialClues,
-    specialCluesConfig: [...specialCluesConfig],
-    ageRangeMin,
-    ageRangeMax
-  });
+  const [localSettings, setLocalSettings] = useState(() => ({
+    ...settings,
+    specialCluesConfig: [...settings.specialCluesConfig],
+    teamNames: [...settings.teamNames],
+  }));
+  const stats = summarize(history);
 
   const MIN_CLUES = 1;
   const MAX_CLUES = 30;
@@ -70,7 +53,8 @@ const SettingsPage = () => {
   };
 
   const handleSaveSettings = () => {
-    Object.entries(localSettings).forEach(([key, value]) => {
+    const teamNames = localSettings.teamNames.map((name, i) => name.trim() || `Hold ${i + 1}`);
+    Object.entries({ ...localSettings, teamNames }).forEach(([key, value]) => {
       updateSetting(key, value);
     });
     setHasChanges(false);
@@ -139,8 +123,12 @@ const SettingsPage = () => {
             <p className="text-xs text-board-text-dimmer">Sværhed</p>
           </div>
           <div className="bg-board-surface-alt rounded-board p-3 text-center border border-[rgba(212,168,84,0.06)]">
-            <p className="text-2xl font-bold text-board-gold">{usedItems.length}</p>
-            <p className="text-xs text-board-text-dimmer">Brugte kort</p>
+            <p className="text-2xl font-bold text-board-gold">
+              {stats?.averageClues ? stats.averageClues.toFixed(1).replace('.', ',') : '-'}
+            </p>
+            <p className="text-xs text-board-text-dimmer">
+              Snit ledetråde{stats ? ` (${stats.played} spil)` : ''}
+            </p>
           </div>
           <div className="bg-board-surface-alt rounded-board p-3 text-center border border-[rgba(212,168,84,0.06)]">
             <p className="text-2xl font-bold text-board-gold">
@@ -180,7 +168,7 @@ const SettingsPage = () => {
                       const value = Math.min(MAX_CLUES, Math.max(MIN_CLUES, parsed));
                       handleLocalChange('numberOfClues', value);
                     }}
-                    className="w-16 px-2 py-1 text-center rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] text-board-text"
+                    className="w-16 px-2 py-1 text-center rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] text-board-text outline-none focus:border-board-gold"
                   />
                   <button
                     onClick={() => handleLocalChange('numberOfClues', Math.min(MAX_CLUES, localSettings.numberOfClues + 5))}
@@ -191,22 +179,30 @@ const SettingsPage = () => {
                 </div>
               </div>
 
-              {/* Hide Answer */}
-              <div className="flex items-center justify-between p-3 rounded-board bg-board-surface">
-                <div className="flex items-center gap-3">
-                  {localSettings.hideAnswerOnGeneration ? <EyeOff className="w-4 h-4 text-board-text-dim" /> : <Eye className="w-4 h-4 text-board-text-dim" />}
-                  <span className="font-medium">Skjul svar ved start</span>
+              <div className="p-3 rounded-board bg-board-surface">
+                <p className="font-medium mb-2">Spiltype</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="radiogroup" aria-label="Spiltype">
+                  {MODES.map(m => {
+                    const active = localSettings.mode === m.value;
+                    return (
+                      <button
+                        key={m.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => handleLocalChange('mode', m.value)}
+                        className={`text-left p-3 rounded-board border-[1.5px] transition-colors ${
+                          active
+                            ? 'bg-board-surface-active border-board-gold'
+                            : 'bg-board-surface-alt border-[rgba(212,168,84,0.1)] hover:border-[rgba(212,168,84,0.25)]'
+                        }`}
+                      >
+                        <span className={`block font-semibold ${active ? 'text-board-text' : 'text-board-text-secondary'}`}>{m.label}</span>
+                        <span className="block text-xs text-board-text-dim mt-1">{m.description}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-                <button
-                  onClick={() => handleLocalChange('hideAnswerOnGeneration', !localSettings.hideAnswerOnGeneration)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-[4px] transition-all ${
-                    localSettings.hideAnswerOnGeneration ? 'bg-board-gold' : 'bg-[rgba(212,168,84,0.08)]'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 rounded-[3px] bg-board-bg transform transition-transform ${
-                    localSettings.hideAnswerOnGeneration ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
               </div>
 
               {/* Timer */}
@@ -216,16 +212,11 @@ const SettingsPage = () => {
                     <Clock className="w-4 h-4 text-board-text-dim" />
                     <span className="font-medium">Tidsgrænse</span>
                   </div>
-                  <button
-                  onClick={() => handleLocalChange('enableTimer', !localSettings.enableTimer)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-[4px] transition-all ${
-                    localSettings.enableTimer ? 'bg-board-gold' : 'bg-[rgba(212,168,84,0.08)]'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 rounded-[3px] bg-board-bg transform transition-transform ${
-                    localSettings.enableTimer ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
+                  <Toggle
+                    label="Tidsgrænse"
+                    checked={localSettings.enableTimer}
+                    onChange={v => handleLocalChange('enableTimer', v)}
+                  />
                 </div>
                 {localSettings.enableTimer && (
                   <div className="flex items-center justify-between mt-3 pl-6">
@@ -244,7 +235,7 @@ const SettingsPage = () => {
                           const value = parseInt(e.target.value) || 1;
                           handleLocalChange('timePerClue', value);
                         }}
-                        className="w-12 px-1 py-0.5 text-center rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] text-sm text-board-text"
+                        className="w-12 px-1 py-0.5 text-center rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] text-sm text-board-text outline-none focus:border-board-gold"
                       />
                       <button
                         onClick={() => handleLocalChange('timePerClue', localSettings.timePerClue + 5)}
@@ -259,12 +250,96 @@ const SettingsPage = () => {
             </div>
           </section>
 
+          {localSettings.mode === 'guess' && (
+            <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
+              <div className="flex items-center justify-between gap-4 mb-1">
+                <h2 className="text-xl font-semibold flex items-center gap-2 font-heading text-board-text">
+                  <Users className="w-5 h-5 text-board-text-dim" />
+                  Hold
+                </h2>
+                <Toggle
+                  label="Spil i hold"
+                  checked={localSettings.teamsEnabled}
+                  onChange={v => handleLocalChange('teamsEnabled', v)}
+                />
+              </div>
+              <p className="text-sm text-board-text-dimmer mb-4">
+                Holdene skiftes til at vende en ledetråd og gætte. Det hold, der gætter rigtigt, får point for hver ledetråd, der er tilbage.
+              </p>
+              {localSettings.teamsEnabled && (
+                <div className="space-y-2">
+                  {localSettings.teamNames.map((name, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        name={`team-${i}`}
+                        aria-label={`Navn på hold ${i + 1}`}
+                        value={name}
+                        maxLength={20}
+                        onChange={e => {
+                          const names = [...localSettings.teamNames];
+                          names[i] = e.target.value;
+                          handleLocalChange('teamNames', names);
+                        }}
+                        className="flex-1 min-w-0 px-3 py-2 rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] focus:border-board-gold outline-none text-board-text"
+                      />
+                      <button
+                        type="button"
+                        disabled={localSettings.teamNames.length <= 2}
+                        onClick={() => handleLocalChange('teamNames', localSettings.teamNames.filter((_, j) => j !== i))}
+                        aria-label={`Fjern hold ${i + 1}`}
+                        className="p-2 rounded-board text-board-special hover:bg-[rgba(200,132,90,0.1)] disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {localSettings.teamNames.length < MAX_TEAMS && (
+                      <button
+                        type="button"
+                        onClick={() => handleLocalChange('teamNames', [...localSettings.teamNames, `Hold ${localSettings.teamNames.length + 1}`])}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-board text-sm bg-board-surface-active text-board-text-secondary hover:text-board-gold border border-[rgba(212,168,84,0.1)]"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Tilføj hold
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm('Nulstil holdenes point?')) resetTeamScores();
+                      }}
+                      className="px-3 py-1.5 rounded-board text-sm text-board-text-dim hover:text-board-text-secondary border border-dashed border-[rgba(212,168,84,0.2)]"
+                    >
+                      Nulstil point
+                    </button>
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
           {/* Game Difficulty */}
           <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 font-heading text-board-text">
               <Gauge className="w-5 h-5 text-board-text-dim" />
               Sværhedsgrad
             </h2>
+
+            <div className="flex items-center justify-between gap-4 p-3 mb-4 rounded-board bg-board-surface">
+              <div>
+                <p className="font-medium">Tilpas automatisk</p>
+                <p className="text-xs text-board-text-dimmer mt-0.5">
+                  Gør kortene sværere, når I gætter tidligt, og lettere, når I går i stå.
+                </p>
+              </div>
+              <Toggle
+                label="Tilpas sværhed automatisk"
+                checked={localSettings.autoDifficulty}
+                onChange={v => handleLocalChange('autoDifficulty', v)}
+              />
+            </div>
 
             <div className="grid md:grid-cols-2 gap-4">
 
@@ -399,6 +474,12 @@ const SettingsPage = () => {
                 <span className="hidden sm:inline">Tilføj</span>
               </button>
             </div>
+
+            {localSettings.mode !== 'reader' && (
+              <p className="mb-4 text-sm text-board-text-dimmer">
+                Special-ledetråde er handlinger til brætspillet og bruges kun i Oplæser-tilstand.
+              </p>
+            )}
 
             {/* Number per game selector */}
             <div className="mb-5 p-3 rounded-board bg-board-surface border border-[rgba(212,168,84,0.06)]">
