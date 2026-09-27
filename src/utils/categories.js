@@ -25,4 +25,3 @@ export const categories = {
 };
 
 export { getDifficultyLabel };
-export const defaultCategories = categories;

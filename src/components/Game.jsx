@@ -11,6 +11,7 @@ import Instructions from './Instructions';
 import LoadingScreen from './LoadingScreen';
 import Timer from './Timer';
 import { generateCluesWithProgress } from '../utils/api';
+import { categories } from '../utils/categories';
 
 const Game = () => {
   const {
@@ -21,7 +22,6 @@ const Game = () => {
     numberOfClues,
     enableTimer,
     timePerClue,
-    categories,
     numberOfSpecialClues,
     specialCluesConfig,
     ageRangeMin,
@@ -185,9 +185,10 @@ const Game = () => {
       <div className="min-h-screen bg-board-bg text-board-text p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 flex justify-between items-center">
-            <h1 className="text-2xl md:text-4xl font-bold font-heading text-board-gold">20 Questions</h1>
+            <h1 className="text-2xl md:text-4xl font-bold font-heading text-board-gold">20 Spørgsmål</h1>
             <Link
               to="/settings"
+              aria-label="Indstillinger"
               className="p-2 rounded-board bg-board-surface border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] text-board-text-dim hover:text-board-gold transition-colors"
             >
               <Settings className="w-5 h-5" />

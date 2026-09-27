@@ -1,4 +1,4 @@
-import { categories } from '../utils/prompts';
+import { categories } from '../utils/categories';
 import { getUsedItemsInCategory } from '../utils/gameLogic';
 
 const CategorySelector = ({
@@ -29,14 +29,14 @@ const CategorySelector = ({
                 }
                 ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
               `}
-              aria-label={`Select ${category.name} category`}
+              aria-label={`Ny ${category.name.toLowerCase()}-ledetråd${usedCount ? `, ${usedCount} brugt` : ''}`}
             >
               <Icon className="w-6 h-6 md:w-8 md:h-8 mb-1" />
               <span className="text-sm md:text-base font-medium">
                 {category.name}
               </span>
               {usedCount > 0 && (
-                <span className="absolute top-1 right-1 text-xs bg-board-bg text-board-text-dimmest px-1.5 py-0.5 rounded-full">
+                <span className="absolute top-1 right-1 text-[11px] leading-none font-semibold bg-board-bg text-board-text-muted min-w-[20px] px-1.5 py-1 rounded-full">
                   {usedCount}
                 </span>
               )}

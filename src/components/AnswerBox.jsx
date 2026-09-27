@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { EyeOff } from 'lucide-react';
 import { isCorrectGuess } from '../utils/gameLogic';
+import HoldButton from './HoldButton';
 
 const AnswerBox = ({ currentItem, showAnswer, setShowAnswer, acceptedAnswers = [] }) => {
   const [guess, setGuess] = useState('');
@@ -18,37 +19,48 @@ const AnswerBox = ({ currentItem, showAnswer, setShowAnswer, acceptedAnswers = [
     }
   };
 
+  const barClass =
+    'w-full min-h-[64px] px-4 py-3 rounded-board text-left bg-board-gold shadow-[0_3px_12px_rgba(0,0,0,0.25)] flex items-center justify-between gap-4';
+  const label = (
+    <span className="text-[10px] uppercase tracking-[1.5px] font-bold text-[#2c2520]/50">Svar</span>
+  );
+
   return (
     <div className="mb-6">
-      <button
-        onClick={() => setShowAnswer(!showAnswer)}
-        className="w-full p-4 rounded-board transition-all text-left bg-board-gold shadow-[0_3px_12px_rgba(0,0,0,0.25)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.3)] transform hover:scale-[1.01] active:scale-[0.99]"
-        aria-label={showAnswer ? 'Skjul svar' : 'Vis svar'}
-      >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="text-[10px] uppercase tracking-[1.5px] font-bold text-[#2c2520]/50">Svar:</span>
-            {showAnswer ? (
-              <span className="text-xl md:text-2xl font-bold font-heading text-[#2c2520]">
-                {currentItem}
-              </span>
-            ) : (
-              <span className="text-xl md:text-2xl font-bold text-[#2c2520]/40">
-                • • • • •
-              </span>
-            )}
-          </div>
-          <div className="flex-shrink-0 text-[#2c2520]/35">
-            {showAnswer ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-          </div>
+      {showAnswer ? (
+        <button
+          onClick={() => setShowAnswer(false)}
+          className={`${barClass} transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,0.3)]`}
+          aria-label={`Svar: ${currentItem}. Tryk for at skjule`}
+        >
+          <span className="flex items-center gap-3 flex-wrap min-w-0">
+            {label}
+            <span className="text-xl md:text-2xl font-bold font-heading text-[#2c2520]">
+              {currentItem}
+            </span>
+          </span>
+          <EyeOff className="w-5 h-5 flex-shrink-0 text-[#2c2520]/35" />
+        </button>
+      ) : (
+        <div className={barClass} aria-label="Svaret er skjult">
+          <span className="flex items-center gap-3">
+            {label}
+            <span className="flex gap-1.5" aria-hidden="true">
+              {[0, 1, 2, 3, 4].map(i => (
+                <span key={i} className="w-2 h-2 rounded-full bg-[#2c2520]/30" />
+              ))}
+            </span>
+          </span>
         </div>
-      </button>
+      )}
 
       {!showAnswer && (
         <>
           <form onSubmit={handleSubmit} className="flex gap-2 mt-3">
             <input
               type="text"
+              name="guess"
+              aria-label="Dit gæt"
               value={guess}
               onChange={e => {
                 setGuess(e.target.value);
@@ -63,17 +75,22 @@ const AnswerBox = ({ currentItem, showAnswer, setShowAnswer, acceptedAnswers = [
             <button
               type="submit"
               disabled={!guess.trim()}
-              className="px-5 py-2.5 bg-board-gold hover:bg-board-gold-muted disabled:opacity-40 disabled:cursor-not-allowed text-board-bg font-semibold rounded-board transition-colors"
+              className="px-5 py-2.5 bg-board-gold hover:bg-board-gold-muted disabled:bg-board-surface-active disabled:text-board-text-faint disabled:cursor-not-allowed text-board-bg font-semibold rounded-board transition-colors"
             >
               Gæt
             </button>
           </form>
-          {wrong && (
-            <p className="mt-2 text-sm text-board-special">Ikke helt, prøv igen</p>
-          )}
-          <p className="mt-2 text-xs text-board-text-dimmer">
-            Tryk på svar-feltet for at give op og afsløre svaret.
-          </p>
+          <div className="mt-2 flex items-center justify-between gap-3 min-h-[32px]">
+            <p className="text-sm text-board-special" aria-live="polite">
+              {wrong ? 'Ikke helt, prøv igen' : ''}
+            </p>
+            <HoldButton
+              onConfirm={() => setShowAnswer(true)}
+              className="flex-shrink-0 px-3 py-1.5 rounded-board text-xs text-board-text-dim hover:text-board-text-secondary border border-dashed border-[rgba(212,168,84,0.2)]"
+            >
+              Hold for at give op
+            </HoldButton>
+          </div>
         </>
       )}
     </div>
