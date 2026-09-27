@@ -1,3 +1,5 @@
+import { getTurnstileToken } from './turnstile';
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 function parseEvent(line) {
@@ -12,9 +14,13 @@ function parseEvent(line) {
 }
 
 export const generateCluesWithProgress = async (requestBody, { onItemFound = () => {} } = {}, signal) => {
+  const token = await getTurnstileToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['X-Turnstile-Token'] = token;
+
   const response = await fetch(`${API_URL}/api/generate-stream`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(requestBody),
     signal,
   });
