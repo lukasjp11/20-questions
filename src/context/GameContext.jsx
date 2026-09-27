@@ -45,9 +45,6 @@ export const GameProvider = ({ children }) => {
   const [usedItems, setUsedItems] = useState(() =>
     loadFromLocalStorage('usedItems', [])
   );
-  const [currentGameState, setCurrentGameState] = useState(() =>
-    loadFromLocalStorage('currentGameState', null)
-  );
   const updateSetting = useCallback((key, value) => {
     saveToLocalStorage(key, value);
     switch(key) {
@@ -93,15 +90,6 @@ export const GameProvider = ({ children }) => {
     window.location.href = import.meta.env.BASE_URL;
   }, []);
   
-  const saveGameState = useCallback((gameState) => {
-    setCurrentGameState(gameState);
-    saveToLocalStorage('currentGameState', gameState);
-  }, []);
-  
-  const clearGameState = useCallback(() => {
-    setCurrentGameState(null);
-    localStorage.removeItem('currentGameState');
-  }, []);
 
   const value = {
     difficulty,
@@ -120,9 +108,6 @@ export const GameProvider = ({ children }) => {
     addUsedItem,
     resetUsedItems,
     resetAllData,
-    currentGameState,
-    saveGameState,
-    clearGameState,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

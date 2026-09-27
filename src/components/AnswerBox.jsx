@@ -1,23 +1,24 @@
 import { useState } from 'react';
 import { EyeOff } from 'lucide-react';
-import { isCorrectGuess } from '../utils/gameLogic';
+import { normalizeGuess } from '../utils/gameLogic';
 import HoldButton from './HoldButton';
 
-const AnswerBox = ({ currentItem, showAnswer, setShowAnswer, acceptedAnswers = [] }) => {
+const AnswerBox = ({ item, status, answerVisible, wrongGuesses, dispatch }) => {
   const [guess, setGuess] = useState('');
-  const [wrong, setWrong] = useState(false);
+  const [submitted, setSubmitted] = useState('');
 
-  if (!currentItem) return null;
+  const canGuess = status === 'playing';
+  const wrong =
+    canGuess && submitted !== '' && wrongGuesses.some(g => normalizeGuess(g) === normalizeGuess(submitted));
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!guess.trim()) return;
-    if (isCorrectGuess(guess, acceptedAnswers)) {
-      setShowAnswer(true);
-    } else {
-      setWrong(true);
-    }
+    setSubmitted(guess);
+    dispatch({ type: 'guess', text: guess });
   };
+
+  const setVisible = visible => dispatch({ type: 'setAnswerVisible', visible });
 
   const barClass =
     'w-full min-h-[64px] px-4 py-3 rounded-board text-left bg-board-gold shadow-[0_3px_12px_rgba(0,0,0,0.25)] flex items-center justify-between gap-4';
@@ -27,16 +28,16 @@ const AnswerBox = ({ currentItem, showAnswer, setShowAnswer, acceptedAnswers = [
 
   return (
     <div className="mb-6">
-      {showAnswer ? (
+      {answerVisible ? (
         <button
-          onClick={() => setShowAnswer(false)}
+          onClick={() => setVisible(false)}
           className={`${barClass} transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,0.3)]`}
-          aria-label={`Svar: ${currentItem}. Tryk for at skjule`}
+          aria-label={`Svar: ${item}. Tryk for at skjule`}
         >
           <span className="flex items-center gap-3 flex-wrap min-w-0">
             {label}
             <span className="text-xl md:text-2xl font-bold font-heading text-[#2c2520]">
-              {currentItem}
+              {item}
             </span>
           </span>
           <EyeOff className="w-5 h-5 flex-shrink-0 text-[#2c2520]/35" />
@@ -54,7 +55,7 @@ const AnswerBox = ({ currentItem, showAnswer, setShowAnswer, acceptedAnswers = [
         </div>
       )}
 
-      {!showAnswer && (
+      {!answerVisible && canGuess && (
         <>
           <form onSubmit={handleSubmit} className="flex gap-2 mt-3">
             <input
@@ -64,7 +65,7 @@ const AnswerBox = ({ currentItem, showAnswer, setShowAnswer, acceptedAnswers = [
               value={guess}
               onChange={e => {
                 setGuess(e.target.value);
-                if (wrong) setWrong(false);
+                setSubmitted('');
               }}
               placeholder="Skriv dit gæt…"
               autoComplete="off"
@@ -85,7 +86,7 @@ const AnswerBox = ({ currentItem, showAnswer, setShowAnswer, acceptedAnswers = [
               {wrong ? 'Ikke helt, prøv igen' : ''}
             </p>
             <HoldButton
-              onConfirm={() => setShowAnswer(true)}
+              onConfirm={() => dispatch({ type: 'giveUp' })}
               className="flex-shrink-0 px-3 py-1.5 rounded-board text-xs text-board-text-dim hover:text-board-text-secondary border border-dashed border-[rgba(212,168,84,0.2)]"
             >
               Hold for at give op
