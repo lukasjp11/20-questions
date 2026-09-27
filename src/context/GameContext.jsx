@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { loadFromLocalStorage, saveToLocalStorage, normalizeItem } from '../utils/gameLogic';
-import { defaultCategories } from '../utils/prompts';
 import { GameContext } from './useGame';
 
 const defaultSpecialCluesConfig = [
@@ -31,9 +30,6 @@ export const GameProvider = ({ children }) => {
   const [timePerClue, setTimePerClue] = useState(() =>
     loadFromLocalStorage('timePerClue', 30)
   );
-  const [categories, setCategories] = useState(() =>
-    loadFromLocalStorage('customCategories', defaultCategories)
-  );
   const [numberOfSpecialClues, setNumberOfSpecialClues] = useState(() =>
     loadFromLocalStorage('numberOfSpecialClues', 0)
   );
@@ -62,7 +58,6 @@ export const GameProvider = ({ children }) => {
       case 'numberOfClues': setNumberOfClues(value); break;
       case 'enableTimer': setEnableTimer(value); break;
       case 'timePerClue': setTimePerClue(value); break;
-      case 'customCategories': setCategories(value); break;
       case 'numberOfSpecialClues': setNumberOfSpecialClues(value); break;
       case 'specialCluesConfig': setSpecialCluesConfig(value); break;
       case 'ageRangeMin': setAgeRangeMin(value); break;
@@ -116,7 +111,6 @@ export const GameProvider = ({ children }) => {
     numberOfClues,
     enableTimer,
     timePerClue,
-    categories,
     numberOfSpecialClues,
     specialCluesConfig,
     ageRangeMin,

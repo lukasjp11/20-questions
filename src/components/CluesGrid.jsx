@@ -24,7 +24,7 @@ const ClueButton = memo(({ clue, index, isRevealed, onClick, specialCluesConfig 
         }
         transform hover:scale-[1.02] active:scale-[0.98]
       `}
-      aria-label={`Clue ${index + 1} ${isRevealed ? '(revealed)' : '(hidden)'}`}
+      aria-label={isRevealed ? undefined : `Ledetråd ${index + 1}, skjult`}
     >
       <div className="flex items-center gap-2">
         {isRevealed ? (
@@ -32,7 +32,7 @@ const ClueButton = memo(({ clue, index, isRevealed, onClick, specialCluesConfig 
         ) : (
           <Circle className="w-4 h-4 text-board-text-faint flex-shrink-0" />
         )}
-        <span className={`font-semibold ${isRevealed ? 'text-board-gold' : 'text-board-text-faint'}`}>
+        <span className={`w-8 flex-shrink-0 font-semibold tabular-nums ${isRevealed ? 'text-board-gold' : 'text-board-text-faint'}`}>
           #{index + 1}
         </span>
         {isRevealed && (

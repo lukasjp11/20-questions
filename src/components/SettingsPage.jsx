@@ -21,7 +21,7 @@ import {
   Users
 } from 'lucide-react';
 import { useGame } from '../context/useGame';
-import { getDifficultyLabel } from '../utils/prompts';
+import { getDifficultyLabel } from '../utils/categories';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -108,6 +108,7 @@ const SettingsPage = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(-1)}
+              aria-label="Tilbage"
               className="p-2 rounded-board bg-board-surface border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] transition-all"
             >
               <ArrowLeft className="w-5 h-5 text-board-text-dim" />
