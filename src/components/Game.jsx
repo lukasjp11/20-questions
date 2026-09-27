@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { Link } from 'react-router';
 import { AlertTriangle, Settings } from 'lucide-react';
-import { shuffleArray, selectSpecialClues, isItemUsed, buildAcceptedAnswers } from '../utils/gameLogic';
 import { useGame } from '../context/useGame';
+import { gameReducer, isCardActive, isGenerating, restoreGame } from '../game/gameReducer';
+import { useCardGenerator } from '../game/useCardGenerator';
+import { loadFromLocalStorage, saveToLocalStorage } from '../utils/gameLogic';
+import { categories } from '../utils/categories';
 import CategorySelector from './CategorySelector';
 import AnswerBox from './AnswerBox';
 import ActionButtons from './ActionButtons';
@@ -10,8 +13,8 @@ import CluesGrid from './CluesGrid';
 import Instructions from './Instructions';
 import LoadingScreen from './LoadingScreen';
 import Timer from './Timer';
-import { generateCluesWithProgress } from '../utils/api';
-import { categories } from '../utils/categories';
+
+const STORAGE_KEY = 'currentGameState';
 
 const Game = () => {
   const {
@@ -28,159 +31,48 @@ const Game = () => {
     ageRangeMax,
     usedItems,
     addUsedItem,
-    currentGameState,
-    saveGameState,
-    clearGameState
   } = useGame();
 
-  const [currentCategory, setCurrentCategory] = useState(currentGameState?.currentCategory || null);
-  const [currentItem, setCurrentItem] = useState(currentGameState?.currentItem || '');
-  const [acceptedAnswers, setAcceptedAnswers] = useState(currentGameState?.acceptedAnswers || []);
-  const [clues, setClues] = useState(currentGameState?.clues || []);
-  const [revealedClues, setRevealedClues] = useState(currentGameState?.revealedClues || []);
-  const [loading, setLoading] = useState(false);
-  const [loadingCategory, setLoadingCategory] = useState('');
-  const [error, setError] = useState('');
-  const [showAnswer, setShowAnswer] = useState(currentGameState?.showAnswer ?? !hideAnswerOnGeneration);
-  const [timerPaused, setTimerPaused] = useState(true);
-  const [timerResetTrigger, setTimerResetTrigger] = useState(0);
-  const [generatingClues, setGeneratingClues] = useState(false);
+  const [game, dispatch] = useReducer(gameReducer, null, () =>
+    restoreGame(loadFromLocalStorage(STORAGE_KEY, null), specialCluesConfig)
+  );
 
   useEffect(() => {
-    if (currentItem && !loading && !generatingClues) {
-      saveGameState({
-        currentCategory,
-        currentItem,
-        acceptedAnswers,
-        clues,
-        revealedClues,
-        showAnswer
-      });
-    }
-  }, [currentCategory, currentItem, acceptedAnswers, clues, revealedClues, showAnswer, loading, generatingClues, saveGameState]);
+    if (isCardActive(game)) saveToLocalStorage(STORAGE_KEY, game);
+    else localStorage.removeItem(STORAGE_KEY);
+  }, [game]);
 
-  const MAX_RETRIES = 3;
+  const settings = useMemo(
+    () => ({
+      difficulty,
+      clueDifficulty,
+      customTheme,
+      hideAnswerOnGeneration,
+      numberOfClues,
+      numberOfSpecialClues,
+      specialCluesConfig,
+      ageRangeMin,
+      ageRangeMax,
+    }),
+    [difficulty, clueDifficulty, customTheme, hideAnswerOnGeneration, numberOfClues,
+      numberOfSpecialClues, specialCluesConfig, ageRangeMin, ageRangeMax]
+  );
 
-  const generateCard = async (category) => {
-    setLoading(true);
-    setLoadingCategory(category);
-    setError('');
-    setRevealedClues([]);
-    setShowAnswer(!hideAnswerOnGeneration);
-    setTimerPaused(true);
-    setTimerResetTrigger(prev => prev + 1);
-    setGeneratingClues(false);
-    setClues([]);
-    setCurrentItem('');
-    setAcceptedAnswers([]);
-
-    clearGameState();
-
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      const specialCluesToUse = Math.min(numberOfSpecialClues, Math.max(0, numberOfClues - 1));
-      const regularCluesNeeded = Math.max(1, numberOfClues - specialCluesToUse);
-
-      let isDuplicate = false;
-      const controller = new AbortController();
-
-      try {
-        const requestBody = {
-          category,
-          settings: {
-            difficulty,
-            clueDifficulty,
-            customTheme,
-            numberOfClues: regularCluesNeeded,
-            ageRangeMin,
-            ageRangeMax,
-            usedItems: usedItems.filter(u => u.category === category).slice(-20)
-          }
-        };
-
-        const result = await generateCluesWithProgress(requestBody, {
-          onItemFound: (item) => {
-            if (isItemUsed(item, usedItems, category)) {
-              isDuplicate = true;
-              controller.abort();
-              return;
-            }
-            setCurrentItem(item);
-            setCurrentCategory(category);
-            if (!hideAnswerOnGeneration) {
-              setShowAnswer(true);
-            }
-            setLoading(false);
-            setGeneratingClues(true);
-          },
-          onComplete: (result) => {
-            if (isDuplicate) return;
-            setAcceptedAnswers(buildAcceptedAnswers(result.item, result.accept));
-            const regularClues = result.clues.slice(0, regularCluesNeeded);
-            const selectedSpecialClues = selectSpecialClues(specialCluesConfig, specialCluesToUse);
-            const allClues = [...regularClues, ...selectedSpecialClues];
-            const shuffledClues = shuffleArray(allClues);
-            setClues(shuffledClues);
-            setGeneratingClues(false);
-          }
-        }, controller.signal);
-
-        if (isDuplicate) {
-          console.log(`Duplicate item detected (attempt ${attempt + 1}/${MAX_RETRIES}), retrying...`);
-          continue;
-        }
-
-        addUsedItem(category, result.item);
-        return;
-
-      } catch (err) {
-        if (isDuplicate || err.name === 'AbortError') {
-          console.log(`Duplicate item detected (attempt ${attempt + 1}/${MAX_RETRIES}), retrying...`);
-          continue;
-        }
-        setError(err.message || 'En fejl opstod. Prøv igen.');
-        console.error('Generation error:', err);
-        setLoading(false);
-        setGeneratingClues(false);
-        return;
-      }
-    }
-
-    setError('Kunne ikke finde et nyt svar efter flere forsøg. Prøv igen.');
-    setLoading(false);
-    setGeneratingClues(false);
-  };
-
-  const toggleClue = (index) => {
-    setRevealedClues(prev => {
-      if (prev.includes(index)) {
-        return prev.filter(i => i !== index);
-      } else {
-        if (enableTimer) {
-          setTimerResetTrigger(trigger => trigger + 1);
-          setTimerPaused(false);
-        }
-        return [...prev, index];
-      }
-    });
-  };
-
-  const handleTimeUp = () => {
-    setTimerPaused(true);
-  };
+  const generateCard = useCardGenerator(dispatch, settings, usedItems, addUsedItem);
+  const busy = isGenerating(game);
 
   const pickRandomCategory = () => {
     const keys = Object.keys(categories);
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    generateCard(randomKey);
+    generateCard(keys[Math.floor(Math.random() * keys.length)]);
   };
 
-  const getCategoryName = (key) => {
-    return categories[key]?.name || key;
-  };
+  const toggleClue = useCallback(index => dispatch({ type: 'toggleClue', index }), []);
 
   return (
     <>
-      {loading && <LoadingScreen category={getCategoryName(loadingCategory)} />}
+      {game.status === 'loading' && (
+        <LoadingScreen category={categories[game.category]?.name || game.category} />
+      )}
 
       <div className="min-h-screen bg-board-bg text-board-text p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
@@ -197,66 +89,51 @@ const Game = () => {
 
           <div className="bg-board-surface rounded-board p-4 md:p-6 border border-[rgba(212,168,84,0.06)]">
             <CategorySelector
-              currentCategory={currentCategory}
+              currentCategory={game.category}
               onCategorySelect={generateCard}
-              loading={loading || generatingClues}
+              loading={busy}
               usedItems={usedItems}
             />
 
-            <AnswerBox
-              key={currentItem}
-              currentItem={currentItem}
-              showAnswer={showAnswer}
-              setShowAnswer={setShowAnswer}
-              acceptedAnswers={acceptedAnswers}
-            />
-
-            {enableTimer && currentItem && revealedClues.length > 0 && (
-              <Timer
-                key={`${timerResetTrigger}-${timePerClue}`}
-                timePerClue={timePerClue}
-                onTimeUp={handleTimeUp}
-                isPaused={timerPaused}
+            {game.item && (
+              <AnswerBox
+                key={game.item}
+                item={game.item}
+                status={game.status}
+                answerVisible={game.answerVisible}
+                wrongGuesses={game.wrongGuesses}
+                dispatch={dispatch}
               />
             )}
 
-            {currentItem && (
-              <ActionButtons
-                onRandomCategory={pickRandomCategory}
-                loading={loading || generatingClues}
-              />
+            {enableTimer && game.status === 'playing' && game.revealed.length > 0 && (
+              <Timer key={`${game.revealed.length}-${timePerClue}`} timePerClue={timePerClue} />
             )}
 
-            {error && (
+            {isCardActive(game) && (
+              <ActionButtons onRandomCategory={pickRandomCategory} loading={busy} />
+            )}
+
+            {game.error && (
               <div className="mb-4 p-3 bg-[rgba(200,132,90,0.1)] border border-[rgba(200,132,90,0.2)] rounded-board flex items-center text-board-special text-sm">
                 <AlertTriangle className="mr-2 w-4 h-4 flex-shrink-0" />
-                <span>{error}</span>
+                <span>{game.error}</span>
               </div>
             )}
 
-            {generatingClues && (
+            {game.status === 'streaming' && (
               <div className="text-center mb-4">
-                <p className="text-sm text-board-text-muted animate-pulse">
-                  Genererer ledetråde...
-                </p>
+                <p className="text-sm text-board-text-muted animate-pulse">Genererer ledetråde...</p>
               </div>
             )}
 
-            <CluesGrid
-              clues={clues}
-              revealedClues={revealedClues}
-              onClueClick={toggleClue}
-            />
+            <CluesGrid clues={game.clues} revealedClues={game.revealed} onClueClick={toggleClue} />
 
-            {!currentItem && !loading && (
-              <Instructions onStartRandom={pickRandomCategory} />
-            )}
+            {game.status === 'idle' && <Instructions onStartRandom={pickRandomCategory} />}
           </div>
 
           {customTheme && (
-            <div className="mt-4 text-center text-sm text-board-text-dimmer">
-              Tema: {customTheme}
-            </div>
+            <div className="mt-4 text-center text-sm text-board-text-dimmer">Tema: {customTheme}</div>
           )}
         </div>
       </div>

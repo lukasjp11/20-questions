@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Clock, AlertCircle } from 'lucide-react';
 
-const Timer = ({ timePerClue, onTimeUp, isPaused }) => {
+const Timer = ({ timePerClue, onTimeUp, isPaused = false }) => {
   const [timeLeft, setTimeLeft] = useState(timePerClue);
   const isTimeUp = timeLeft === 0;
   const onTimeUpRef = useRef(onTimeUp);

@@ -1,10 +1,8 @@
 import { memo, useCallback } from 'react';
 import { CheckCircle, Circle } from 'lucide-react';
-import { isSpecialClue } from '../utils/gameLogic';
-import { useGame } from '../context/useGame';
 
-const ClueButton = memo(({ clue, index, isRevealed, onClick, specialCluesConfig }) => {
-  const isSpecial = isSpecialClue(clue, specialCluesConfig);
+const ClueButton = memo(({ clue, index, isRevealed, onClick }) => {
+  const isSpecial = clue.special;
 
   const handleClick = useCallback(() => {
     onClick(index);
@@ -37,7 +35,7 @@ const ClueButton = memo(({ clue, index, isRevealed, onClick, specialCluesConfig 
         </span>
         {isRevealed && (
           <span className={`flex-1 text-sm ${isSpecial ? 'text-board-special' : 'text-board-text-secondary'}`}>
-            {clue}
+            {clue.text}
           </span>
         )}
       </div>
@@ -48,8 +46,6 @@ const ClueButton = memo(({ clue, index, isRevealed, onClick, specialCluesConfig 
 ClueButton.displayName = 'ClueButton';
 
 const CluesGrid = memo(({ clues, revealedClues, onClueClick }) => {
-  const { specialCluesConfig } = useGame();
-
   if (clues.length === 0) return null;
 
   return (
@@ -69,7 +65,6 @@ const CluesGrid = memo(({ clues, revealedClues, onClueClick }) => {
             index={index}
             isRevealed={revealedClues.includes(index)}
             onClick={onClueClick}
-            specialCluesConfig={specialCluesConfig}
           />
         ))}
       </div>

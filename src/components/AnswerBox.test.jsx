@@ -1,15 +1,25 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { useState } from 'react';
+import { useReducer } from 'react';
 import AnswerBox from './AnswerBox';
+import { gameReducer, initialGame } from '../game/gameReducer';
+
+const playing = {
+  ...initialGame,
+  status: 'playing',
+  item: 'Diskette',
+  acceptedAnswers: ['Diskette', 'Disketten'],
+  clues: [{ text: 'a', special: false }],
+};
 
 const Harness = () => {
-  const [showAnswer, setShowAnswer] = useState(false);
+  const [game, dispatch] = useReducer(gameReducer, playing);
   return (
     <AnswerBox
-      currentItem="Diskette"
-      acceptedAnswers={['Diskette', 'Disketten']}
-      showAnswer={showAnswer}
-      setShowAnswer={setShowAnswer}
+      item={game.item}
+      status={game.status}
+      answerVisible={game.answerVisible}
+      wrongGuesses={game.wrongGuesses}
+      dispatch={dispatch}
     />
   );
 };
