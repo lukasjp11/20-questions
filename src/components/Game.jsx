@@ -62,7 +62,8 @@ const Game = () => {
 
   useEffect(() => {
     if (game.status === 'playing') prefetch(nextCategory, [game.item]);
-  }, [game.status, game.item, nextCategory, prefetch]);
+    else if (game.status === 'idle' && !game.error) prefetch(nextCategory);
+  }, [game.status, game.item, game.error, nextCategory, prefetch]);
 
   const finishRound = useCallback((finished) => {
     const result = resultOf(finished);
