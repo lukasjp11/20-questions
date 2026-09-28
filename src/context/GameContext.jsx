@@ -4,11 +4,11 @@ import { addToHistory } from '../game/scoring';
 import { GameContext } from './useGame';
 
 const MAX_USED_ITEMS = 200;
-const SETTINGS_VERSION = 2;
+const SETTINGS_VERSION = 3;
 
 const SETTING_DEFAULTS = {
   mode: 'reader',
-  difficulty: 55,
+  difficulty: 48,
   clueDifficulty: 55,
   customTheme: '',
   numberOfClues: 10,
@@ -32,11 +32,16 @@ function loadSettings() {
   for (const [key, fallback] of Object.entries(SETTING_DEFAULTS)) {
     settings[key] = loadFromLocalStorage(key, fallback);
   }
-  if (loadFromLocalStorage('settingsVersion', 1) < SETTINGS_VERSION) {
+  const version = loadFromLocalStorage('settingsVersion', 1);
+  if (version < 2) {
     settings.mode = 'reader';
     saveToLocalStorage('mode', 'reader');
-    saveToLocalStorage('settingsVersion', SETTINGS_VERSION);
   }
+  if (version < 3 && settings.difficulty === 55 && settings.clueDifficulty === 55 && settings.ageRangeMin === 18 && settings.ageRangeMax === 65) {
+    settings.difficulty = 48;
+    saveToLocalStorage('difficulty', 48);
+  }
+  if (version < SETTINGS_VERSION) saveToLocalStorage('settingsVersion', SETTINGS_VERSION);
   return settings;
 }
 
