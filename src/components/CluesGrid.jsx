@@ -34,7 +34,7 @@ const ClueButton = memo(({ clue, index, isRevealed, onClick }) => {
           #{index + 1}
         </span>
         {isRevealed && (
-          <span className={`flex-1 text-sm ${isSpecial ? 'text-board-special' : 'text-board-text-secondary'}`}>
+          <span className={`flex-1 text-base leading-snug md:text-sm ${isSpecial ? 'text-board-special' : 'text-board-text-secondary'}`}>
             {clue.text}
           </span>
         )}

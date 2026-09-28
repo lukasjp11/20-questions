@@ -1,3 +1,4 @@
+import { StrictMode, useEffect } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useCardGenerator, buildCard } from './useCardGenerator';
 import { generateCluesWithProgress } from '../utils/api';
@@ -45,7 +46,23 @@ describe('buildCard', () => {
 });
 
 describe('useCardGenerator', () => {
-  beforeEach(() => generateCluesWithProgress.mockReset());
+  beforeEach(() => {
+    generateCluesWithProgress.mockReset();
+  });
+
+  it('still prefetches when an effect asks for a card on a StrictMode double mount', async () => {
+    generateCluesWithProgress.mockImplementation(async (body, handlers, signal) => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+      return respondWith('Diskette')(body, handlers, signal);
+    });
+    const { result } = renderHook(() => {
+      const generator = useCardGenerator(vi.fn(), settings, [], vi.fn());
+      const { prefetch } = generator;
+      useEffect(() => prefetch('ting'), [prefetch]);
+      return generator;
+    }, { wrapper: StrictMode });
+    await waitFor(() => expect(result.current.prefetchedCategory).toBe('ting'));
+  });
 
   it('retries when the model returns an already used item', async () => {
     generateCluesWithProgress

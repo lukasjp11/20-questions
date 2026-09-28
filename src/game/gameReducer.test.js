@@ -21,15 +21,16 @@ const ready = (mode, teamCount = 0, firstTurn = 0) =>
 describe('generation', () => {
   it('moves through loading, streaming and playing', () => {
     let s = gameReducer(initialGame, { type: 'start', category: 'ting', mode: 'reader' });
-    expect(s).toMatchObject({ status: 'loading', category: 'ting', answerVisible: true, teamCount: 0 });
+    expect(s).toMatchObject({ status: 'loading', category: 'ting', answerVisible: false, teamCount: 0 });
     s = gameReducer(s, { type: 'itemFound', item: 'Diskette' });
     expect(s).toMatchObject({ status: 'streaming', item: 'Diskette' });
     s = gameReducer(s, { type: 'cardReady', ...card });
     expect(s).toMatchObject({ status: 'playing', clues: card.clues });
   });
 
-  it('hides the answer in guess mode and ignores teams in reader mode', () => {
+  it('hides the answer in both modes and ignores teams in reader mode', () => {
     expect(ready('guess')).toMatchObject({ answerVisible: false });
+    expect(ready('reader')).toMatchObject({ answerVisible: false });
     expect(ready('reader', 3)).toMatchObject({ teamCount: 0 });
   });
 
@@ -44,18 +45,28 @@ describe('generation', () => {
 });
 
 describe('reader mode', () => {
-  it('toggles any clue and records who guessed', () => {
+  it('toggles any clue and the answer, and never ends the round', () => {
     let s = run([{ type: 'toggleClue', index: 2 }, { type: 'toggleClue', index: 0 }], ready('reader'));
     expect(s.revealed).toEqual([2, 0]);
     s = gameReducer(s, { type: 'toggleClue', index: 2 });
     expect(s.revealed).toEqual([0]);
     expect(gameReducer(s, { type: 'guess', text: 'Diskette' })).toBe(s);
-    expect(gameReducer(s, { type: 'readerResult', solved: true }).status).toBe('solved');
-    expect(gameReducer(s, { type: 'readerResult', solved: false }).status).toBe('gaveUp');
+    expect(gameReducer(s, { type: 'readerResult', solved: true })).toBe(s);
+    s = gameReducer(s, { type: 'setAnswerVisible', visible: true });
+    expect(s).toMatchObject({ status: 'playing', answerVisible: true });
+    expect(gameReducer(s, { type: 'setAnswerVisible', visible: false }).answerVisible).toBe(false);
   });
 });
 
 describe('solo guess mode', () => {
+  it('trusts the server verdict for guesses the local matcher does not know', () => {
+    const playing = ready('guess');
+    expect(gameReducer(playing, { type: 'guess', text: 'floppy disk', verdict: 'correct' })).toMatchObject({ status: 'solved' });
+    expect(gameReducer(playing, { type: 'guess', text: 'usb', verdict: 'close' }).lastGuess).toEqual({ text: 'usb', close: true });
+    expect(gameReducer(playing, { type: 'guess', text: 'disket', verdict: 'wrong' }).lastGuess).toEqual({ text: 'disket', close: false });
+    expect(gameReducer(playing, { type: 'guess', text: 'disket' }).lastGuess).toEqual({ text: 'disket', close: true });
+  });
+
   it('reveals clues in order and solves on a correct guess', () => {
     let s = run([{ type: 'revealNext' }, { type: 'revealNext' }], ready('guess'));
     expect(s.revealed).toEqual([0, 1]);

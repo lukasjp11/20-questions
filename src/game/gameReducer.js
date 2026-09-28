@@ -42,7 +42,6 @@ export function gameReducer(state, action) {
         teamCount,
         turn: teamCount ? action.firstTurn % teamCount : 0,
         category: action.category,
-        answerVisible: action.mode === 'reader',
       };
     }
 
@@ -89,7 +88,7 @@ export function gameReducer(state, action) {
       const text = action.text.trim();
       if (!normalizeGuess(text)) return state;
 
-      if (isCorrectGuess(text, state.acceptedAnswers)) {
+      if (action.verdict === 'correct' || isCorrectGuess(text, state.acceptedAnswers)) {
         return {
           ...state,
           status: 'solved',
@@ -99,7 +98,8 @@ export function gameReducer(state, action) {
         };
       }
 
-      const lastGuess = { text, close: isCloseGuess(text, state.acceptedAnswers) };
+      const close = action.verdict ? action.verdict === 'close' : isCloseGuess(text, state.acceptedAnswers);
+      const lastGuess = { text, close };
       const seen = state.wrongGuesses.some(g => normalizeGuess(g) === normalizeGuess(text));
       const next = { ...state, lastGuess, wrongGuesses: seen ? state.wrongGuesses : [...state.wrongGuesses, text] };
       return hasTeams(state) ? nextTurn(next) : next;
@@ -112,10 +112,6 @@ export function gameReducer(state, action) {
     case 'giveUp':
       if (state.status !== 'playing') return state;
       return { ...state, status: 'gaveUp', answerVisible: true, lastGuess: null };
-
-    case 'readerResult':
-      if (state.status !== 'playing' || state.mode !== 'reader') return state;
-      return { ...state, status: action.solved ? 'solved' : 'gaveUp', answerVisible: true };
 
     case 'setAnswerVisible':
       if (!isCardActive(state) && !isGenerating(state)) return state;

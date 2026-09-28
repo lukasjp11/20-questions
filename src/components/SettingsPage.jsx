@@ -25,8 +25,8 @@ import { DIFFICULTY_PRESETS, matchPreset, presetValues } from '../game/presets';
 import Toggle from './Toggle';
 
 const MODES = [
-  { value: 'guess', label: 'Gæt selv', description: 'Solo eller på skift. Svaret er skjult, og I gætter i appen.' },
-  { value: 'reader', label: 'Oplæser', description: 'Til brætspillet. Du ser svaret og læser ledetrådene op.' },
+  { value: 'reader', label: 'Oplæser', description: 'Til brætspillet. Du læser ledetrådene op og kan se svaret, når du trykker på det.' },
+  { value: 'guess', label: 'Gæt selv', description: 'Solo eller på skift. I gætter i appen og får point.' },
 ];
 const MAX_TEAMS = 4;
 
@@ -86,8 +86,8 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-board-bg text-board-text">
-      <div className="max-w-4xl mx-auto p-4 md:p-8">
+    <div className="min-h-dvh bg-board-bg text-board-text">
+      <div className={`max-w-4xl mx-auto px-3 py-4 sm:p-4 md:p-8 ${hasChanges ? 'pb-28 sm:pb-8' : ''}`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -103,10 +103,10 @@ const SettingsPage = () => {
           {hasChanges && (
             <button
               onClick={handleSaveSettings}
-              className="flex items-center gap-2 px-4 py-2 bg-board-gold hover:bg-board-gold-muted text-board-bg rounded-board shadow-sm hover:shadow-md transition-all"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-board-gold hover:bg-board-gold-muted text-board-bg rounded-board shadow-sm hover:shadow-md transition-all"
             >
               <Save className="w-4 h-4" />
-              <span className="hidden sm:inline">Gem ændringer</span>
+              Gem ændringer
             </button>
           )}
         </div>
@@ -142,7 +142,7 @@ const SettingsPage = () => {
         {/* Settings sections */}
         <div className="space-y-6">
           {/* Basic Game Settings */}
-          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
+          <section className="bg-board-surface-alt rounded-board p-4 sm:p-6 border border-[rgba(212,168,84,0.06)]">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 font-heading text-board-text">
               <Sliders className="w-5 h-5 text-board-text-dim" />
               Grundlæggende
@@ -252,7 +252,7 @@ const SettingsPage = () => {
           </section>
 
           {localSettings.mode === 'guess' && (
-            <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
+            <section className="bg-board-surface-alt rounded-board p-4 sm:p-6 border border-[rgba(212,168,84,0.06)]">
               <div className="flex items-center justify-between gap-4 mb-1">
                 <h2 className="text-xl font-semibold flex items-center gap-2 font-heading text-board-text">
                   <Users className="w-5 h-5 text-board-text-dim" />
@@ -322,7 +322,7 @@ const SettingsPage = () => {
           )}
 
           {/* Game Difficulty */}
-          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
+          <section className="bg-board-surface-alt rounded-board p-4 sm:p-6 border border-[rgba(212,168,84,0.06)]">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 font-heading text-board-text">
               <Gauge className="w-5 h-5 text-board-text-dim" />
               Sværhedsgrad
@@ -357,19 +357,21 @@ const SettingsPage = () => {
               {matchPreset(localSettings) ? 'Du kan finjustere nedenfor.' : 'Egne indstillinger. Vælg et niveau ovenfor for at starte forfra.'}
             </p>
 
-            <div className="flex items-center justify-between gap-4 p-3 mb-4 rounded-board bg-board-surface">
-              <div>
-                <p className="font-medium">Tilpas automatisk</p>
-                <p className="text-xs text-board-text-dimmer mt-0.5">
-                  Gør kortene sværere, når I gætter tidligt, og lettere, når I går i stå.
-                </p>
+            {localSettings.mode === 'guess' && (
+              <div className="flex items-center justify-between gap-4 p-3 mb-4 rounded-board bg-board-surface">
+                <div>
+                  <p className="font-medium">Tilpas automatisk</p>
+                  <p className="text-xs text-board-text-dimmer mt-0.5">
+                    Gør kortene sværere, når I gætter tidligt, og lettere, når I går i stå.
+                  </p>
+                </div>
+                <Toggle
+                  label="Tilpas sværhed automatisk"
+                  checked={localSettings.autoDifficulty}
+                  onChange={v => handleLocalChange('autoDifficulty', v)}
+                />
               </div>
-              <Toggle
-                label="Tilpas sværhed automatisk"
-                checked={localSettings.autoDifficulty}
-                onChange={v => handleLocalChange('autoDifficulty', v)}
-              />
-            </div>
+            )}
 
             <div className="grid md:grid-cols-2 gap-4">
 
@@ -490,7 +492,7 @@ const SettingsPage = () => {
           </section>
 
           {/* Special Clues */}
-          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
+          <section className="bg-board-surface-alt rounded-board p-4 sm:p-6 border border-[rgba(212,168,84,0.06)]">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2 font-heading text-board-text">
                 <Sparkles className="w-5 h-5 text-board-special" />
@@ -544,23 +546,12 @@ const SettingsPage = () => {
               {localSettings.specialCluesConfig.map((clueConfig, index) => (
                 <div
                   key={index}
-                  className="group flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-board bg-board-surface hover:bg-board-surface-active transition-colors"
+                  className="flex items-center gap-2 p-3 rounded-board bg-board-surface hover:bg-board-surface-active transition-colors"
                 >
-                  <div className="flex-1">
-                    <p className="text-board-text-secondary text-sm font-medium">{clueConfig.text}</p>
-                    <span className={`inline-block mt-1 px-2 py-0.5 rounded-board text-xs font-medium ${
-                      clueConfig.weight === 1 ? 'bg-board-surface-active text-board-text-dim' :
-                      clueConfig.weight === 2 ? 'bg-[rgba(212,168,84,0.1)] text-board-gold' :
-                      clueConfig.weight === 3 ? 'bg-[rgba(200,132,90,0.12)] text-board-special' :
-                      'bg-[rgba(200,132,90,0.16)] text-board-special'
-                    }`}>
-                      {clueConfig.weight === 1 ? 'Sjælden' :
-                      clueConfig.weight === 2 ? 'Normal' :
-                      clueConfig.weight === 3 ? 'Hyppig' : 'Meget hyppig'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 self-end sm:self-center">
+                  <p className="flex-1 min-w-0 text-board-text-secondary text-sm font-medium">{clueConfig.text}</p>
+                  <div className="flex items-center gap-1 flex-shrink-0">
                     <select
+                      aria-label={`Hyppighed for ${clueConfig.text}`}
                       value={clueConfig.weight}
                       onChange={(e) => handleWeightChange(index, parseInt(e.target.value))}
                       className="px-2 py-1 rounded-board bg-board-bg border border-[rgba(212,168,84,0.08)] hover:border-board-gold text-sm cursor-pointer transition-colors text-board-text"
@@ -572,7 +563,8 @@ const SettingsPage = () => {
                     </select>
                     <button
                       onClick={() => handleRemoveSpecialClue(index)}
-                      className="p-1.5 rounded-board hover:bg-[rgba(200,132,90,0.1)] text-board-special transition-colors"
+                      aria-label={`Fjern ${clueConfig.text}`}
+                      className="p-2 rounded-board hover:bg-[rgba(200,132,90,0.1)] text-board-special transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -647,7 +639,7 @@ const SettingsPage = () => {
           </section>
 
           {/* Experimental Features */}
-          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
+          <section className="bg-board-surface-alt rounded-board p-4 sm:p-6 border border-[rgba(212,168,84,0.06)]">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 font-heading text-board-text">
               <FlaskConical className="w-5 h-5 text-board-text-dim" />
               Eksperimentelle funktioner
@@ -676,7 +668,7 @@ const SettingsPage = () => {
           </section>
 
           {/* Data Management */}
-          <section className="bg-board-surface-alt rounded-board p-6 border border-[rgba(212,168,84,0.06)]">
+          <section className="bg-board-surface-alt rounded-board p-4 sm:p-6 border border-[rgba(212,168,84,0.06)]">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 font-heading text-board-text">
               <Database className="w-5 h-5 text-board-text-dim" />
               Data
@@ -722,6 +714,18 @@ const SettingsPage = () => {
           </section>
         </div>
       </div>
+
+      {hasChanges && (
+        <div className="sm:hidden fixed inset-x-0 bottom-0 z-40 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] bg-board-bg/95 border-t border-[rgba(212,168,84,0.12)]">
+          <button
+            onClick={handleSaveSettings}
+            className="w-full flex items-center justify-center gap-2 py-3 bg-board-gold text-board-bg font-semibold rounded-board"
+          >
+            <Save className="w-4 h-4" />
+            Gem ændringer
+          </button>
+        </div>
+      )}
     </div>
   );
 };

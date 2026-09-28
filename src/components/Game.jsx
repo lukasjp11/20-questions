@@ -56,9 +56,9 @@ const Game = () => {
 
   const startCard = useCallback((category) => {
     setAdjusted(null);
-    setNextCategory(randomCategory());
+    if (category === nextCategory) setNextCategory(randomCategory());
     generate(category, { firstTurn: history.length });
-  }, [generate, history.length]);
+  }, [generate, history.length, nextCategory]);
 
   useEffect(() => {
     if (game.status === 'playing') prefetch(nextCategory, [game.item]);
@@ -89,6 +89,7 @@ const Game = () => {
   const toggleClue = useCallback(index => act({ type: 'toggleClue', index }), [act]);
   const busy = isGenerating(game);
   const roundOver = game.status === 'solved' || game.status === 'gaveUp';
+  const reader = game.mode === 'reader';
   const result = roundOver ? resultOf(game) : null;
   const teams = hasTeams(game);
   const readyName = prefetchedCategory && prefetchedCategory === nextCategory
@@ -101,9 +102,9 @@ const Game = () => {
         <LoadingScreen category={categories[game.category]?.name || game.category} />
       )}
 
-      <div className="min-h-screen bg-board-bg text-board-text p-4 md:p-8">
+      <div className="min-h-dvh bg-board-bg text-board-text px-3 py-4 sm:p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-6 flex justify-between items-center">
+          <div className="mb-4 md:mb-6 flex justify-between items-center px-1 sm:px-0">
             <h1 className="text-2xl md:text-4xl font-bold font-heading text-board-gold">20 Spørgsmål</h1>
             <Link
               to="/settings"
@@ -114,7 +115,7 @@ const Game = () => {
             </Link>
           </div>
 
-          <div className="bg-board-surface rounded-board p-4 md:p-6 border border-[rgba(212,168,84,0.06)]">
+          <div className="bg-board-surface rounded-board p-3 sm:p-4 md:p-6 border border-[rgba(212,168,84,0.06)]">
             {teamCount > 0 && (
               <Scoreboard
                 teamNames={settings.teamNames}
@@ -144,7 +145,13 @@ const Game = () => {
             )}
 
             {isCardActive(game) && (
-              <ActionButtons onNext={nextCard} loading={busy} primary={roundOver} readyCategoryName={readyName} />
+              <ActionButtons
+                onNext={nextCard}
+                loading={busy}
+                primary={roundOver || reader}
+                label={roundOver || reader ? 'Næste kort' : 'Tilfældig kategori'}
+                readyCategoryName={readyName}
+              />
             )}
 
             {game.error && (
@@ -160,13 +167,13 @@ const Game = () => {
               </div>
             )}
 
-            {game.mode === 'reader' ? (
+            {reader ? (
               <CluesGrid clues={game.clues} revealedClues={game.revealed} onClueClick={toggleClue} />
             ) : (
               <ClueList game={game} dispatch={act} teamNames={settings.teamNames} />
             )}
 
-            {game.status === 'idle' && <Instructions onStartRandom={nextCard} />}
+            {game.status === 'idle' && <Instructions onStartRandom={nextCard} ready={Boolean(readyName)} />}
           </div>
 
           {settings.customTheme && (
