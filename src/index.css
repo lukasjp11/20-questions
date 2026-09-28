@@ -16,21 +16,29 @@ code {
     monospace;
 }
 
-/* iOS 26+ draws a Liquid Glass blur about 40pt below the status bar of an installed app,
-   so content starts below it and a solid strip covers the status bar itself. */
+/* iOS 26+ blurs whatever scrolls under the status bar. In Safari a solid fixed box over 10px tall at the
+   top edge turns that into a solid bar. The installed app blurs about 40pt further down, so there the box
+   also covers that band and the content starts below it. */
 :root {
   --top-clear: 0px;
+  --shield-min: 0px;
 }
 
-@media (display-mode: standalone) {
+@supports (-webkit-touch-callout: none) {
   :root {
-    --top-clear: 2.5rem;
+    --shield-min: 12px;
   }
-}
 
-@media (display-mode: standalone) and (orientation: landscape) and (max-height: 500px) {
-  :root {
-    --top-clear: 0px;
+  @media (display-mode: standalone) {
+    :root {
+      --top-clear: 2.5rem;
+    }
+  }
+
+  @media (display-mode: standalone) and (orientation: landscape) and (max-height: 500px) {
+    :root {
+      --top-clear: 0px;
+    }
   }
 }
 
@@ -44,7 +52,7 @@ body {
 .status-bar-shield {
   position: fixed;
   inset: 0 0 auto 0;
-  height: env(safe-area-inset-top);
+  height: max(calc(env(safe-area-inset-top) + var(--top-clear)), var(--shield-min));
   background-color: #2c2520;
   z-index: 60;
 }
