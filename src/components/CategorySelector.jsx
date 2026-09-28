@@ -8,8 +8,8 @@ const CategorySelector = ({
   usedItems
 }) => {
   return (
-    <div className="mb-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+    <div className="mb-4 md:mb-6">
+      <div className="grid grid-cols-4 gap-2 md:gap-3">
         {Object.entries(categories).map(([key, category]) => {
           const Icon = category.icon;
           const usedCount = getUsedItemsInCategory(usedItems, key);
@@ -21,7 +21,7 @@ const CategorySelector = ({
               onClick={() => onCategorySelect(key)}
               disabled={loading}
               className={`
-                relative p-3 md:p-4 rounded-board flex flex-col items-center
+                relative px-1 py-2.5 sm:p-3 md:p-4 rounded-board flex flex-col items-center
                 transition-all transform hover:scale-105
                 ${isActive
                   ? 'bg-board-surface-active border-[1.5px] border-board-gold text-board-text shadow-md'
@@ -32,7 +32,7 @@ const CategorySelector = ({
               aria-label={`Ny ${category.name.toLowerCase()}-ledetråd${usedCount ? `, ${usedCount} brugt` : ''}`}
             >
               <Icon className="w-6 h-6 md:w-8 md:h-8 mb-1" />
-              <span className="text-sm md:text-base font-medium">
+              <span className="text-xs sm:text-sm md:text-base font-medium">
                 {category.name}
               </span>
               {usedCount > 0 && (

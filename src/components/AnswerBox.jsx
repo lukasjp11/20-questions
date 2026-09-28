@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { EyeOff, Eye } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { EyeOff, Eye, LoaderCircle } from 'lucide-react';
 import { hasTeams } from '../game/gameReducer';
+import { checkGuess } from '../utils/api';
+import { isCorrectGuess, normalizeGuess } from '../utils/gameLogic';
 import HoldButton from './HoldButton';
 
 const barClass =
@@ -65,13 +67,36 @@ const AnswerBar = ({ game, dispatch }) => {
 
 const GuessForm = ({ game, dispatch, teamNames }) => {
   const [guess, setGuess] = useState('');
+  const [checking, setChecking] = useState(false);
+  const verdicts = useRef(new Map());
+  const mounted = useRef(true);
   const teams = hasTeams(game);
   const mustReveal = teams && game.awaitingReveal;
+  const earlierGuesses = game.wrongGuesses.filter(g => g !== game.lastGuess?.text);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!guess.trim()) return;
-    dispatch({ type: 'guess', text: guess });
+    const text = guess.trim();
+    if (!text || checking) return;
+    if (isCorrectGuess(text, game.acceptedAnswers)) {
+      dispatch({ type: 'guess', text });
+      setGuess('');
+      return;
+    }
+    const key = normalizeGuess(text);
+    if (!verdicts.current.has(key)) {
+      setChecking(true);
+      const verdict = await checkGuess({ category: game.category, item: game.item, accept: game.acceptedAnswers, guess: text });
+      if (!mounted.current) return;
+      setChecking(false);
+      if (verdict) verdicts.current.set(key, verdict);
+    }
+    dispatch({ type: 'guess', text, verdict: verdicts.current.get(key) });
     setGuess('');
   };
 
@@ -84,19 +109,25 @@ const GuessForm = ({ game, dispatch, teamNames }) => {
           aria-label="Dit gæt"
           value={guess}
           disabled={mustReveal}
+          readOnly={checking}
           onChange={e => setGuess(e.target.value)}
           placeholder={mustReveal ? 'Vend en ledetråd først' : teams ? `${teamNames[game.turn]} gætter…` : 'Skriv dit gæt…'}
           autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="sentences"
+          spellCheck={false}
+          enterKeyHint="send"
           className={`flex-1 min-w-0 px-3 py-2.5 rounded-board bg-board-bg border outline-none transition-colors text-board-text placeholder-board-text-faint disabled:opacity-60 ${
             game.lastGuess && !game.lastGuess.close ? 'border-board-special' : 'border-[rgba(212,168,84,0.1)] focus:border-board-gold'
           }`}
         />
         <button
           type="submit"
-          disabled={!guess.trim() || mustReveal}
-          className="px-5 py-2.5 bg-board-gold hover:bg-board-gold-muted disabled:bg-board-surface-active disabled:text-board-text-faint disabled:cursor-not-allowed text-board-bg font-semibold rounded-board transition-colors"
+          disabled={!guess.trim() || mustReveal || checking}
+          aria-label={checking ? 'Tjekker gæt' : 'Gæt'}
+          className="min-w-[72px] px-5 py-2.5 bg-board-gold hover:bg-board-gold-muted disabled:bg-board-surface-active disabled:text-board-text-faint disabled:cursor-not-allowed text-board-bg font-semibold rounded-board transition-colors flex items-center justify-center"
         >
-          Gæt
+          {checking ? <LoaderCircle className="w-5 h-5 animate-spin" /> : 'Gæt'}
         </button>
         {teams && (
           <button
@@ -118,9 +149,9 @@ const GuessForm = ({ game, dispatch, teamNames }) => {
               {teams && ` Nu er det ${teamNames[game.turn]}.`}
             </p>
           )}
-          {game.wrongGuesses.length > 0 && (
+          {earlierGuesses.length > 0 && (
             <ul className="flex flex-wrap gap-1.5 mt-2" aria-label="Forkerte gæt">
-              {game.wrongGuesses.map(g => (
+              {earlierGuesses.map(g => (
                 <li key={g} className="px-2 py-0.5 rounded-full text-xs bg-board-surface-active text-board-text-dim line-through">
                   {g}
                 </li>
@@ -139,30 +170,12 @@ const GuessForm = ({ game, dispatch, teamNames }) => {
   );
 };
 
-const ReaderControls = ({ dispatch }) => (
-  <div className="grid grid-cols-2 gap-2 mt-3">
-    <button
-      onClick={() => dispatch({ type: 'readerResult', solved: true })}
-      className="py-2.5 rounded-board font-semibold bg-board-gold text-board-bg hover:bg-board-gold-muted transition-colors"
-    >
-      Gættet!
-    </button>
-    <button
-      onClick={() => dispatch({ type: 'readerResult', solved: false })}
-      className="py-2.5 rounded-board font-medium bg-board-surface-active text-board-text-secondary border border-[rgba(212,168,84,0.15)] hover:text-board-gold transition-colors"
-    >
-      Ingen gættede den
-    </button>
-  </div>
-);
-
 const AnswerBox = ({ game, dispatch, teamNames = [] }) => {
   const playing = game.status === 'playing';
   return (
     <div className="mb-6">
       <AnswerBar game={game} dispatch={dispatch} />
       {playing && game.mode === 'guess' && <GuessForm game={game} dispatch={dispatch} teamNames={teamNames} />}
-      {playing && game.mode === 'reader' && <ReaderControls dispatch={dispatch} />}
     </div>
   );
 };

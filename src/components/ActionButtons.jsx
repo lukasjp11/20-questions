@@ -1,6 +1,6 @@
 import { Shuffle } from 'lucide-react';
 
-const ActionButtons = ({ onNext, loading, primary, readyCategoryName }) => (
+const ActionButtons = ({ onNext, loading, primary, label, readyCategoryName }) => (
   <div className="mb-6">
     <button
       onClick={onNext}
@@ -12,7 +12,7 @@ const ActionButtons = ({ onNext, loading, primary, readyCategoryName }) => (
       }`}
     >
       <Shuffle className="w-4 h-4" />
-      {primary ? 'Næste kort' : 'Tilfældig kategori'}
+      {label}
       {readyCategoryName && (
         <span className={`text-xs font-medium ${primary ? 'text-board-bg/60' : 'text-board-text-dim'}`}>
           · {readyCategoryName} er klar

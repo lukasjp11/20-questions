@@ -26,7 +26,7 @@ const ClueList = ({ game, dispatch, teamNames = [] }) => {
             className="flex gap-3 p-3 rounded-board bg-board-surface-active border border-[rgba(212,168,84,0.15)]"
           >
             <span className="w-6 flex-shrink-0 font-semibold tabular-nums text-board-gold">{i + 1}</span>
-            <span className="text-sm text-board-text-secondary">{game.clues[index].text}</span>
+            <span className="text-base leading-snug md:text-sm text-board-text-secondary">{game.clues[index].text}</span>
           </li>
         ))}
       </ol>

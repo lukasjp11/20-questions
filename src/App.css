@@ -1,5 +1,5 @@
 .App {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .slider {
@@ -142,18 +142,28 @@ button:active {
   transform: scale(0.98);
 }
 
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+}
+
+button,
+a,
+input,
+label {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 button,
 a,
 input,
 select,
 textarea {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-@media (max-width: 768px) {
-  html {
-    font-size: 14px;
-  }
 }
 
 @media print {

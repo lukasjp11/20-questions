@@ -9,6 +9,7 @@ function App() {
     <GameProvider>
       <Router basename={import.meta.env.BASE_URL}>
         <div className="App font-body">
+          <div className="status-bar-shield" aria-hidden="true" />
           <Routes>
             <Route path="/" element={<Game />} />
             <Route path="/settings" element={<SettingsPage />} />

@@ -4,9 +4,10 @@ import { addToHistory } from '../game/scoring';
 import { GameContext } from './useGame';
 
 const MAX_USED_ITEMS = 200;
+const SETTINGS_VERSION = 2;
 
 const SETTING_DEFAULTS = {
-  mode: 'guess',
+  mode: 'reader',
   difficulty: 55,
   clueDifficulty: 55,
   customTheme: '',
@@ -31,8 +32,10 @@ function loadSettings() {
   for (const [key, fallback] of Object.entries(SETTING_DEFAULTS)) {
     settings[key] = loadFromLocalStorage(key, fallback);
   }
-  if (localStorage.getItem('mode') === null && loadFromLocalStorage('hideAnswerOnGeneration', true) === false) {
+  if (loadFromLocalStorage('settingsVersion', 1) < SETTINGS_VERSION) {
     settings.mode = 'reader';
+    saveToLocalStorage('mode', 'reader');
+    saveToLocalStorage('settingsVersion', SETTINGS_VERSION);
   }
   return settings;
 }

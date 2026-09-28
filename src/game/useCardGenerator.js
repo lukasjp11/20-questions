@@ -106,6 +106,7 @@ export function useCardGenerator(dispatch, settings, usedItems, addUsedItem) {
   useEffect(() => () => {
     activeRef.current?.abort();
     prefetchRef.current?.controller.abort();
+    prefetchRef.current = null;
   }, []);
 
   const deliver = useCallback((category, result) => {

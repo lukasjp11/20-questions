@@ -60,3 +60,23 @@ export const generateCluesWithProgress = async (requestBody, { onItemFound = () 
 
   return undefined;
 };
+
+export const checkGuess = async ({ category, item, accept, guess }, { timeoutMs = 5000 } = {}) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(`${API_URL}/api/check-guess`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category, item, accept, guess }),
+      signal: controller.signal,
+    });
+    if (!response.ok) return null;
+    const { verdict } = await response.json();
+    return ['correct', 'close', 'wrong'].includes(verdict) ? verdict : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+};
