@@ -7,8 +7,8 @@ const MAX_USED_ITEMS = 200;
 
 const SETTING_DEFAULTS = {
   mode: 'guess',
-  difficulty: 25,
-  clueDifficulty: 55,
+  difficulty: 40,
+  clueDifficulty: 75,
   customTheme: '',
   numberOfClues: 10,
   enableTimer: false,
@@ -19,8 +19,8 @@ const SETTING_DEFAULTS = {
     { text: 'Du har 2 gæt', weight: 2 },
     { text: 'Byt plads med forreste', weight: 1 },
   ],
-  ageRangeMin: 8,
-  ageRangeMax: 70,
+  ageRangeMin: 18,
+  ageRangeMax: 65,
   autoDifficulty: false,
   teamsEnabled: false,
   teamNames: ['Hold 1', 'Hold 2'],
