@@ -7,8 +7,8 @@ const MAX_USED_ITEMS = 200;
 
 const SETTING_DEFAULTS = {
   mode: 'guess',
-  difficulty: 45,
-  clueDifficulty: 75,
+  difficulty: 55,
+  clueDifficulty: 55,
   customTheme: '',
   numberOfClues: 10,
   enableTimer: false,
