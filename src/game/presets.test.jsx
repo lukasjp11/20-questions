@@ -7,14 +7,14 @@ describe('difficulty presets', () => {
     expect(matchPreset({ ...presetValues(family), difficulty: 26 })).toBeNull();
   });
 
-  it('uses the family preset as the default for new players', async () => {
+  it('uses the adult preset as the default for new players', async () => {
     const { render, screen } = await import('@testing-library/react');
     const { MemoryRouter } = await import('react-router');
     const { GameProvider } = await import('../context/GameContext');
     const Instructions = (await import('../components/Instructions')).default;
     localStorage.clear();
     render(<MemoryRouter><GameProvider><Instructions onStartRandom={() => {}} /></GameProvider></MemoryRouter>);
-    expect(screen.getByText('Familie')).toBeInTheDocument();
+    expect(screen.getByText('Voksne')).toBeInTheDocument();
   });
 
   it('orders presets from easiest to hardest', () => {
