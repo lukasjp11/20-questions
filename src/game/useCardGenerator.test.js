@@ -1,5 +1,4 @@
-import { StrictMode, useEffect } from 'react';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useCardGenerator, buildCard } from './useCardGenerator';
 import { generateCluesWithProgress } from '../utils/api';
 
@@ -50,20 +49,6 @@ describe('useCardGenerator', () => {
     generateCluesWithProgress.mockReset();
   });
 
-  it('still prefetches when an effect asks for a card on a StrictMode double mount', async () => {
-    generateCluesWithProgress.mockImplementation(async (body, handlers, signal) => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-      return respondWith('Diskette')(body, handlers, signal);
-    });
-    const { result } = renderHook(() => {
-      const generator = useCardGenerator(vi.fn(), settings, [], vi.fn());
-      const { prefetch } = generator;
-      useEffect(() => prefetch('ting'), [prefetch]);
-      return generator;
-    }, { wrapper: StrictMode });
-    await waitFor(() => expect(result.current.prefetchedCategory).toBe('ting'));
-  });
-
   it('retries when the model returns an already used item', async () => {
     generateCluesWithProgress
       .mockImplementationOnce(respondWith('Diskette'))
@@ -93,47 +78,6 @@ describe('useCardGenerator', () => {
     await act(() => result.current.generate('ting'));
     expect(generateCluesWithProgress.mock.calls[0][0].settings.numberOfClues).toBe(4);
     expect(dispatch.mock.calls[2][0].clues.every(c => !c.special)).toBe(true);
-  });
-
-  it('serves a prefetched card without a new request', async () => {
-    generateCluesWithProgress.mockImplementationOnce(respondWith('Walkman'));
-    const dispatch = vi.fn();
-    const addUsedItem = vi.fn();
-    const { result } = renderHook(() => useCardGenerator(dispatch, settings, [], addUsedItem));
-
-    act(() => result.current.prefetch('ting', ['Diskette']));
-    await waitFor(() => expect(result.current.prefetchedCategory).toBe('ting'));
-    expect(generateCluesWithProgress.mock.calls[0][0].settings.usedItems).toEqual([{ category: 'ting', item: 'Diskette' }]);
-
-    await act(() => result.current.generate('ting'));
-    expect(generateCluesWithProgress).toHaveBeenCalledTimes(1);
-    expect(dispatch.mock.calls.map(([a]) => a.type)).toEqual(['start', 'itemFound', 'cardReady']);
-    expect(addUsedItem).toHaveBeenCalledWith('ting', 'Walkman');
-    expect(result.current.prefetchedCategory).toBeNull();
-  });
-
-  it('ignores a prefetched card for another category', async () => {
-    generateCluesWithProgress
-      .mockImplementationOnce(respondWith('Walkman'))
-      .mockImplementationOnce(respondWith('Petra'));
-    const dispatch = vi.fn();
-    const { result } = renderHook(() => useCardGenerator(dispatch, settings, [], vi.fn()));
-    act(() => result.current.prefetch('ting'));
-    await waitFor(() => expect(result.current.prefetchedCategory).toBe('ting'));
-    await act(() => result.current.generate('sted'));
-    expect(generateCluesWithProgress).toHaveBeenCalledTimes(2);
-    expect(dispatch.mock.calls.at(-1)[0].item).toBe('Petra');
-  });
-
-  it('stops prefetching when the server says it cannot afford it', async () => {
-    generateCluesWithProgress.mockImplementationOnce(async (_body, { onItemFound }) => {
-      onItemFound('Walkman');
-      return { item: 'Walkman', clues: ['a', 'b', 'c', 'd'], accept: ['Walkman'], prefetch: false };
-    });
-    const { result } = renderHook(() => useCardGenerator(vi.fn(), settings, [], vi.fn()));
-    await act(() => result.current.generate('ting'));
-    act(() => result.current.prefetch('sted'));
-    expect(generateCluesWithProgress).toHaveBeenCalledTimes(1);
   });
 
   it('reports server errors', async () => {
