@@ -7,20 +7,21 @@ import { useCardGenerator } from '../game/useCardGenerator';
 import { adjustDifficulty, resultOf } from '../game/scoring';
 import { loadFromLocalStorage, saveToLocalStorage } from '../utils/gameLogic';
 import { categories } from '../utils/categories';
+import { drawCategory, markPlayed } from '../game/categoryBag';
 import CategorySelector from './CategorySelector';
 import AnswerBox from './AnswerBox';
 import ActionButtons from './ActionButtons';
 import CluesGrid from './CluesGrid';
 import ClueList from './ClueList';
 import Instructions from './Instructions';
-import LoadingScreen from './LoadingScreen';
+import CardLoading from './CardLoading';
 import ResultBanner from './ResultBanner';
 import Scoreboard from './Scoreboard';
 import Timer from './Timer';
 
 const STORAGE_KEY = 'currentGameState';
+const BAG_KEY = 'categoryBag';
 const CATEGORY_KEYS = Object.keys(categories);
-const randomCategory = () => CATEGORY_KEYS[Math.floor(Math.random() * CATEGORY_KEYS.length)];
 
 const Game = () => {
   const {
@@ -38,6 +39,7 @@ const Game = () => {
     restoreGame(loadFromLocalStorage(STORAGE_KEY, null), settings.specialCluesConfig)
   );
   const [adjusted, setAdjusted] = useState(null);
+  const [loadKey, setLoadKey] = useState(0);
   const gameRef = useRef(game);
 
   useEffect(() => {
@@ -55,8 +57,16 @@ const Game = () => {
 
   const startCard = useCallback((category) => {
     setAdjusted(null);
+    setLoadKey(k => k + 1);
+    saveToLocalStorage(BAG_KEY, markPlayed(loadFromLocalStorage(BAG_KEY, []), category));
     generate(category, { firstTurn: history.length });
   }, [generate, history.length]);
+
+  const randomCard = useCallback(() => {
+    const { category, bag } = drawCategory(loadFromLocalStorage(BAG_KEY, []), CATEGORY_KEYS, gameRef.current.category);
+    saveToLocalStorage(BAG_KEY, bag);
+    startCard(category);
+  }, [startCard]);
 
   const finishRound = useCallback((finished) => {
     const result = resultOf(finished);
@@ -77,7 +87,7 @@ const Game = () => {
     if (!resultOf(before) && resultOf(after)) finishRound(after);
   }, [finishRound]);
 
-  const nextCard = () => startCard(randomCategory());
+  const nextCard = randomCard;
 
   const toggleClue = useCallback(index => act({ type: 'toggleClue', index }), [act]);
   const busy = isGenerating(game);
@@ -88,10 +98,6 @@ const Game = () => {
 
   return (
     <>
-      {game.status === 'loading' && (
-        <LoadingScreen category={categories[game.category]?.name || game.category} />
-      )}
-
       <div className="min-h-dvh bg-board-bg text-board-text px-3 py-4 sm:p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-4 md:mb-6 flex justify-between items-center px-1 sm:px-0">
@@ -126,7 +132,17 @@ const Game = () => {
               <ResultBanner result={result} item={game.item} teamNames={settings.teamNames} adjusted={adjusted} />
             )}
 
-            {game.item && (
+            {busy && (
+              <CardLoading
+                key={loadKey}
+                categoryName={categories[game.category]?.name}
+                clueCount={settings.numberOfClues}
+                reader={reader}
+                onRetry={() => startCard(game.category)}
+              />
+            )}
+
+            {isCardActive(game) && (
               <AnswerBox key={game.item} game={game} dispatch={act} teamNames={settings.teamNames} />
             )}
 
@@ -147,12 +163,6 @@ const Game = () => {
               <div className="mb-4 p-3 bg-[rgba(200,132,90,0.1)] border border-[rgba(200,132,90,0.2)] rounded-board flex items-center text-board-special text-sm">
                 <AlertTriangle className="mr-2 w-4 h-4 flex-shrink-0" />
                 <span>{game.error}</span>
-              </div>
-            )}
-
-            {game.status === 'streaming' && (
-              <div className="text-center mb-4">
-                <p className="text-sm text-board-text-muted animate-pulse">Genererer ledetråde...</p>
               </div>
             )}
 
