@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { generateCluesWithProgress } from '../utils/api';
 import {
   buildAcceptedAnswers,
@@ -8,7 +8,6 @@ import {
 } from '../utils/gameLogic';
 
 const MAX_ATTEMPTS = 3;
-const DIFFICULTY_TOLERANCE = 10;
 
 export function buildCard(result, { mode, regularCount, specialTexts = [] }) {
   const sharpness = Array.isArray(result.sharpness) ? result.sharpness : [];
@@ -38,13 +37,6 @@ function clueCounts(settings) {
   const specialCount = Math.min(settings.numberOfSpecialClues, Math.max(0, settings.numberOfClues - 1));
   return { regularCount: Math.max(1, settings.numberOfClues - specialCount), specialCount };
 }
-
-const requestKey = (category, settings) =>
-  JSON.stringify([category, clueCounts(settings).regularCount, settings.customTheme, settings.ageRangeMin, settings.ageRangeMax]);
-
-const closeEnough = (a, b) =>
-  Math.abs(a.difficulty - b.difficulty) <= DIFFICULTY_TOLERANCE &&
-  Math.abs(a.clueDifficulty - b.clueDifficulty) <= DIFFICULTY_TOLERANCE;
 
 async function requestCard(category, settings, usedItems, { signal, onItemFound }) {
   const used = usedItems.filter(u => u.category === category);
@@ -99,15 +91,8 @@ async function requestCard(category, settings, usedItems, { signal, onItemFound 
 
 export function useCardGenerator(dispatch, settings, usedItems, addUsedItem) {
   const activeRef = useRef(null);
-  const prefetchRef = useRef(null);
-  const [prefetchedCategory, setPrefetchedCategory] = useState(null);
-  const [prefetchAllowed, setPrefetchAllowed] = useState(true);
 
-  useEffect(() => () => {
-    activeRef.current?.abort();
-    prefetchRef.current?.controller.abort();
-    prefetchRef.current = null;
-  }, []);
+  useEffect(() => () => activeRef.current?.abort(), []);
 
   const deliver = useCallback((category, result) => {
     const specialTexts = selectSpecialClues(settings.specialCluesConfig, clueCounts(settings).specialCount);
@@ -116,7 +101,6 @@ export function useCardGenerator(dispatch, settings, usedItems, addUsedItem) {
       ...buildCard(result, { mode: settings.mode, regularCount: clueCounts(settings).regularCount, specialTexts }),
     });
     addUsedItem(category, result.item);
-    setPrefetchAllowed(result.prefetch !== false);
   }, [dispatch, settings, addUsedItem]);
 
   const generate = useCallback(async (category, { firstTurn = 0 } = {}) => {
@@ -124,23 +108,6 @@ export function useCardGenerator(dispatch, settings, usedItems, addUsedItem) {
     const controller = new AbortController();
     activeRef.current = controller;
     dispatch({ type: 'start', category, mode: settings.mode, teamCount: settings.teamCount, firstTurn });
-
-    const pending = prefetchRef.current;
-    if (pending && pending.key === requestKey(category, settings) && closeEnough(pending.settings, settings)) {
-      prefetchRef.current = null;
-      setPrefetchedCategory(null);
-      try {
-        const result = pending.result ?? (await pending.promise);
-        if (activeRef.current !== controller) return;
-        if (!isItemUsed(result.item, usedItems, category)) {
-          dispatch({ type: 'itemFound', item: result.item });
-          deliver(category, result);
-          return;
-        }
-      } catch {
-        if (activeRef.current !== controller) return;
-      }
-    }
 
     try {
       const result = await requestCard(category, settings, usedItems, {
@@ -155,32 +122,5 @@ export function useCardGenerator(dispatch, settings, usedItems, addUsedItem) {
     }
   }, [dispatch, settings, usedItems, deliver]);
 
-  const prefetch = useCallback((category, alsoAvoid = []) => {
-    if (!prefetchAllowed) return;
-    const key = requestKey(category, settings);
-    const current = prefetchRef.current;
-    if (current && current.key === key && closeEnough(current.settings, settings)) return;
-    current?.controller.abort();
-
-    const controller = new AbortController();
-    const avoid = [...usedItems, ...alsoAvoid.map(item => ({ category, item }))];
-    const entry = { key, category, settings, controller };
-    entry.promise = requestCard(category, settings, avoid, { signal: controller.signal });
-    entry.promise.then(
-      (result) => {
-        entry.result = result;
-        if (prefetchRef.current === entry) setPrefetchedCategory(category);
-      },
-      () => {
-        if (prefetchRef.current === entry) {
-          prefetchRef.current = null;
-          setPrefetchedCategory(null);
-        }
-      }
-    );
-    prefetchRef.current = entry;
-    setPrefetchedCategory(null);
-  }, [settings, usedItems, prefetchAllowed]);
-
-  return { generate, prefetch, prefetchedCategory };
+  return { generate };
 }

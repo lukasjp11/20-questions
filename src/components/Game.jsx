@@ -38,7 +38,6 @@ const Game = () => {
     restoreGame(loadFromLocalStorage(STORAGE_KEY, null), settings.specialCluesConfig)
   );
   const [adjusted, setAdjusted] = useState(null);
-  const [nextCategory, setNextCategory] = useState(randomCategory);
   const gameRef = useRef(game);
 
   useEffect(() => {
@@ -52,18 +51,12 @@ const Game = () => {
 
   const teamCount = settings.mode === 'guess' && settings.teamsEnabled ? settings.teamNames.length : 0;
   const generatorSettings = useMemo(() => ({ ...settings, teamCount }), [settings, teamCount]);
-  const { generate, prefetch, prefetchedCategory } = useCardGenerator(dispatch, generatorSettings, usedItems, addUsedItem);
+  const { generate } = useCardGenerator(dispatch, generatorSettings, usedItems, addUsedItem);
 
   const startCard = useCallback((category) => {
     setAdjusted(null);
-    if (category === nextCategory) setNextCategory(randomCategory());
     generate(category, { firstTurn: history.length });
-  }, [generate, history.length, nextCategory]);
-
-  useEffect(() => {
-    if (game.status === 'playing') prefetch(nextCategory, [game.item]);
-    else if (game.status === 'idle' && !game.error) prefetch(nextCategory);
-  }, [game.status, game.item, game.error, nextCategory, prefetch]);
+  }, [generate, history.length]);
 
   const finishRound = useCallback((finished) => {
     const result = resultOf(finished);
@@ -84,7 +77,7 @@ const Game = () => {
     if (!resultOf(before) && resultOf(after)) finishRound(after);
   }, [finishRound]);
 
-  const nextCard = () => startCard(nextCategory);
+  const nextCard = () => startCard(randomCategory());
 
   const toggleClue = useCallback(index => act({ type: 'toggleClue', index }), [act]);
   const busy = isGenerating(game);
@@ -92,9 +85,6 @@ const Game = () => {
   const reader = game.mode === 'reader';
   const result = roundOver ? resultOf(game) : null;
   const teams = hasTeams(game);
-  const readyName = prefetchedCategory && prefetchedCategory === nextCategory
-    ? categories[prefetchedCategory]?.name
-    : null;
 
   return (
     <>
@@ -150,7 +140,6 @@ const Game = () => {
                 loading={busy}
                 primary={roundOver || reader}
                 label={roundOver || reader ? 'Næste kort' : 'Tilfældig kategori'}
-                readyCategoryName={readyName}
               />
             )}
 
@@ -173,7 +162,7 @@ const Game = () => {
               <ClueList game={game} dispatch={act} teamNames={settings.teamNames} />
             )}
 
-            {game.status === 'idle' && <Instructions onStartRandom={nextCard} ready={Boolean(readyName)} />}
+            {game.status === 'idle' && <Instructions onStartRandom={nextCard} />}
           </div>
 
           {settings.customTheme && (

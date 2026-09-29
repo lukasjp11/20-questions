@@ -3,7 +3,7 @@ import { Shuffle } from 'lucide-react';
 import { useGame } from '../context/useGame';
 import { matchPreset } from '../game/presets';
 
-const Instructions = ({ onStartRandom, ready }) => {
+const Instructions = ({ onStartRandom }) => {
   const { settings } = useGame();
   const preset = matchPreset(settings);
   const level = preset ? preset.label : 'Egne indstillinger';
@@ -16,13 +16,10 @@ const Instructions = ({ onStartRandom, ready }) => {
       <span className="text-board-text-faint mb-6 block">eller</span>
       <button
         onClick={onStartRandom}
-        className="bg-board-gold hover:bg-board-gold-muted text-board-bg rounded-board font-semibold text-lg transition-all transform active:scale-95 flex flex-col items-center mx-auto px-8 py-4 w-full max-w-sm"
+        className="bg-board-gold hover:bg-board-gold-muted text-board-bg rounded-board font-semibold text-lg transition-all transform active:scale-95 flex items-center justify-center gap-3 mx-auto px-8 py-4 w-full max-w-sm"
       >
-        <span className="flex items-center gap-3">
-          <Shuffle className="w-5 h-5" />
-          Start med tilfældig kategori
-        </span>
-        <span className="text-xs font-medium text-board-bg/60 mt-1">{ready ? 'Kortet er klar' : 'Gør kortet klar…'}</span>
+        <Shuffle className="w-5 h-5" />
+        Start med tilfældig kategori
       </button>
       <p className="mt-8 text-sm text-board-text-dim">
         Sværhed: <span className="text-board-text-secondary font-medium">{level}</span>
