@@ -117,6 +117,7 @@ const GuessForm = ({ game, dispatch, teamNames }) => {
           autoCapitalize="sentences"
           spellCheck={false}
           enterKeyHint="send"
+          inputMode={game.category === 'aarstal' ? 'numeric' : 'text'}
           className={`flex-1 min-w-0 px-3 py-2.5 rounded-board bg-board-bg border outline-none transition-colors text-board-text placeholder-board-text-faint disabled:opacity-60 ${
             game.lastGuess && !game.lastGuess.close ? 'border-board-special' : 'border-[rgba(212,168,84,0.1)] focus:border-board-gold'
           }`}

@@ -16,13 +16,16 @@ import {
   ListChecks,
   Database,
   Minus,
-  Users
+  Users,
+  LayoutGrid
 } from 'lucide-react';
 import { useGame } from '../context/useGame';
 import { getDifficultyLabel } from '../utils/categories';
 import { summarize } from '../game/scoring';
 import { DIFFICULTY_PRESETS, matchPreset, presetValues } from '../game/presets';
 import Toggle from './Toggle';
+import CategoryPicker from './CategoryPicker';
+import { activeCategoryKeys, ACTIVE_COUNT } from '../utils/categories';
 
 const MODES = [
   { value: 'reader', label: 'Oplæser', description: 'Til brætspillet. Du læser ledetrådene op og kan se svaret, når du trykker på det.' },
@@ -38,7 +41,9 @@ const SettingsPage = () => {
     ...settings,
     specialCluesConfig: [...settings.specialCluesConfig],
     teamNames: [...settings.teamNames],
+    activeCategories: activeCategoryKeys(settings.activeCategories),
   }));
+  const categoriesValid = localSettings.activeCategories.length === ACTIVE_COUNT;
   const stats = summarize(history);
 
   const MIN_CLUES = 1;
@@ -53,13 +58,19 @@ const SettingsPage = () => {
     setHasChanges(true);
   };
 
+  const goBack = () => {
+    if (window.history.state?.idx > 0) navigate(-1);
+    else navigate('/', { replace: true });
+  };
+
   const handleSaveSettings = () => {
+    if (!categoriesValid) return;
     const teamNames = localSettings.teamNames.map((name, i) => name.trim() || `Hold ${i + 1}`);
     Object.entries({ ...localSettings, teamNames }).forEach(([key, value]) => {
       updateSetting(key, value);
     });
     setHasChanges(false);
-    navigate(-1);
+    goBack();
   };
 
   const handleAddSpecialClue = () => {
@@ -92,7 +103,7 @@ const SettingsPage = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate(-1)}
+              onClick={goBack}
               aria-label="Tilbage"
               className="p-2 rounded-board bg-board-surface border border-[rgba(212,168,84,0.08)] hover:border-[rgba(212,168,84,0.2)] transition-all"
             >
@@ -103,10 +114,11 @@ const SettingsPage = () => {
           {hasChanges && (
             <button
               onClick={handleSaveSettings}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-board-gold hover:bg-board-gold-muted text-board-bg rounded-board shadow-sm hover:shadow-md transition-all"
+              disabled={!categoriesValid}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-board-gold hover:bg-board-gold-muted disabled:opacity-50 disabled:cursor-not-allowed text-board-bg rounded-board shadow-sm hover:shadow-md transition-all"
             >
               <Save className="w-4 h-4" />
-              Gem ændringer
+              {categoriesValid ? 'Gem ændringer' : `Vælg ${ACTIVE_COUNT} kategorier`}
             </button>
           )}
         </div>
@@ -249,6 +261,18 @@ const SettingsPage = () => {
                 )}
               </div>
             </div>
+          </section>
+
+          <section className="bg-board-surface-alt rounded-board p-4 sm:p-6 border border-[rgba(212,168,84,0.06)]">
+            <h2 className="text-xl font-semibold flex items-center gap-2 font-heading text-board-text mb-1">
+              <LayoutGrid className="w-5 h-5 text-board-text-dim" />
+              Kategorier
+            </h2>
+            <p className="text-xs text-board-text-dimmer mb-4">Vælg de {ACTIVE_COUNT} kategorier, der er med i spillet.</p>
+            <CategoryPicker
+              value={localSettings.activeCategories}
+              onChange={v => handleLocalChange('activeCategories', v)}
+            />
           </section>
 
           {localSettings.mode === 'guess' && (
@@ -719,10 +743,11 @@ const SettingsPage = () => {
         <div className="sm:hidden fixed inset-x-0 bottom-0 z-40 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] bg-board-bg/95 border-t border-[rgba(212,168,84,0.12)]">
           <button
             onClick={handleSaveSettings}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-board-gold text-board-bg font-semibold rounded-board"
+            disabled={!categoriesValid}
+            className="w-full flex items-center justify-center gap-2 py-3 bg-board-gold disabled:opacity-50 text-board-bg font-semibold rounded-board"
           >
             <Save className="w-4 h-4" />
-            Gem ændringer
+            {categoriesValid ? 'Gem ændringer' : `Vælg ${ACTIVE_COUNT} kategorier`}
           </button>
         </div>
       )}

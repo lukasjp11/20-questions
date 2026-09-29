@@ -2,9 +2,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { loadFromLocalStorage, saveToLocalStorage, normalizeItem } from '../utils/gameLogic';
 import { addToHistory } from '../game/scoring';
 import { GameContext } from './useGame';
+import { DEFAULT_CATEGORIES } from '../utils/categories';
 
 const MAX_USED_ITEMS = 200;
-const SETTINGS_VERSION = 3;
+const SETTINGS_VERSION = 4;
 
 const SETTING_DEFAULTS = {
   mode: 'reader',
@@ -25,6 +26,7 @@ const SETTING_DEFAULTS = {
   autoDifficulty: false,
   teamsEnabled: false,
   teamNames: ['Hold 1', 'Hold 2'],
+  activeCategories: DEFAULT_CATEGORIES,
 };
 
 function loadSettings() {
@@ -40,6 +42,10 @@ function loadSettings() {
   if (version < 3 && settings.difficulty === 55 && settings.clueDifficulty === 55 && settings.ageRangeMin === 18 && settings.ageRangeMax === 65) {
     settings.difficulty = 48;
     saveToLocalStorage('difficulty', 48);
+  }
+  if (version < 4) {
+    settings.activeCategories = DEFAULT_CATEGORIES;
+    saveToLocalStorage('activeCategories', DEFAULT_CATEGORIES);
   }
   if (version < SETTINGS_VERSION) saveToLocalStorage('settingsVersion', SETTINGS_VERSION);
   return settings;

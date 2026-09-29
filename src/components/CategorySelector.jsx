@@ -2,6 +2,7 @@ import { categories } from '../utils/categories';
 import { getUsedItemsInCategory } from '../utils/gameLogic';
 
 const CategorySelector = ({
+  keys,
   currentCategory,
   onCategorySelect,
   loading,
@@ -10,7 +11,8 @@ const CategorySelector = ({
   return (
     <div className="mb-4 md:mb-6">
       <div className="grid grid-cols-4 gap-2 md:gap-3">
-        {Object.entries(categories).map(([key, category]) => {
+        {keys.map((key) => {
+          const category = categories[key];
           const Icon = category.icon;
           const usedCount = getUsedItemsInCategory(usedItems, key);
           const isActive = currentCategory === key;
