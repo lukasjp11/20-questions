@@ -174,3 +174,13 @@ describe('isCloseGuess', () => {
     expect(isCloseGuess('ko', buildAcceptedAnswers('Ål'))).toBe(false);
   });
 });
+
+describe('year guesses', () => {
+  it('counts a year within two years as close, and other numbers as wrong', () => {
+    expect(isCloseGuess('1987', ['1986'])).toBe(true);
+    expect(isCloseGuess('1984', ['1986'])).toBe(true);
+    expect(isCloseGuess('1983', ['1986'])).toBe(false);
+    expect(isCorrectGuess('1986', ['1986'])).toBe(true);
+    expect(isCloseGuess('1987', ['Diskette'])).toBe(false);
+  });
+});

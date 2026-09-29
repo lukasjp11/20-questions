@@ -6,7 +6,7 @@ import { gameReducer, hasTeams, isCardActive, isGenerating, restoreGame } from '
 import { useCardGenerator } from '../game/useCardGenerator';
 import { adjustDifficulty, resultOf } from '../game/scoring';
 import { loadFromLocalStorage, saveToLocalStorage } from '../utils/gameLogic';
-import { categories } from '../utils/categories';
+import { activeCategoryKeys, categoryInfo } from '../utils/categories';
 import { drawCategory, markPlayed } from '../game/categoryBag';
 import CategorySelector from './CategorySelector';
 import AnswerBox from './AnswerBox';
@@ -21,7 +21,6 @@ import Timer from './Timer';
 
 const STORAGE_KEY = 'currentGameState';
 const BAG_KEY = 'categoryBag';
-const CATEGORY_KEYS = Object.keys(categories);
 
 const Game = () => {
   const {
@@ -62,11 +61,13 @@ const Game = () => {
     generate(category, { firstTurn: history.length });
   }, [generate, history.length]);
 
+  const activeKeys = useMemo(() => activeCategoryKeys(settings.activeCategories), [settings.activeCategories]);
+
   const randomCard = useCallback(() => {
-    const { category, bag } = drawCategory(loadFromLocalStorage(BAG_KEY, []), CATEGORY_KEYS, gameRef.current.category);
+    const { category, bag } = drawCategory(loadFromLocalStorage(BAG_KEY, []), activeKeys, gameRef.current.category);
     saveToLocalStorage(BAG_KEY, bag);
     startCard(category);
-  }, [startCard]);
+  }, [startCard, activeKeys]);
 
   const finishRound = useCallback((finished) => {
     const result = resultOf(finished);
@@ -122,6 +123,7 @@ const Game = () => {
             )}
 
             <CategorySelector
+              keys={activeKeys}
               currentCategory={game.category}
               onCategorySelect={startCard}
               loading={busy}
@@ -135,7 +137,7 @@ const Game = () => {
             {busy && (
               <CardLoading
                 key={loadKey}
-                categoryName={categories[game.category]?.name}
+                categoryName={categoryInfo(game.category)?.name}
                 clueCount={settings.numberOfClues}
                 reader={reader}
                 onRetry={() => startCard(game.category)}

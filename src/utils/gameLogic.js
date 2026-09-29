@@ -59,9 +59,14 @@ const editDistance = (a, b) => {
   return prev[b.length];
 };
 
+const YEAR = /^\d{4}$/;
+
 export const isCloseGuess = (guess, acceptedAnswers = []) => {
   const g = normalizeGuess(guess);
   if (!g || isCorrectGuess(guess, acceptedAnswers)) return false;
+  if (YEAR.test(g)) {
+    return acceptedAnswers.some(answer => YEAR.test(normalizeGuess(answer)) && Math.abs(Number(g) - Number(normalizeGuess(answer))) <= 2);
+  }
   const guessWords = g.split(' ');
   return acceptedAnswers.some(answer => {
     const a = normalizeGuess(answer);

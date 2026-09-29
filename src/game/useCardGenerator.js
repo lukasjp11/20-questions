@@ -50,6 +50,7 @@ async function requestCard(category, settings, usedItems, { signal, onItemFound 
       ageRangeMin: settings.ageRangeMin,
       ageRangeMax: settings.ageRangeMax,
       usedItems: used.slice(-20),
+      activeCategories: settings.activeCategories,
     },
   };
 
