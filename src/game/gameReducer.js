@@ -114,7 +114,7 @@ export function gameReducer(state, action) {
       return { ...state, status: 'gaveUp', answerVisible: true, lastGuess: null };
 
     case 'setAnswerVisible':
-      if (!isCardActive(state) && !isGenerating(state)) return state;
+      if (!isCardActive(state)) return state;
       if (state.mode === 'guess' && state.status === 'playing' && action.visible) return state;
       return { ...state, answerVisible: action.visible };
 

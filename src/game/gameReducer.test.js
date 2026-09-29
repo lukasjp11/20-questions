@@ -34,6 +34,18 @@ describe('generation', () => {
     expect(ready('reader', 3)).toMatchObject({ teamCount: 0 });
   });
 
+  it('keeps the answer out of reach until the card is ready', () => {
+    let s = run([
+      { type: 'start', category: 'ting', mode: 'reader' },
+      { type: 'itemFound', item: 'Forkastet svar' },
+    ]);
+    s = gameReducer(s, { type: 'setAnswerVisible', visible: true });
+    expect(s.answerVisible).toBe(false);
+    s = gameReducer(s, { type: 'cardReady', ...card });
+    expect(s).toMatchObject({ item: 'Diskette', answerVisible: false });
+    expect(gameReducer(s, { type: 'setAnswerVisible', visible: true }).answerVisible).toBe(true);
+  });
+
   it('ignores a late cardReady after a failure', () => {
     const s = run([
       { type: 'start', category: 'ting', mode: 'guess' },
