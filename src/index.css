@@ -17,8 +17,8 @@ code {
 }
 
 /* iOS 26+ blurs whatever scrolls under the status bar. In Safari a solid fixed box over 10px tall at the
-   top edge turns that into a solid bar. The installed app blurs about 40pt further down, so there the box
-   also covers that band and the content starts below it. */
+   top edge turns that into a solid bar. The installed app blurs about 40pt further down, but only content
+   that has scrolled there, so the box grows over that band once the page is scrolled. */
 :root {
   --top-clear: 0px;
   --shield-min: 0px;
@@ -43,7 +43,7 @@ code {
 }
 
 body {
-  padding-top: calc(env(safe-area-inset-top) + var(--top-clear));
+  padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   padding-bottom: env(safe-area-inset-bottom);
@@ -52,9 +52,13 @@ body {
 .status-bar-shield {
   position: fixed;
   inset: 0 0 auto 0;
-  height: max(calc(env(safe-area-inset-top) + var(--top-clear)), var(--shield-min));
+  height: max(env(safe-area-inset-top), var(--shield-min));
   background-color: #2c2520;
   z-index: 60;
+}
+
+.scrolled .status-bar-shield {
+  height: max(calc(env(safe-area-inset-top) + var(--top-clear)), var(--shield-min));
 }
 
 ::-webkit-scrollbar {
