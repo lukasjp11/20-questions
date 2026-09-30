@@ -28,8 +28,8 @@ import CategoryPicker from './CategoryPicker';
 import { activeCategoryKeys, ACTIVE_COUNT } from '../utils/categories';
 
 const MODES = [
-  { value: 'reader', label: 'Oplæser', description: 'Til brætspillet. Du læser ledetrådene op og kan se svaret, når du trykker på det.' },
   { value: 'ladder', label: 'Trinvis', description: 'Til gruppen. Du læser ledetrådene op i rækkefølge, fra de svære til de lette. Den første, der gætter rigtigt, vinder kortet.' },
+  { value: 'reader', label: 'Oplæser', description: 'Til brætspillet. Du læser ledetrådene op og kan se svaret, når du trykker på det.' },
   { value: 'guess', label: 'Gæt selv', description: 'Solo eller på skift. I gætter i appen og får point.' },
 ];
 const MAX_TEAMS = 4;

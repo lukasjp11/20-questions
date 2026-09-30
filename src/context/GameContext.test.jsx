@@ -16,18 +16,33 @@ const renderWith = (stored) => {
 describe('settings migration', () => {
   it('replaces Begivenhed with the new default four once', () => {
     renderWith({ settingsVersion: 3, activeCategories: ['person', 'sted', 'ting', 'begivenhed'] });
-    expect(screen.getByText('reader 48/55 person,sted,ting,aarstal')).toBeInTheDocument();
+    expect(screen.getByText('ladder 48/55 person,sted,ting,aarstal')).toBeInTheDocument();
   });
 
-  it('starts new phones in Oplæser on the Voksne preset', () => {
+  it('starts new phones in Trinvis on the Voksne preset', () => {
     renderWith({});
-    expect(screen.getByText('reader 48/55 person,sted,ting,aarstal')).toBeInTheDocument();
+    expect(screen.getByText('ladder 48/55 person,sted,ting,aarstal')).toBeInTheDocument();
   });
 
-  it('moves old phones to Oplæser and the old Voksne values to the new ones once', () => {
+  it('moves old phones to Trinvis and the old Voksne values to the new ones once', () => {
     renderWith({ mode: 'guess', difficulty: 55, clueDifficulty: 55, ageRangeMin: 18, ageRangeMax: 65 });
+    expect(screen.getByText('ladder 48/55 person,sted,ting,aarstal')).toBeInTheDocument();
+    expect(localStorage.getItem('settingsVersion')).toBe('5');
+  });
+
+  it('moves Oplæser to Trinvis once', () => {
+    renderWith({ mode: 'reader', settingsVersion: 4 });
+    expect(screen.getByText('ladder 48/55 person,sted,ting,aarstal')).toBeInTheDocument();
+  });
+
+  it('leaves Gæt selv alone', () => {
+    renderWith({ mode: 'guess', settingsVersion: 4 });
+    expect(screen.getByText('guess 48/55 person,sted,ting,aarstal')).toBeInTheDocument();
+  });
+
+  it('keeps Oplæser when it was chosen after the move', () => {
+    renderWith({ mode: 'reader', settingsVersion: 5 });
     expect(screen.getByText('reader 48/55 person,sted,ting,aarstal')).toBeInTheDocument();
-    expect(localStorage.getItem('settingsVersion')).toBe('4');
   });
 
   it('keeps custom difficulty and later choices', () => {
