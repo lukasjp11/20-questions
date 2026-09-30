@@ -5,10 +5,10 @@ import { GameContext } from './useGame';
 import { DEFAULT_CATEGORIES } from '../utils/categories';
 
 const MAX_USED_ITEMS = 200;
-const SETTINGS_VERSION = 4;
+const SETTINGS_VERSION = 5;
 
 const SETTING_DEFAULTS = {
-  mode: 'reader',
+  mode: 'ladder',
   difficulty: 48,
   clueDifficulty: 55,
   customTheme: '',
@@ -46,6 +46,10 @@ function loadSettings() {
   if (version < 4) {
     settings.activeCategories = DEFAULT_CATEGORIES;
     saveToLocalStorage('activeCategories', DEFAULT_CATEGORIES);
+  }
+  if (version < 5 && settings.mode === 'reader') {
+    settings.mode = 'ladder';
+    saveToLocalStorage('mode', 'ladder');
   }
   if (version < SETTINGS_VERSION) saveToLocalStorage('settingsVersion', SETTINGS_VERSION);
   return settings;
