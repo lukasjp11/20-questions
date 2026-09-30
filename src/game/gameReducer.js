@@ -72,7 +72,7 @@ export function gameReducer(state, action) {
     }
 
     case 'revealNext': {
-      if (state.mode !== 'guess' || !isCardActive(state) || cluesLeft(state) === 0) return state;
+      if (state.mode === 'reader' || !isCardActive(state) || cluesLeft(state) === 0) return state;
       if (state.status === 'playing' && hasTeams(state) && !state.awaitingReveal) return state;
       return {
         ...state,

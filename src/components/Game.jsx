@@ -94,6 +94,7 @@ const Game = () => {
   const busy = isGenerating(game);
   const roundOver = game.status === 'solved' || game.status === 'gaveUp';
   const reader = game.mode === 'reader';
+  const readAloud = game.mode !== 'guess';
   const result = roundOver ? resultOf(game) : null;
   const teams = hasTeams(game);
 
@@ -156,8 +157,8 @@ const Game = () => {
               <ActionButtons
                 onNext={nextCard}
                 loading={busy}
-                primary={roundOver || reader}
-                label={roundOver || reader ? 'Næste kort' : 'Tilfældig kategori'}
+                primary={roundOver || readAloud}
+                label={roundOver || readAloud ? 'Næste kort' : 'Tilfældig kategori'}
               />
             )}
 

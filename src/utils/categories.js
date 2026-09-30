@@ -1,4 +1,4 @@
-import { Brain, MapPin, Lightbulb, CalendarDays, PawPrint, Clapperboard, Leaf, Trophy, Music, Cpu, Swords } from 'lucide-react';
+import { Brain, MapPin, Lightbulb, CalendarDays, PawPrint, Clapperboard, Leaf, Trophy, Music, Cpu, HeartPulse, FlaskConical, Swords } from 'lucide-react';
 import { getDifficultyLabel } from './promptCore';
 
 export const categories = {
@@ -12,6 +12,8 @@ export const categories = {
   sport: { name: 'Sport & leg', icon: Trophy, description: 'Sportsgrene, spil og lege' },
   musik: { name: 'Musik', icon: Music, description: 'Sange, kunstnere og instrumenter' },
   teknologi: { name: 'Teknologi', icon: Cpu, description: 'Maskiner, computere, spil og gammel teknik' },
+  kroppen: { name: 'Kroppen', icon: HeartPulse, description: 'Kroppen, sanserne og sundhed' },
+  videnskab: { name: 'Videnskab', icon: FlaskConical, description: 'Opdagelser, grundstoffer og naturlove' },
 };
 
 export const legacyCategories = {

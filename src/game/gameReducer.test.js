@@ -70,6 +70,17 @@ describe('reader mode', () => {
   });
 });
 
+describe('Trinvis', () => {
+  it('turns the clues in order, lets the reader see the answer, and never ends the round', () => {
+    let s = run([{ type: 'revealNext' }, { type: 'revealNext' }], ready('ladder'));
+    expect(s.revealed).toEqual([0, 1]);
+    expect(gameReducer(s, { type: 'toggleClue', index: 2 })).toBe(s);
+    expect(gameReducer(s, { type: 'guess', text: 'Diskette' })).toBe(s);
+    s = gameReducer(s, { type: 'setAnswerVisible', visible: true });
+    expect(s).toMatchObject({ status: 'playing', answerVisible: true, teamCount: 0 });
+  });
+});
+
 describe('solo guess mode', () => {
   it('trusts the server verdict for guesses the local matcher does not know', () => {
     const playing = ready('guess');

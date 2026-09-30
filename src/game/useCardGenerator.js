@@ -15,14 +15,15 @@ export function buildCard(result, { mode, regularCount, specialTexts = [] }) {
     .slice(0, regularCount)
     .map((text, i) => ({ text, special: false, sharpness: sharpness[i] ?? null }));
 
+  const specials = specialTexts.map(text => ({ text, special: true, sharpness: null }));
   let clues;
   if (mode === 'guess') {
-    const shuffled = shuffleArray(regular);
-    clues = sharpness.length
-      ? shuffled.sort((a, b) => (a.sharpness ?? 3) - (b.sharpness ?? 3))
-      : shuffled;
+    clues = regular;
+  } else if (mode === 'ladder') {
+    clues = [...regular];
+    for (const special of specials) clues.splice(1 + Math.floor(Math.random() * clues.length), 0, special);
   } else {
-    clues = shuffleArray([...regular, ...specialTexts.map(text => ({ text, special: true, sharpness: null }))]);
+    clues = shuffleArray([...regular, ...specials]);
   }
 
   return {
@@ -51,6 +52,7 @@ async function requestCard(category, settings, usedItems, { signal, onItemFound 
       ageRangeMax: settings.ageRangeMax,
       usedItems: used.slice(-20),
       activeCategories: settings.activeCategories,
+      clueOrder: settings.mode === 'reader' ? 'any' : 'ladder',
     },
   };
 

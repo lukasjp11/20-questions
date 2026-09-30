@@ -86,4 +86,11 @@ describe('AnswerBox', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Vis svar' }));
     expect(screen.getByText('Diskette')).toBeInTheDocument();
   });
+
+  it('lets the reader see the answer in Trinvis, with no guess field', () => {
+    render(<Harness mode="ladder" />);
+    expect(screen.queryByRole('textbox', { name: 'Dit gæt' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Vis svar' }));
+    expect(screen.getByText('Diskette')).toBeInTheDocument();
+  });
 });

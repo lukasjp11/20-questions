@@ -29,6 +29,7 @@ import { activeCategoryKeys, ACTIVE_COUNT } from '../utils/categories';
 
 const MODES = [
   { value: 'reader', label: 'Oplæser', description: 'Til brætspillet. Du læser ledetrådene op og kan se svaret, når du trykker på det.' },
+  { value: 'ladder', label: 'Trinvis', description: 'Til gruppen. Du læser ledetrådene op i rækkefølge, fra de svære til de lette. Den første, der gætter rigtigt, vinder kortet.' },
   { value: 'guess', label: 'Gæt selv', description: 'Solo eller på skift. I gætter i appen og får point.' },
 ];
 const MAX_TEAMS = 4;
@@ -194,7 +195,7 @@ const SettingsPage = () => {
 
               <div className="p-3 rounded-board bg-board-surface">
                 <p className="font-medium mb-2">Spiltype</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="radiogroup" aria-label="Spiltype">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2" role="radiogroup" aria-label="Spiltype">
                   {MODES.map(m => {
                     const active = localSettings.mode === m.value;
                     return (
@@ -531,9 +532,9 @@ const SettingsPage = () => {
               </button>
             </div>
 
-            {localSettings.mode !== 'reader' && (
+            {localSettings.mode === 'guess' && (
               <p className="mb-4 text-sm text-board-text-dimmer">
-                Special-ledetråde er handlinger til brætspillet og bruges kun i Oplæser-tilstand.
+                Special-ledetråde er handlinger til brætspillet og bruges ikke i Gæt selv.
               </p>
             )}
 

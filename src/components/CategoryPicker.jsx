@@ -20,7 +20,7 @@ const CategoryPicker = ({ value, onChange }) => {
 
   return (
     <div>
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2" role="group" aria-label="Kategorier">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="group" aria-label="Kategorier">
         {Object.entries(categories).map(([key, category]) => {
           const Icon = category.icon;
           const on = selected.includes(key);
