@@ -21,7 +21,7 @@ const HiddenDots = () => (
 );
 
 const AnswerBar = ({ game, dispatch }) => {
-  const canToggle = game.mode === 'reader' || game.status !== 'playing';
+  const canToggle = game.mode !== 'guess' || game.status !== 'playing';
 
   if (game.answerVisible) {
     return (

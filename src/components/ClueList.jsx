@@ -9,6 +9,7 @@ const ClueList = ({ game, dispatch, teamNames = [] }) => {
   const playing = game.status === 'playing';
   const canReveal = left > 0 && (!playing || !teams || game.awaitingReveal);
   const nextNumber = game.revealed.length + 1;
+  const ladder = game.mode === 'ladder';
 
   return (
     <div>
@@ -19,6 +20,14 @@ const ClueList = ({ game, dispatch, teamNames = [] }) => {
         </span>
       </div>
 
+      {ladder && (
+        <div className="flex gap-1 mb-3" aria-hidden="true">
+          {game.clues.map((_, i) => (
+            <span key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i < game.revealed.length ? 'bg-board-gold' : 'bg-board-surface-active'}`} />
+          ))}
+        </div>
+      )}
+
       <ol className="space-y-2">
         {game.revealed.map((index, i) => (
           <li
@@ -26,7 +35,7 @@ const ClueList = ({ game, dispatch, teamNames = [] }) => {
             className="flex gap-3 p-3 rounded-board bg-board-surface-active border border-[rgba(212,168,84,0.15)]"
           >
             <span className="w-6 flex-shrink-0 font-semibold tabular-nums text-board-gold">{i + 1}</span>
-            <span className="text-base leading-snug md:text-sm text-board-text-secondary">{game.clues[index].text}</span>
+            <span className={`text-base leading-snug md:text-sm ${game.clues[index].special ? 'text-board-special' : 'text-board-text-secondary'}`}>{game.clues[index].text}</span>
           </li>
         ))}
       </ol>
@@ -42,7 +51,9 @@ const ClueList = ({ game, dispatch, teamNames = [] }) => {
       )}
 
       {playing && left === 0 && (
-        <p className="mt-3 text-sm text-center text-board-text-dim">Alle ledetråde er vendt. Gæt eller giv op.</p>
+        <p className="mt-3 text-sm text-center text-board-text-dim">
+          {!ladder ? 'Alle ledetråde er vendt. Gæt eller giv op.' : game.answerVisible ? 'Alle ledetråde er vendt.' : 'Alle ledetråde er vendt. Tryk på svaret for at se det.'}
+        </p>
       )}
     </div>
   );
